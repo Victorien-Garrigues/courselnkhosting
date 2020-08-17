@@ -46,10 +46,9 @@
 </template>
 
 <script>
-import firebase from "firebase";
-
+import firebase from 'firebase';
 export default {
-  name: "Login",
+  name: 'Login',
   data() {
     return {
       email: null,
@@ -66,16 +65,16 @@ export default {
           .signInWithEmailAndPassword(this.email, this.password)
           .then(() => {
             if (firebase.auth().currentUser.emailVerified) {
-              console.log("Verifed");
+              this.$router.push({ name: 'Courses' });
             } else {
-              console.log("Not Verifed");
+              this.feedback('The email or passoword is incorrect');
             }
           })
           .catch((err) => {
             this.feedback = err.message;
           });
       } else {
-        this.feedback = "Please Fill In Both Fields";
+        this.feedback = 'Please Fill In Both Fields';
       }
     },
   },
@@ -88,14 +87,13 @@ export default {
   margin: 2px;
   padding: 0;
 }
-
 .signup {
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
-  background: url("../../assets/authBackground.png") no-repeat left/contain
+  background: url('../../assets/authBackground.png') no-repeat left/contain
     fixed;
 }
 .background {
@@ -106,20 +104,17 @@ export default {
   text-decoration: none;
   color: #535c68;
 }
-
 .noUnderline {
   text-decoration: none;
 }
-
 .feedback {
   color: red;
   margin-top: -15px;
   text-align: left;
 }
-
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type='text'],
+input[type='password'] {
   width: 100%;
   padding: 15px;
   margin: -7px 0 22px 0;
@@ -129,7 +124,6 @@ input[type="password"] {
   border-radius: 6px;
   font-size: 14px;
 }
-
 p {
   color: #535c68;
 }
@@ -137,18 +131,15 @@ h1 {
   margin-bottom: 20px;
   color: #0fb9b1ff;
 }
-
-input[type="text"]:focus,
-input[type="password"]:focus {
+input[type='text']:focus,
+input[type='password']:focus {
   background-color: #ddd;
   outline: none;
 }
-
 hr {
   border: 2px solid #f1f1f1;
   margin-bottom: 25px;
 }
-
 /* Set a style for all buttons */
 button {
   background-color: #0fb9b1ff;
@@ -161,11 +152,9 @@ button {
   opacity: 0.9;
   font: 24px bold Arial, Helvetica, sans-serif;
 }
-
 button:hover {
   opacity: 1;
 }
-
 /* Add padding to container elements */
 .container {
   margin: auto;
@@ -174,14 +163,12 @@ button:hover {
   padding: 16px;
   text-align: center;
 }
-
 /* Clear floats */
 .clearfix::after {
-  content: "";
+  content: '';
   clear: both;
   display: table;
 }
-
 .select-css {
   font-size: 14px;
   width: 100%;
@@ -193,23 +180,19 @@ button:hover {
   border-radius: 5px;
   line-height: 1.3;
   appearance: none;
-
-  background-image: url("../../assets/dropdown.png"),
+  background-image: url('../../assets/dropdown.png'),
     linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
   background-repeat: no-repeat, repeat;
   background-position: right 0.7em top 50%, 0 0;
   background-size: 0.65em auto, 100%;
 }
-
 /* Hover style */
 .select-css:hover {
   border-color: #888;
 }
-
 .select-css option {
   font-weight: normal;
 }
-
 body {
   margin: 2rem;
 }

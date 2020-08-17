@@ -13,11 +13,11 @@
 
 <script>
 export default {
-  name: "PasswordEmailSent",
+  name: 'PasswordEmailSent',
 
   methods: {
     backToLogin() {
-      this.$router.push({ name: "Login" });
+      this.$router.push({ name: 'Login' });
     },
   },
 };

@@ -30,7 +30,7 @@
 import firebase from "firebase";
 
 export default {
-  name: "Signup",
+  name: "ResetPassword",
   data() {
     return {
       email: null,
