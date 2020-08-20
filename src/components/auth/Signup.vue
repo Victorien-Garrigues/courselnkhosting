@@ -3,7 +3,7 @@
     <div class="background"></div>
     <div class="container">
       <form @submit.prevent="signup">
-        <img src="../../assets/logo.png" alt="" />
+        <img src="../../assets/logo.png" alt />
         <h1>Sign Up</h1>
         <p style="margin-bottom: 22px;">
           Interact with students in your classes for free
@@ -62,11 +62,12 @@
 </template>
 
 <script>
-import firebase from "firebase";
-import db from "@/firebase/init";
+import firebase from 'firebase';
+import db from '@/firebase';
+import router from '@/router/index';
 
 export default {
-  name: "Signup",
+  name: 'Signup',
   data() {
     return {
       email: null,
@@ -85,15 +86,15 @@ export default {
         this.university != 0
       ) {
         if (
-          (this.university == "Western" && this.email.endsWith("@uwo.ca")) ||
-          (this.university == "McGill" &&
-            this.email.endsWith("@mail.mcgill.ca"))
+          (this.university == 'Western' && this.email.endsWith('@uwo.ca')) ||
+          (this.university == 'McGill' &&
+            this.email.endsWith('@mail.mcgill.ca'))
         ) {
           this.feedback = null;
-          let ref = db.collection("users").doc(this.username);
+          let ref = db.collection('users').doc(this.username);
           ref.get().then((doc) => {
             if (doc.exists) {
-              this.feedback = "Name already exists";
+              this.feedback = 'Name already exists';
             } else {
               firebase
                 .auth()
@@ -104,7 +105,7 @@ export default {
                     .currentUser.sendEmailVerification()
                     .then(
                       function() {
-                        console.log("sent");
+                        router.push('/verification-email-sent');
                       },
                       function(error) {
                         console.log(error.message);
@@ -122,10 +123,10 @@ export default {
             }
           });
         } else {
-          this.feedback = "Please enter correct university email";
+          this.feedback = 'Please enter correct university email';
         }
       } else {
-        this.feedback = "You must enter all fields";
+        this.feedback = 'You must enter all fields';
       }
     },
   },
@@ -145,7 +146,7 @@ export default {
   top: 0;
   left: 0;
   display: flex;
-  background: url("../../assets/authBackground.png") no-repeat left/contain
+  background: url('../../assets/authBackground.png') no-repeat left/contain
     fixed;
 }
 
@@ -164,8 +165,8 @@ export default {
 }
 
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type='text'],
+input[type='password'] {
   width: 100%;
   padding: 15px;
   margin: -7px 0 22px 0;
@@ -184,8 +185,8 @@ p {
   color: #535c68;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
+input[type='text']:focus,
+input[type='password']:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -222,7 +223,7 @@ button:hover {
 
 /* Clear floats */
 .clearfix::after {
-  content: "";
+  content: '';
   clear: both;
   display: table;
 }
@@ -239,7 +240,7 @@ button:hover {
   line-height: 1.3;
   appearance: none;
 
-  background-image: url("../../assets/dropdown.png"),
+  background-image: url('../../assets/dropdown.png'),
     linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
   background-repeat: no-repeat, repeat;
   background-position: right 0.7em top 50%, 0 0;
