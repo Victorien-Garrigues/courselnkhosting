@@ -5,9 +5,11 @@ import store from './store';
 import Buefy from 'buefy';
 import 'buefy/dist/buefy.css';
 import VueScrollTo from 'vue-scrollto';
+import VueLazyLoad from 'vue-lazyload';
 
 Vue.config.productionTip = false;
 Vue.use(Buefy);
+Vue.use(VueLazyLoad);
 Vue.use(VueScrollTo, {
   container: '.postContainer',
   duration: 500,

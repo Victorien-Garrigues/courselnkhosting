@@ -15,13 +15,22 @@
         <div class="posts is-multiline">
           <div v-for="(post, index) in filteredPosts" :key="index">
             <div class="card" :id="post.id">
+              <div class="clip">
+                <button @click="addClip(post.id)" class="button is-success">
+                  Clip
+                </button>
+              </div>
               <div class="card-image" v-if="post.files[0]">
                 <figure
+                  style="display: inline-block"
                   class="image"
                   :key="index"
                   v-for="(file, index) in post.files"
                 >
-                  <img :src="file.src" alt="Placeholder image" />
+                  <img
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
                 </figure>
               </div>
               <div v-if="post.deleted" class="card-content">
@@ -48,26 +57,31 @@
                   <button @click="deletePost(post.id)" class="button is-danger">
                     Delete Post
                   </button>
-                  <div v-if="post.replys > 0" class="post-info">
+                  <div v-if="post.replies > 0" class="post-info">
                     <button
                       class="button is-success"
-                      @click="viewReplys(post.id)"
+                      @click="viewReplies(post.id)"
                       style="margin-right: 2em;"
                     >
-                      {{ post.replys }} Replys
+                      {{ post.replies }} Replies
                     </button>
-                    <p>{{ post.clips }} Clips</p>
                   </div>
+
+                  <p>{{ post.clips }} Clips</p>
                   <button @click="reply(post)" class="button is-primary">
                     Reply
                   </button>
                 </div>
               </div>
             </div>
-            <div v-if="listReplys == post.id">
-              <!--  Start of List Of  Replys -->
+            <div v-if="listReplies == post.id">
+              <!--  Start of List Of  Replies -->
 
-              <div v-for="(reply, index) in replys" :key="index" class="replys">
+              <div
+                v-for="(reply, index) in replies"
+                :key="index"
+                class="replies"
+              >
                 <div style="margin-left: 75px;" class="card">
                   <div class="card-image" v-if="reply.files[0]">
                     <figure
@@ -80,8 +94,10 @@
                   </div>
                   <div class="card-content">
                     <div class="media">
-                      <div class="media-left"></div>
-                      <div class="media-content">
+                      <div v-if="reply.deleted">
+                        <p>{{ post.username }} deleted this post</p>
+                      </div>
+                      <div v-if="!reply.deleted" class="media-content">
                         <div class="reply" v-if="reply.isReply">
                           <p>Reply to {{ reply.replyUsername }}</p>
                         </div>
@@ -89,7 +105,7 @@
                         <p class="subtitle is-6">{{ reply.username }}</p>
                       </div>
                     </div>
-                    <div class="content">
+                    <div v-if="!reply.deleted" class="content">
                       <br />
                       <time>{{ getCreated(index) }}</time>
                       <br />
@@ -102,7 +118,10 @@
                       <div class="post-info">
                         <p>{{ reply.clips }} Clips</p>
                       </div>
-                      <button @click="reply(reply)" class="button is-primary">
+                      <button
+                        @click="childReply(reply)"
+                        class="button is-primary"
+                      >
                         Reply
                       </button>
                     </div>
@@ -110,19 +129,19 @@
                 </div>
               </div>
             </div>
-            <!--  End of List Of  Replys -->
+            <!--  End of List Of  Replies -->
           </div>
         </div>
         <div id="bottom"></div>
       </div>
-      <form @submit.prevent="onCreatePost()">
+      <form>
         <label for="file-upload" class="custom-file-upload">
           <i class="fa fa-cloud-upload"></i>
         </label>
         <vue-dropzone
           v-if="showDropArea"
           ref="imgDropZone"
-          id="customdropzone"
+          id="attach"
           :options="dropzoneOptions"
           @vdropzone-complete="afterComplete"
         ></vue-dropzone>
@@ -143,18 +162,28 @@
             <p>Reply to {{ replyingTo }}</p>
             <p>{{ replyingMessage }}</p>
           </div>
-          <ResizeAuto>
-            <template v-slot:default="{ resize }">
-              <textarea
-                v-model="post.content"
-                class="textarea"
-                rows="1"
-                @input="resize"
-              ></textarea>
-            </template>
-          </ResizeAuto>
+          <div class="text-area">
+            <ResizeAuto>
+              <template v-slot:default="{ resize }">
+                <textarea
+                  v-model="post.content"
+                  class="textarea"
+                  rows="1"
+                  @input="resize"
+                ></textarea>
+              </template>
+            </ResizeAuto>
+            <vue-dropzone
+              ref="imgDropZone"
+              id="attach"
+              :include-styling="false"
+              :options="dropzoneOptions"
+              @vdropzone-complete="afterComplete()"
+            ></vue-dropzone>
+          </div>
         </div>
         <button
+          @click="onCreatePost()"
           class="button is-success bottom"
           style="margin-top: 1em"
           v-scroll-to="'#bottom'"
@@ -163,16 +192,20 @@
         </button>
       </form>
     </div>
+    <LightBox ref="lightbox" :media="media" :show-light-box="false" />
   </section>
 </template>
 
 <script>
+require('vue-image-lightbox/dist/vue-image-lightbox.min.css');
+
 import { mapState, mapGetters, mapActions } from 'vuex';
 import firebase from '@/firebase';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import ResizeAuto from '@/components/ResizeAuto';
 import db from '@/db';
+import LightBox from 'vue-image-lightbox';
 
 let uuid = require('uuid');
 
@@ -180,15 +213,18 @@ export default {
   components: {
     vueDropzone: vue2Dropzone,
     ResizeAuto,
+    LightBox,
   },
   data: () => ({
+    media: [],
     searchTerm: '',
     showDropArea: false,
+    scroll: true,
     replyingTo: '',
     replyingToId: '',
     replyingMessage: '',
     repliedUsername: '',
-    listReplys: '',
+    listReplies: '',
     dropzoneOptions: {
       url: 'https://httpbin.org/post',
       thumbnailWidth: 150,
@@ -204,9 +240,9 @@ export default {
   }),
   mounted() {
     this.initCourse(this.$route.params.name);
-    this.initUsers();
   },
-  created() {
+
+  updated() {
     this.scrollToBottom();
   },
   watch: {
@@ -218,24 +254,15 @@ export default {
         this.initPosts(this.course.id);
       }
     },
-    listReplys() {
-      this.initReplys(this.listReplys);
+    listReplies() {
+      this.initReplies(this.listReplies);
     },
   },
   computed: {
-    ...mapState('messageBoard', ['posts', 'replys']),
+    ...mapState('messageBoard', ['posts', 'replies']),
     ...mapGetters({
       course: 'messageBoard/course',
-      usersById: 'users/usersById',
     }),
-    loadedUsersById() {
-      return this.posts.reduce((byId, post) => {
-        byId[post.user_id] = this.usersById[post.user_id] || {
-          username: 'Loading...',
-        };
-        return byId;
-      }, {});
-    },
     filteredPosts() {
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, 'gi');
@@ -250,21 +277,47 @@ export default {
       'initCourse',
       'initPosts',
       'deletePost',
-      'initReplys',
+      'initReplies',
     ]),
-    ...mapActions('users', {
-      initUsers: 'init',
-    }),
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
-      container.scrollTop = container.scrollHeight;
+      if (this.scroll) {
+        container.scrollTop = container.scrollHeight;
+        if (container.scrollHeight > 400) {
+          this.scroll = false;
+        }
+      }
     },
     async addReply(id) {
-      console.log(id);
       db.collection('posts')
         .doc(id)
         .update({
-          replys: firebase.firestore.FieldValue.increment(1),
+          replies: firebase.firestore.FieldValue.increment(1),
+        });
+    },
+    async addClip(id) {
+      const user = firebase.auth().currentUser;
+      db.collection('users')
+        .doc(user.uid)
+        .get()
+        .then((doc) => {
+          for (const clip in doc.data().clips) {
+            console.log(clip);
+            if (doc.data().clips[clip] == id) {
+              console.log('User has already clipped this');
+            } else {
+              db.collection('posts')
+                .doc(id)
+                .update({
+                  clips: firebase.firestore.FieldValue.increment(1),
+                });
+              db.collection('users')
+                .doc(user.uid)
+                .update({
+                  clips: firebase.firestore.FieldValue.arrayUnion(id),
+                });
+            }
+          }
         });
     },
     async afterComplete(file) {
@@ -283,18 +336,32 @@ export default {
       }
       this.$refs.imgDropZone.removeFile(file);
     },
-    showReplys(post) {
-      this.listReplys = post.id;
+    openGallery(index, files) {
+      console.log(files);
+      this.media = [];
+      for (const file in files) {
+        const fi = {
+          thumb: files[file].src,
+          src: files[file].src,
+        };
+        this.media.push(fi);
+      }
+      this.$refs.lightbox.showImage(index);
     },
-    viewReplys(id) {
-      this.listReplys = id;
+    showReplies(post) {
+      this.listReplies = post.id;
+    },
+    viewReplies(id) {
+      this.listReplies = id;
     },
     reply(post) {
-      console.log(post);
       this.post.isReply = true;
       this.replyingTo = post.username;
       this.replyingMessage = post.content;
       this.post.parent_id = post.id;
+    },
+    childReply(post) {
+      this.reply(post);
     },
     async onCreatePost() {
       if (this.post.content || this.post.files[0]) {
@@ -305,12 +372,10 @@ export default {
             .doc(this.post.parent_id)
             .get()
             .then((doc) => {
-              console.log(doc.data());
               //If the post being replied to is also a reply
               if (doc.data().isReply) {
                 this.addReply(doc.data().parent_id);
               } else {
-                console.log(doc.data().id);
                 this.addReply(doc.data().id);
               }
             });
@@ -355,8 +420,6 @@ export default {
   },
 };
 </script>
-
-};
 
 <style>
 .search-form {
@@ -421,5 +484,24 @@ input[type='file'] {
 
 .post-info {
   display: flex;
+}
+
+#attach {
+  width: 50px;
+  height: 50px;
+  padding: 20px 20px;
+  cursor: pointer;
+  background: url('../assets/attach.png') center/cover;
+}
+
+.text-area {
+  display: flex;
+  margin-right: 3em;
+  margin-left: 1.5em;
+}
+.clip {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 </style>
