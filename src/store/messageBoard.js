@@ -62,7 +62,11 @@ const actions = {
       });
   },
   async deletePost(_, post_id) {
-    await posts.doc(post_id).delete();
+    await posts.doc(post_id).update({
+      files: [],
+      content: [],
+      deleted: true,
+    });
   },
   async addReply(post) {
     console.log('yo');

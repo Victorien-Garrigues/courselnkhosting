@@ -24,7 +24,10 @@
                   <img :src="file.src" alt="Placeholder image" />
                 </figure>
               </div>
-              <div class="card-content">
+              <div v-if="post.deleted" class="card-content">
+                <p>{{ post.username }} deleted this post</p>
+              </div>
+              <div v-if="!post.deleted" class="card-content">
                 <div class="media">
                   <div class="media-left"></div>
                   <div class="media-content">
@@ -41,6 +44,7 @@
                   <br />
                   <time>{{ getCreated(index) }}</time>
                   <br />
+
                   <button @click="deletePost(post.id)" class="button is-danger">
                     Delete Post
                   </button>
@@ -151,9 +155,9 @@
           </ResizeAuto>
         </div>
         <button
-          v-scroll-to="'#bottom'"
           class="button is-success bottom"
           style="margin-top: 1em"
+          v-scroll-to="'#bottom'"
         >
           Add Post
         </button>
@@ -202,7 +206,7 @@ export default {
     this.initCourse(this.$route.params.name);
     this.initUsers();
   },
-  updated() {
+  created() {
     this.scrollToBottom();
   },
   watch: {
