@@ -7,7 +7,7 @@ const posts = db.collection('posts');
 const state = {
   courses: [],
   posts: [],
-  replys: [],
+  replies: [],
 };
 
 const getters = {
@@ -22,7 +22,7 @@ const actions = {
     post.id = result.id;
     post.user_id = user.uid;
     post.created_at = firebase.firestore.FieldValue.serverTimestamp();
-    post.replys = 0;
+    post.replies = 0;
     post.clips = 0;
     db.collection('users')
       .where('userId', '==', user.uid)
@@ -38,6 +38,11 @@ const actions = {
               .then(function(querySnapshot) {
                 querySnapshot.forEach(function(doc) {
                   post.replyUsername = doc.data().username;
+                  if (doc.data().isReply) {
+                    post.originalPost_id = doc.data().parent_id;
+                  } else {
+                    post.originalPost_id = post.parent_id;
+                  }
                   try {
                     posts.doc(post.id).set(post);
                   } catch (error) {
@@ -64,18 +69,9 @@ const actions = {
   async deletePost(_, post_id) {
     await posts.doc(post_id).update({
       files: [],
-      content: [],
+      content: '',
       deleted: true,
     });
-  },
-  async addReply(post) {
-    console.log('yo');
-    console.log(post);
-    db.collection('posts')
-      .doc(post.id)
-      .update({
-        replys: post.replys + 1,
-      });
   },
 
   initCourse: firestoreAction(({ bindFirestoreRef }, courseCode) => {
@@ -93,12 +89,12 @@ const actions = {
         .orderBy('created_at', 'asc')
     );
   }),
-  initReplys: firestoreAction(({ bindFirestoreRef }, parent_id) => {
+  initReplies: firestoreAction(({ bindFirestoreRef }, originalPost_id) => {
     bindFirestoreRef(
-      'replys',
+      'replies',
       db
         .collection('posts')
-        .where('parent_id', '==', parent_id)
+        .where('originalPost_id', '==', originalPost_id)
         .orderBy('created_at', 'asc')
     );
   }),
