@@ -34,7 +34,8 @@
                   />
 
                   <div style="display: flex;" v-else class="fileType">
-                    <img src="../assets/file.png" />
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
                     <a :href="file.src">{{ file.name }} </a>
                   </div>
                 </figure>
@@ -101,7 +102,11 @@
                         @click="openGallery(index, post.files)"
                       />
 
-                      <img src="" alt="" />
+                      <div style="display: flex;" v-else class="fileType">
+                        <img v-if="isVideo(file)" src="../assets/video.png" />
+                        <img v-else src="../assets/file.png" />
+                        <a :href="file.src">{{ file.name }} </a>
+                      </div>
                     </figure>
                   </div>
                   <div class="card-content">
@@ -236,7 +241,7 @@ export default {
       url: 'https://httpbin.org/post',
       thumbnailWidth: 150,
       thumbnailHeight: 150,
-      maxFilesize: 0.5,
+      maxFilesize: 5,
       maxFiles: 10,
       duplicateCheck: true,
       addRemoveLinks: true,
@@ -291,6 +296,9 @@ export default {
     ]),
     isImage(file) {
       return file.src.includes('png');
+    },
+    isVideo(file) {
+      return file.src.includes('MP4') || file.src.includes('mp4');
     },
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
@@ -565,6 +573,7 @@ input[type='file'] {
   position: absolute;
   top: 0;
   right: 0;
+  z-index: 1;
 }
 
 .fileType img {
