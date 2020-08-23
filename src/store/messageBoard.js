@@ -25,42 +25,40 @@ const actions = {
     post.replies = 0;
     post.clips = 0;
     db.collection('users')
-      .where('userId', '==', user.uid)
+      .doc(user.uid)
       .get()
-      .then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-          post.username = doc.data().username;
+      .then((doc) => {
+        post.username = doc.data().username;
 
-          if (post.isReply) {
-            db.collection('posts')
-              .where('id', '==', post.parent_id)
-              .get()
-              .then(function(querySnapshot) {
-                querySnapshot.forEach(function(doc) {
-                  post.replyUsername = doc.data().username;
-                  if (doc.data().isReply) {
-                    post.originalPost_id = doc.data().parent_id;
-                  } else {
-                    post.originalPost_id = post.parent_id;
-                  }
-                  try {
-                    posts.doc(post.id).set(post);
-                  } catch (error) {
-                    console.error(error);
-                  }
-                });
-              })
-              .catch(function(error) {
-                console.log('Error getting documents: ', error);
+        if (post.isReply) {
+          db.collection('posts')
+            .where('id', '==', post.parent_id)
+            .get()
+            .then(function(querySnapshot) {
+              querySnapshot.forEach(function(doc) {
+                post.replyUsername = doc.data().username;
+                if (doc.data().isReply) {
+                  post.originalPost_id = doc.data().parent_id;
+                } else {
+                  post.originalPost_id = post.parent_id;
+                }
+                try {
+                  posts.doc(post.id).set(post);
+                } catch (error) {
+                  console.error(error);
+                }
               });
-          } else {
-            try {
-              posts.doc(post.id).set(post);
-            } catch (error) {
-              console.error(error);
-            }
+            })
+            .catch(function(error) {
+              console.log('Error getting documents: ', error);
+            });
+        } else {
+          try {
+            posts.doc(post.id).set(post);
+          } catch (error) {
+            console.error(error);
           }
-        });
+        }
       })
       .catch(function(error) {
         console.log('Error getting documents: ', error);

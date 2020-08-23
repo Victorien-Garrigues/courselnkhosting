@@ -15,7 +15,7 @@
         <div class="posts is-multiline">
           <div v-for="(post, index) in filteredPosts" :key="index">
             <div class="card" :id="post.id">
-              <div class="clip">
+              <div v-if="!post.deleted" class="clip">
                 <button @click="addClip(post.id)" class="button is-success">
                   Clip
                 </button>
@@ -28,9 +28,15 @@
                   v-for="(file, index) in post.files"
                 >
                   <img
+                    v-if="isImage(file)"
                     v-lazy="file.src || file.thumb"
                     @click="openGallery(index, post.files)"
                   />
+
+                  <div style="display: flex;" v-else class="fileType">
+                    <img src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }} </a>
+                  </div>
                 </figure>
               </div>
               <div v-if="post.deleted" class="card-content">
@@ -89,7 +95,13 @@
                       :key="index"
                       v-for="(file, index) in reply.files"
                     >
-                      <img :src="file.src" alt="Placeholder image" />
+                      <img
+                        v-if="isImage(file)"
+                        v-lazy="file.src || file.thumb"
+                        @click="openGallery(index, post.files)"
+                      />
+
+                      <img src="" alt="" />
                     </figure>
                   </div>
                   <div class="card-content">
@@ -138,22 +150,15 @@
         <label for="file-upload" class="custom-file-upload">
           <i class="fa fa-cloud-upload"></i>
         </label>
+
         <vue-dropzone
-          v-if="showDropArea"
+          v-if="showDropArea || fileDropped"
           ref="imgDropZone"
-          id="attach"
+          id="dropzone"
           :options="dropzoneOptions"
+          @vdropzone-drop="fileDropped = true"
           @vdropzone-complete="afterComplete"
         ></vue-dropzone>
-        <div v-if="post.files.length > 0" class="image-div">
-          <div
-            style="display: inline-block;"
-            v-for="file in post.files"
-            :key="file.src"
-          >
-            <img :src="file.src" class="image" />
-          </div>
-        </div>
         <div class="wrapper">
           <div v-if="post.isReply" class="reply">
             <button @click="post.isReply = false" class="button is-danger">
@@ -174,11 +179,11 @@
               </template>
             </ResizeAuto>
             <vue-dropzone
-              ref="imgDropZone"
+              ref="sideDropZone"
               id="attach"
               :include-styling="false"
               :options="dropzoneOptions"
-              @vdropzone-complete="afterComplete()"
+              @vdropzone-complete="afterAttach"
             ></vue-dropzone>
           </div>
         </div>
@@ -207,7 +212,7 @@ import ResizeAuto from '@/components/ResizeAuto';
 import db from '@/db';
 import LightBox from 'vue-image-lightbox';
 
-let uuid = require('uuid');
+// let uuid = require('uuid');
 
 export default {
   components: {
@@ -218,8 +223,10 @@ export default {
   data: () => ({
     media: [],
     searchTerm: '',
+    addedManually: false,
     showDropArea: false,
     scroll: true,
+    fileDropped: false,
     replyingTo: '',
     replyingToId: '',
     replyingMessage: '',
@@ -230,6 +237,9 @@ export default {
       thumbnailWidth: 150,
       thumbnailHeight: 150,
       maxFilesize: 0.5,
+      maxFiles: 10,
+      duplicateCheck: true,
+      addRemoveLinks: true,
     },
     post: {
       content: '',
@@ -279,6 +289,9 @@ export default {
       'deletePost',
       'initReplies',
     ]),
+    isImage(file) {
+      return file.src.includes('png');
+    },
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
       if (this.scroll) {
@@ -297,47 +310,79 @@ export default {
     },
     async addClip(id) {
       const user = firebase.auth().currentUser;
+      var alreadyClipped = false;
       db.collection('users')
         .doc(user.uid)
         .get()
         .then((doc) => {
           for (const clip in doc.data().clips) {
-            console.log(clip);
             if (doc.data().clips[clip] == id) {
+              alreadyClipped = true;
               console.log('User has already clipped this');
-            } else {
-              db.collection('posts')
-                .doc(id)
-                .update({
-                  clips: firebase.firestore.FieldValue.increment(1),
-                });
-              db.collection('users')
-                .doc(user.uid)
-                .update({
-                  clips: firebase.firestore.FieldValue.arrayUnion(id),
-                });
             }
+          }
+          if (!alreadyClipped) {
+            db.collection('posts')
+              .doc(id)
+              .update({
+                clips: firebase.firestore.FieldValue.increment(1),
+              });
+            db.collection('users')
+              .doc(user.uid)
+              .update({
+                clips: firebase.firestore.FieldValue.arrayUnion(id),
+              });
           }
         });
     },
     async afterComplete(file) {
-      const fileName = uuid.v1();
+      this.fileDropped = true;
       try {
-        var metadata = {
-          contentType: 'image/png',
-        };
         const storageRef = firebase.storage().ref();
-        const fileRef = storageRef.child(`files/${fileName}.png`);
-        await fileRef.put(file, metadata);
-        const downloadURL = await fileRef.getDownloadURL();
-        this.post.files.push({ src: downloadURL });
+
+        if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
+          const fileRef = storageRef.child(`images/${file.name}.png`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          this.post.files.push({ src: downloadURL, name: file.name });
+        } else {
+          const fileRef = storageRef.child(`files/${file.name}`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          console.log('wow');
+          console.log(file.name);
+          console.log(downloadURL);
+          this.post.files.push({
+            src: downloadURL,
+            name: file.name,
+          });
+        }
       } catch (error) {
         console.log(error);
       }
-      this.$refs.imgDropZone.removeFile(file);
+    },
+    async afterAttach(file) {
+      this.fileDropped = true;
+      try {
+        const storageRef = firebase.storage().ref();
+
+        if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
+          const fileRef = storageRef.child(`images/${file.name}.png`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+        } else {
+          const fileRef = storageRef.child(`files/${file.name}`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+
+          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
     openGallery(index, files) {
-      console.log(files);
       this.media = [];
       for (const file in files) {
         const fi = {
@@ -364,7 +409,13 @@ export default {
       this.reply(post);
     },
     async onCreatePost() {
+      console.log('yo');
+      console.log(this.post.files);
       if (this.post.content || this.post.files[0]) {
+        this.fileDropped = false;
+
+        console.log();
+
         this.createPost(this.post);
 
         if (this.post.isReply) {
@@ -382,7 +433,7 @@ export default {
         }
         this.post = {
           content: '',
-          files: '',
+          files: [],
           isReply: false,
           parent_id: '',
         };
@@ -494,6 +545,17 @@ input[type='file'] {
   background: url('../assets/attach.png') center/cover;
 }
 
+#attach .dz-success-mark,
+.dz-error-mark,
+.dz-remove {
+  display: none;
+}
+
+#attach .dz-filename,
+.dz-size {
+  display: none;
+}
+
 .text-area {
   display: flex;
   margin-right: 3em;
@@ -503,5 +565,10 @@ input[type='file'] {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.fileType img {
+  max-width: 25px;
+  max-height: 25px;
 }
 </style>
