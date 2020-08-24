@@ -6,7 +6,6 @@
       An email has been sent to your university email with instructions on how
       to reset your password
     </p>
-
     <button @click="backToLogin" type="submit" class="signupbtn">Done</button>
   </div>
 </template>
@@ -14,7 +13,6 @@
 <script>
 export default {
   name: 'PasswordEmailSent',
-
   methods: {
     backToLogin() {
       this.$router.push({ name: 'Login' });

@@ -1,14 +1,20 @@
-import { firestoreAction } from 'vuexfire';
 import db from '@/db';
+import firebase from '@/firebase';
 
 const state = {
   courses: [],
 };
 
 const actions = {
-  init: firestoreAction(({ bindFirestoreRef }) => {
-    bindFirestoreRef('courses', db.collection('courses'));
-  }),
+  async initCourses({ state }) {
+    await db
+      .collection('users')
+      .doc(firebase.auth().currentUser.uid)
+      .get()
+      .then((doc) => {
+        state.courses = doc.data().courses;
+      });
+  },
 };
 
 export default {

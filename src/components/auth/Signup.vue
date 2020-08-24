@@ -12,8 +12,12 @@
           <option disabled selected="selected" value="0"
             >Select University...</option
           >
-          <option value="McGill">McGill University</option>
-          <option value="Western">Western University</option>
+          <option
+            v-for="(school, index) in schools"
+            :key="index"
+            :value="school.id"
+            >{{ school.data().name }}</option
+          >
         </select>
         <input
           v-model="email"
@@ -67,16 +71,30 @@ import db from '@/db';
 import router from '@/router/index';
 export default {
   name: 'Signup',
-  data() {
-    return {
-      email: null,
-      username: null,
-      password: null,
-      university: 0,
-      feedback: null,
-    };
+  data: () => ({
+    schools: [],
+    email: null,
+    username: null,
+    password: null,
+    university: 0,
+    feedback: null,
+  }),
+  mounted() {
+    this.getSchools();
   },
   methods: {
+    async getSchools() {
+      var tempSchools = [];
+      await db
+        .collection('Schools')
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            tempSchools.push(doc);
+          });
+        });
+      this.schools = tempSchools;
+    },
     signup() {
       if (
         this.username &&
@@ -109,6 +127,7 @@ export default {
                 .doc(cred.user.uid)
                 .set({
                   username: this.username,
+                  school_id: this.university,
                 });
             })
             .catch((err) => {

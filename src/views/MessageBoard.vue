@@ -83,7 +83,6 @@
             </div>
             <div v-if="listReplies == post.id">
               <!--  Start of List Of  Replies -->
-
               <div
                 v-for="(reply, index) in replies"
                 :key="index"
@@ -208,7 +207,6 @@
 
 <script>
 require('vue-image-lightbox/dist/vue-image-lightbox.min.css');
-
 import { mapState, mapGetters, mapActions } from 'vuex';
 import firebase from '@/firebase';
 import vue2Dropzone from 'vue2-dropzone';
@@ -254,7 +252,7 @@ export default {
     },
   }),
   mounted() {
-    this.initCourse(this.$route.params.name);
+    this.initPosts(this.$route.params.name);
   },
 
   updated() {
@@ -262,9 +260,10 @@ export default {
   },
   watch: {
     '$route.params.name': function() {
-      this.initCourse(this.$route.params.name);
+      this.initPosts(this.$route.params.name);
     },
     course() {
+      //   console.log(this.course.id);
       if (this.course.id) {
         this.initPosts(this.course.id);
       }
