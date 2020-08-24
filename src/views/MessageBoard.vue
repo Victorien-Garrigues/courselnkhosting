@@ -7,6 +7,7 @@
       @mouseout="showDropArea = false"
       @drop="showDropArea = false"
     >
+    
       <!-- start of navbar design -->
       <div class="navbar">
         <!-- brand design -->
@@ -54,7 +55,19 @@
                       :key="index"
                       v-for="(file, index) in post.files"
                     >
-                      <img v-lazy="file.src || file.thumb" @click="openGallery(index, post.files)" />
+
+                      <img
+                        v-if="isImage(file)"
+                        v-lazy="file.src || file.thumb"
+                        @click="openGallery(index, post.files)"
+                      />
+
+                      <div style="display: flex;" v-else class="fileType">
+                        <img v-if="isVideo(file)" src="../assets/video.png" />
+                        <img v-else src="../assets/file.png" />
+                        <a :href="file.src">{{ file.name }} </a>
+                      </div>
+
                     </figure>
                   </div>
                   <!-- DELETED POSTS -->
@@ -152,7 +165,33 @@
                 <!--  End of List Of  Replies -->
               </div>
             </div>
-            <div id="bottom"></div>
+
+          <!--  End of List Of  Replies -->
+          </div>
+        </div>
+        <div id="bottom"></div>
+      </div>
+      <form>
+        <label for="file-upload" class="custom-file-upload">
+          <i class="fa fa-cloud-upload"></i>
+        </label>
+
+        <vue-dropzone
+          v-if="showDropArea || fileDropped"
+          ref="imgDropZone"
+          id="dropzone"
+          :options="dropzoneOptions"
+          @vdropzone-drop="fileDropped = true"
+          @vdropzone-complete="afterComplete"
+        ></vue-dropzone>
+        <div class="wrapper">
+          <div v-if="post.isReply" class="reply">
+            <button @click="post.isReply = false" class="button is-danger">
+              X
+            </button>
+            <p>Reply to {{ replyingTo }}</p>
+            <p>{{ replyingMessage }}</p>
+
           </div>
 
           <form>
@@ -160,11 +199,14 @@
               <i class="fa fa-cloud-upload"></i>
             </label>
             <vue-dropzone
-              v-if="showDropArea"
-              ref="imgDropZone"
+
+              ref="sideDropZone"
+
               id="attach"
               :options="dropzoneOptions"
-              @vdropzone-complete="afterComplete"
+              
+              @vdropzone-complete="afterAttach"
+
             ></vue-dropzone>
             <div v-if="post.files.length > 0" class="image-div">
               <div style="display: inline-block;" v-for="file in post.files" :key="file.src">
@@ -215,17 +257,18 @@
 </template>
 
 <script>
-require("vue-image-lightbox/dist/vue-image-lightbox.min.css");
 
-import { mapState, mapGetters, mapActions } from "vuex";
-import firebase from "@/firebase";
-import vue2Dropzone from "vue2-dropzone";
-import "vue2-dropzone/dist/vue2Dropzone.min.css";
-import ResizeAuto from "@/components/ResizeAuto";
-import db from "@/db";
-import LightBox from "vue-image-lightbox";
+require('vue-image-lightbox/dist/vue-image-lightbox.min.css');
+import { mapState, mapGetters, mapActions } from 'vuex';
+import firebase from '@/firebase';
+import vue2Dropzone from 'vue2-dropzone';
+import 'vue2-dropzone/dist/vue2Dropzone.min.css';
+import ResizeAuto from '@/components/ResizeAuto';
+import db from '@/db';
+import LightBox from 'vue-image-lightbox';
 
-let uuid = require("uuid");
+// let uuid = require('uuid');
+
 
 export default {
   components: {
@@ -235,19 +278,26 @@ export default {
   },
   data: () => ({
     media: [],
-    searchTerm: "",
+
+    searchTerm: '',
+    addedManually: false,
     showDropArea: false,
     scroll: true,
-    replyingTo: "",
-    replyingToId: "",
-    replyingMessage: "",
-    repliedUsername: "",
-    listReplies: "",
+    fileDropped: false,
+    replyingTo: '',
+    replyingToId: '',
+    replyingMessage: '',
+    repliedUsername: '',
+    listReplies: '',
+
     dropzoneOptions: {
       url: "https://httpbin.org/post",
       thumbnailWidth: 150,
       thumbnailHeight: 150,
-      maxFilesize: 0.5,
+      maxFilesize: 5,
+      maxFiles: 10,
+      duplicateCheck: true,
+      addRemoveLinks: true,
     },
     post: {
       content: "",
@@ -257,17 +307,20 @@ export default {
     },
   }),
   mounted() {
-    this.initCourse(this.$route.params.name);
+    this.initPosts(this.$route.params.name);
   },
 
   updated() {
     this.scrollToBottom();
   },
   watch: {
-    "$route.params.name": function () {
-      this.initCourse(this.$route.params.name);
+
+      '$route.params.name': function() {
+      this.initPosts(this.$route.params.name);
+
     },
     course() {
+      //   console.log(this.course.id);
       if (this.course.id) {
         this.initPosts(this.course.id);
       }
@@ -297,6 +350,12 @@ export default {
       "deletePost",
       "initReplies",
     ]),
+    isImage(file) {
+      return file.src.includes('png');
+    },
+    isVideo(file) {
+      return file.src.includes('MP4') || file.src.includes('mp4');
+    },
     scrollToBottom() {
       var container = this.$el.querySelector(".postContainer");
       if (this.scroll) {
@@ -315,47 +374,84 @@ export default {
     },
     async addClip(id) {
       const user = firebase.auth().currentUser;
-      db.collection("users")
+
+      var alreadyClipped = false;
+      db.collection('users')
+
         .doc(user.uid)
         .get()
         .then((doc) => {
           for (const clip in doc.data().clips) {
-            console.log(clip);
             if (doc.data().clips[clip] == id) {
-              console.log("User has already clipped this");
-            } else {
-              db.collection("posts")
-                .doc(id)
-                .update({
-                  clips: firebase.firestore.FieldValue.increment(1),
-                });
-              db.collection("users")
-                .doc(user.uid)
-                .update({
-                  clips: firebase.firestore.FieldValue.arrayUnion(id),
-                });
+
+              alreadyClipped = true;
+              console.log('User has already clipped this');
+
             }
+          }
+          if (!alreadyClipped) {
+            db.collection('posts')
+              .doc(id)
+              .update({
+                clips: firebase.firestore.FieldValue.increment(1),
+              });
+            db.collection('users')
+              .doc(user.uid)
+              .update({
+                clips: firebase.firestore.FieldValue.arrayUnion(id),
+              });
           }
         });
     },
     async afterComplete(file) {
-      const fileName = uuid.v1();
+      this.fileDropped = true;
       try {
-        var metadata = {
-          contentType: "image/png",
-        };
         const storageRef = firebase.storage().ref();
-        const fileRef = storageRef.child(`files/${fileName}.png`);
-        await fileRef.put(file, metadata);
-        const downloadURL = await fileRef.getDownloadURL();
-        this.post.files.push({ src: downloadURL });
+
+        if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
+          const fileRef = storageRef.child(`images/${file.name}.png`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          this.post.files.push({ src: downloadURL, name: file.name });
+        } else {
+          const fileRef = storageRef.child(`files/${file.name}`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          console.log('wow');
+          console.log(file.name);
+          console.log(downloadURL);
+          this.post.files.push({
+            src: downloadURL,
+            name: file.name,
+          });
+        }
       } catch (error) {
         console.log(error);
       }
-      this.$refs.imgDropZone.removeFile(file);
+    },
+    async afterAttach(file) {
+      this.fileDropped = true;
+      try {
+
+        const storageRef = firebase.storage().ref();
+
+        if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
+          const fileRef = storageRef.child(`images/${file.name}.png`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+        } else {
+          const fileRef = storageRef.child(`files/${file.name}`);
+          await fileRef.put(file);
+          const downloadURL = await fileRef.getDownloadURL();
+
+          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
     openGallery(index, files) {
-      console.log(files);
       this.media = [];
       for (const file in files) {
         const fi = {
@@ -382,7 +478,13 @@ export default {
       this.reply(post);
     },
     async onCreatePost() {
+      console.log('yo');
+      console.log(this.post.files);
       if (this.post.content || this.post.files[0]) {
+        this.fileDropped = false;
+
+        console.log();
+
         this.createPost(this.post);
 
         if (this.post.isReply) {
@@ -399,8 +501,10 @@ export default {
             });
         }
         this.post = {
-          content: "",
-          files: "",
+
+          content: '',
+          files: [],
+
           isReply: false,
           parent_id: "",
         };
@@ -529,6 +633,17 @@ input[type="file"] {
   background: url("../assets/attach.png") center/cover;
 }
 
+#attach .dz-success-mark,
+.dz-error-mark,
+.dz-remove {
+  display: none;
+}
+
+#attach .dz-filename,
+.dz-size {
+  display: none;
+}
+
 .text-area {
   display: flex;
   margin-right: 3em;
@@ -539,6 +654,15 @@ input[type="file"] {
   position: absolute;
   top: 25%;
   right: 0;
+
+  z-index: 1;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.fileType img {
+  max-width: 25px;
+  max-height: 25px;
   margin-top: 10px;
   margin-right: 10px;
 }

@@ -6,7 +6,7 @@
     <ul class="menu-list">
       <li v-for="course in courses" :key="course.id">
         <router-link
-          :to="{ name: 'MessageBoard', params: { name: course.courseCode } }"
+          :to="{ name: 'MessageBoard', params: { name: course.course_id } }"
         >
           {{ course.courseCode }}
         </router-link>
@@ -19,9 +19,9 @@
 import { mapState, mapActions } from 'vuex';
 export default {
   mounted() {
-    this.init();
+    this.initCourses();
   },
   computed: mapState('courses', ['courses']),
-  methods: mapActions('courses', ['init']),
+  methods: mapActions('courses', ['initCourses']),
 };
 </script>
