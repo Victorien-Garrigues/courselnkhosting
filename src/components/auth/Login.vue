@@ -3,28 +3,14 @@
     <div class="background"></div>
     <div class="container">
       <form @submit.prevent="login">
-        <img src="../../assets/logo.png" alt="" />
+        <img src="../../assets/logo.png" alt="simple logo" />
         <h1>Welcome to CourseLnk</h1>
-        <input
-          v-model="email"
-          type="text"
-          placeholder="University Email"
-          name="email"
-          required
-        />
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Password"
-          name="psw"
-          required
-        />
+        <input v-model="email" type="text" placeholder="University Email" name="email" required />
+        <input v-model="password" type="password" placeholder="Password" name="psw" required />
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
         <p style="text-align:left;">
-          <router-link class="forgotPassword" :to="{ name: 'Password' }"
-            >Forgot password?</router-link
-          >
+          <router-link class="forgotPassword" :to="{ name: 'Password' }">Forgot password?</router-link>
         </p>
 
         <div class="clearfix">
@@ -33,12 +19,7 @@
 
         <p>
           Not on CoursLnk yet?
-          <router-link
-            class="noUnderline"
-            style="color:dodgerblue"
-            :to="{ name: 'Signup' }"
-            >Signup</router-link
-          >
+          <router-link class="noUnderline" style="color:dodgerblue" :to="{ name: 'Signup' }">Signup</router-link>
         </p>
       </form>
     </div>
@@ -46,9 +27,9 @@
 </template>
 
 <script>
-import firebase from 'firebase';
+import firebase from "firebase";
 export default {
-  name: 'Login',
+  name: "Login",
   data() {
     return {
       email: null,
@@ -65,16 +46,16 @@ export default {
           .signInWithEmailAndPassword(this.email, this.password)
           .then(() => {
             if (firebase.auth().currentUser.emailVerified) {
-              this.$router.push({ name: 'Courses' });
+              this.$router.push({ name: "Courses" });
             } else {
-              this.feedback('The email or passoword is incorrect');
+              this.feedback("The email or passoword is incorrect");
             }
           })
           .catch((err) => {
             this.feedback = err.message;
           });
       } else {
-        this.feedback = 'Please Fill In Both Fields';
+        this.feedback = "Please Fill In Both Fields";
       }
     },
   },
@@ -93,7 +74,7 @@ export default {
   top: 0;
   left: 0;
   display: flex;
-  background: url('../../assets/authBackground.png') no-repeat left/contain
+  background: url("../../assets/authBackground.png") no-repeat left/contain
     fixed;
 }
 .background {
@@ -113,8 +94,8 @@ export default {
   text-align: left;
 }
 /* Full-width input fields */
-input[type='text'],
-input[type='password'] {
+input[type="text"],
+input[type="password"] {
   width: 100%;
   padding: 15px;
   margin: -7px 0 22px 0;
@@ -131,8 +112,8 @@ h1 {
   margin-bottom: 20px;
   color: #0fb9b1ff;
 }
-input[type='text']:focus,
-input[type='password']:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -165,7 +146,7 @@ button:hover {
 }
 /* Clear floats */
 .clearfix::after {
-  content: '';
+  content: "";
   clear: both;
   display: table;
 }
@@ -180,7 +161,7 @@ button:hover {
   border-radius: 5px;
   line-height: 1.3;
   appearance: none;
-  background-image: url('../../assets/dropdown.png'),
+  background-image: url("../../assets/dropdown.png"),
     linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
   background-repeat: no-repeat, repeat;
   background-position: right 0.7em top 50%, 0 0;
