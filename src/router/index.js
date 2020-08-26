@@ -12,13 +12,13 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'Signup',
-    component: Signup,
-  },
-  {
-    path: '/login',
     name: 'Login',
     component: Login,
+  },
+  {
+    path: '/Signup',
+    name: 'Signup',
+    component: Signup,
   },
   {
     path: '/reset-password',
@@ -32,6 +32,8 @@ const routes = [
   },
   {
     path: '/:name',
+    name: 'MessageBoard',
+    path: '/r/:name',
     name: 'MessageBoard',
     component: MessageBoard,
   },
