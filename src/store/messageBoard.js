@@ -4,21 +4,22 @@ import db from '@/db';
 
 const posts = db.collection('posts');
 
+const mutations = {
+  setCourse(state, course_id) {
+    state.course = course_id;
+  },
+};
+
 const state = {
-  courses: [],
+  course: [],
   posts: [],
   replies: [],
 };
 
-const getters = {
-  course: (state) => (state.courses[0] ? state.courses[0] : {}),
-};
-
 const actions = {
-  async createPost({ getters }, post) {
+  async createPost(_, post) {
     const result = posts.doc();
     const user = firebase.auth().currentUser;
-    post.course_id = getters.course.id;
     post.id = result.id;
     post.user_id = user.uid;
     post.created_at = firebase.firestore.FieldValue.serverTimestamp();
@@ -72,12 +73,6 @@ const actions = {
     });
   },
 
-  initCourse: firestoreAction(({ bindFirestoreRef }, courseCode) => {
-    bindFirestoreRef(
-      'courses',
-      db.collection('courses').where('courseCode', '==', courseCode)
-    );
-  }),
   initPosts: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
       'posts',
@@ -102,5 +97,5 @@ export default {
   namespaced: true,
   state,
   actions,
-  getters,
+  mutations,
 };

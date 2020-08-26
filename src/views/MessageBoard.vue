@@ -250,7 +250,6 @@
         </div>
       </div>
       <!-- END OF TABLE -->
-    </div>
     <LightBox ref="lightbox" :media="media" :show-light-box="false" />
   </section>
 </body>
@@ -259,7 +258,7 @@
 <script>
 
 require('vue-image-lightbox/dist/vue-image-lightbox.min.css');
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import firebase from '@/firebase';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -289,6 +288,7 @@ export default {
     replyingMessage: '',
     repliedUsername: '',
     listReplies: '',
+    currentCourse: '',
 
     dropzoneOptions: {
       url: "https://httpbin.org/post",
@@ -303,11 +303,14 @@ export default {
       content: "",
       files: [],
       isReply: false,
-      parent_id: "",
+      parent_id: '',
+      course_id: '',
     },
   }),
   mounted() {
-    this.initPosts(this.$route.params.name);
+    if (this.course) {
+      this.initPosts(this.course);
+    }
   },
 
   updated() {
@@ -320,9 +323,8 @@ export default {
 
     },
     course() {
-      //   console.log(this.course.id);
-      if (this.course.id) {
-        this.initPosts(this.course.id);
+      if (this.course) {
+        this.initPosts(this.course);
       }
     },
     listReplies() {
@@ -330,7 +332,7 @@ export default {
     },
   },
   computed: {
-    ...mapState("messageBoard", ["posts", "replies"]),
+    ...mapState('messageBoard', ['posts', 'replies', 'course']),
     ...mapGetters({
       course: "messageBoard/course",
     }),
@@ -417,9 +419,6 @@ export default {
           const fileRef = storageRef.child(`files/${file.name}`);
           await fileRef.put(file);
           const downloadURL = await fileRef.getDownloadURL();
-          console.log('wow');
-          console.log(file.name);
-          console.log(downloadURL);
           this.post.files.push({
             src: downloadURL,
             name: file.name,
@@ -478,12 +477,9 @@ export default {
       this.reply(post);
     },
     async onCreatePost() {
-      console.log('yo');
-      console.log(this.post.files);
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
-
-        console.log();
+        this.post.course_id = this.course;
 
         this.createPost(this.post);
 
@@ -504,9 +500,8 @@ export default {
 
           content: '',
           files: [],
-
           isReply: false,
-          parent_id: "",
+          parent_id: '',
         };
       }
     },
