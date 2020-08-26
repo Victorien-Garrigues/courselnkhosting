@@ -207,7 +207,7 @@
 
 <script>
 require('vue-image-lightbox/dist/vue-image-lightbox.min.css');
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import firebase from '@/firebase';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -235,6 +235,7 @@ export default {
     replyingMessage: '',
     repliedUsername: '',
     listReplies: '',
+    currentCourse: '',
     dropzoneOptions: {
       url: 'https://httpbin.org/post',
       thumbnailWidth: 150,
@@ -249,10 +250,13 @@ export default {
       files: [],
       isReply: false,
       parent_id: '',
+      course_id: '',
     },
   }),
   mounted() {
-    this.initPosts(this.$route.params.name);
+    if (this.course) {
+      this.initPosts(this.course);
+    }
   },
 
   updated() {
@@ -263,9 +267,8 @@ export default {
       this.initPosts(this.$route.params.name);
     },
     course() {
-      //   console.log(this.course.id);
-      if (this.course.id) {
-        this.initPosts(this.course.id);
+      if (this.course) {
+        this.initPosts(this.course);
       }
     },
     listReplies() {
@@ -273,10 +276,7 @@ export default {
     },
   },
   computed: {
-    ...mapState('messageBoard', ['posts', 'replies']),
-    ...mapGetters({
-      course: 'messageBoard/course',
-    }),
+    ...mapState('messageBoard', ['posts', 'replies', 'course']),
     filteredPosts() {
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, 'gi');
@@ -356,9 +356,6 @@ export default {
           const fileRef = storageRef.child(`files/${file.name}`);
           await fileRef.put(file);
           const downloadURL = await fileRef.getDownloadURL();
-          console.log('wow');
-          console.log(file.name);
-          console.log(downloadURL);
           this.post.files.push({
             src: downloadURL,
             name: file.name,
@@ -416,12 +413,9 @@ export default {
       this.reply(post);
     },
     async onCreatePost() {
-      console.log('yo');
-      console.log(this.post.files);
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
-
-        console.log();
+        this.post.course_id = this.course;
 
         this.createPost(this.post);
 
@@ -443,6 +437,7 @@ export default {
           files: [],
           isReply: false,
           parent_id: '',
+          course_id: '',
         };
       }
     },

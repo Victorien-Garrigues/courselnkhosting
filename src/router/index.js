@@ -31,7 +31,7 @@ const routes = [
     component: VerificationEmailSent,
   },
   {
-    path: '/r/:name',
+    path: '/:name',
     name: 'MessageBoard',
     component: MessageBoard,
   },
