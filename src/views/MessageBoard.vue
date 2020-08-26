@@ -22,7 +22,13 @@
           </div>
 
           <!-- search design -->
-          <form class="search-form-outside">
+          <form style="display: flex;" class="search-form-outside">
+            <button
+              @click.prevent="filterByFiles = !filterByFiles"
+              class="button"
+            >
+              Files
+            </button>
             <b-field>
               <b-input
                 v-model="searchTerm"
@@ -314,7 +320,6 @@ export default {
   },
   data: () => ({
     media: [],
-
     searchTerm: '',
     addedManually: false,
     showDropArea: false,
@@ -326,7 +331,7 @@ export default {
     repliedUsername: '',
     listReplies: '',
     currentCourse: '',
-
+    filterByFiles: false,
     dropzoneOptions: {
       url: 'https://httpbin.org/post',
       thumbnailWidth: 150,
@@ -372,6 +377,10 @@ export default {
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, 'gi');
         return this.posts.filter((post) => post.content.match(regexp));
+      }
+
+      if (this.filterByFiles) {
+        return this.posts.filter((post) => post.files[0]);
       }
       return this.posts;
     },
