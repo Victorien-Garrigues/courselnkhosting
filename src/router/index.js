@@ -33,8 +33,6 @@ const routes = [
   {
     path: '/:name',
     name: 'MessageBoard',
-    path: '/r/:name',
-    name: 'MessageBoard',
     component: MessageBoard,
   },
   {
