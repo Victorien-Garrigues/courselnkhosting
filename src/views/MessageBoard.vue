@@ -26,7 +26,8 @@
             <!-- Files filter -->
             <button
               @click.prevent="filterByFiles = !filterByFiles"
-              class="button"
+              id="tags"
+              :class="{ clicked: filterByFiles }"
             >
               Files
             </button>
@@ -34,10 +35,45 @@
             <!-- Clips filter -->
             <button
               @click.prevent="filterByClips = !filterByClips"
-              class="button"
+              id="tags"
+              :class="{ clicked: filterByClips }"
             >
               Clips
             </button>
+
+            <!-- General Tag -->
+            <button
+              @click.prevent="filterByGeneral = !filterByGeneral"
+              id="tags"
+              :class="{ clicked: filterByGeneral }"
+            >
+              General
+            </button>
+
+            <button
+              @click.prevent="filterByNotes = !filterByNotes"
+              id="tags"
+              :class="{ clicked: filterByNotes }"
+            >
+              Notes
+            </button>
+
+            <button
+              @click.prevent="filterByExam = !filterByExam"
+              id="tags"
+              :class="{ clicked: filterByExam }"
+            >
+              Exam
+            </button>
+
+            <button
+              @click.prevent="filterByAssignment = !filterByAssignment"
+              id="tags"
+              :class="{ clicked: filterByAssignment }"
+            >
+              Assignment
+            </button>
+
             <b-field>
               <b-input
                 v-model="searchTerm"
@@ -391,8 +427,14 @@ export default {
     replyingToId: '', //The id of the user you are replying to
     replyingMessage: '', //The message of the post your are replying to
     listReplies: '', //id of post in which to list replies for
-    filterByFiles: false, //If the user is filtering by files
-    filterByClips: false, //If the user is filtering by clips
+
+    //Filters
+    filterByFiles: false,
+    filterByClips: false,
+    filterByGeneral: false,
+    filterByNotes: false,
+    filterByExam: false,
+    filterByAssignment: false,
 
     //Which Tags are clicked
     generalTag: false,
@@ -469,6 +511,28 @@ export default {
         return this.posts.slice().sort((a, b) => {
           return a.clips - b.clips;
         });
+      }
+
+      // If filter by number of clips
+      if (this.filterByGeneral) {
+        return this.posts.filter((post) => this.checkForTag(post, 'general'));
+      }
+
+      // If filter by number of clips
+      if (this.filterByNotes) {
+        return this.posts.filter((post) => this.checkForTag(post, 'notes'));
+      }
+
+      // If filter by number of clips
+      if (this.filterByExam) {
+        return this.posts.filter((post) => this.checkForTag(post, 'exam'));
+      }
+
+      // If filter by number of clips
+      if (this.filterByAssignment) {
+        return this.posts.filter((post) =>
+          this.checkForTag(post, 'assignment')
+        );
       }
       return this.posts;
     },
@@ -661,6 +725,12 @@ export default {
             });
         }
 
+        //Resets tags
+        this.generalTag = false;
+        this.notesTag = false;
+        this.examTag = false;
+        this.notesTag = false;
+
         //Resets the post
         this.post = {
           content: '',
@@ -689,6 +759,16 @@ export default {
         this.post.tags.push('assignment');
       }
     },
+
+    checkForTag(post, tag) {
+      for (const index in post.tags) {
+        if (post.tags[index] === tag) {
+          return true;
+        }
+      }
+      return false;
+    },
+
     // toggleTag(tag) {
     //   for (const index in this.post.tags) {
     //     if (this.post.tags[index] === tag) {
