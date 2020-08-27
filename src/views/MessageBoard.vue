@@ -156,6 +156,17 @@
                           </button>
                         </div>
                         <p>{{ post.clips }} Clips</p>
+
+                        <!-- Display the posts tags -->
+                        <div style="display: flex;">
+                          <p
+                            style="margin-right:1em;"
+                            v-for="(tag, index) in post.tags"
+                            :key="index"
+                          >
+                            {{ tag }}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -260,7 +271,40 @@
               </div>
             </div>
 
-            <div class="wrapper">
+            <div class="wrapper buttons are-small">
+              <!-- Tags -->
+              <div style="display: flex;" class="tags">
+                <button
+                  @click.prevent="generalTag = !generalTag"
+                  class=""
+                  :class="{ clicked: generalTag }"
+                  id="tag"
+                >
+                  General
+                </button>
+                <button
+                  @click.prevent="notesTag = !notesTag"
+                  id="tag"
+                  :class="{ clicked: notesTag }"
+                >
+                  Notes
+                </button>
+                <button
+                  @click.prevent="examTag = !examTag"
+                  id="tag"
+                  :class="{ clicked: examTag }"
+                >
+                  Exam
+                </button>
+                <button
+                  @click.prevent="assignmentTag = !assignmentTag"
+                  id="tag"
+                  :class="{ clicked: assignmentTag }"
+                >
+                  Assignment
+                </button>
+              </div>
+
               <!-- If the post is a reply -->
               <div v-if="post.isReply" class="reply">
                 <!-- Cancel reply button -->
@@ -350,6 +394,12 @@ export default {
     filterByFiles: false, //If the user is filtering by files
     filterByClips: false, //If the user is filtering by clips
 
+    //Which Tags are clicked
+    generalTag: false,
+    notesTag: false,
+    examTag: false,
+    assignmentTag: false,
+
     //Drop zone options
     dropzoneOptions: {
       url: 'https://httpbin.org/post',
@@ -365,9 +415,10 @@ export default {
     post: {
       content: '',
       files: [],
-      isReply: false,
-      parent_id: '',
-      course_id: '',
+      isReply: false, //if the post is a reply
+      parent_id: '', //the id of the post being replied to
+      course_id: '', //the id of the selected course
+      tags: [], //tags applied to the post
     },
   }),
   mounted() {
@@ -592,7 +643,7 @@ export default {
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
-
+        this.setTags();
         this.createPost(this.post);
 
         //if the post is a reply -> adds the reply to the post
@@ -616,9 +667,37 @@ export default {
           files: [],
           isReply: false,
           parent_id: '',
+          tags: [],
         };
       }
     },
+
+    setTags() {
+      if (this.generalTag) {
+        this.post.tags.push('general');
+      }
+
+      if (this.notesTag) {
+        this.post.tags.push('notes');
+      }
+
+      if (this.examTag) {
+        this.post.tags.push('exam');
+      }
+
+      if (this.assignmentTag) {
+        this.post.tags.push('assignment');
+      }
+    },
+    // toggleTag(tag) {
+    //   for (const index in this.post.tags) {
+    //     if (this.post.tags[index] === tag) {
+    //       this.post.tags.splice(index, 1);
+    //       return;
+    //     }
+    //   }
+    //   this.post.tags.push(tag);
+    // },
 
     //Sets the time since the post was created
     getCreated(index) {
@@ -838,5 +917,16 @@ input[type='file'] {
 
 .right {
   width: 20%;
+}
+
+.clicked {
+  background-color: gray;
+}
+
+#tag {
+  color: black;
+  border: 1px solid gray;
+  padding: 5px;
+  margin: 0 2px;
 }
 </style>
