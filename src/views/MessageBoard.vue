@@ -113,13 +113,14 @@
               <div class="posts is-multiline">
                 <div v-for="(post, index) in filteredPosts" :key="index">
                   <!-- this is the post card -->
-                  <div :id="post.id">
+                  <div style="dislpay: block;" :id="post.id">
                     <div v-if="!post.deleted" class="card-content">
                       <div class="row">
                         <!-- columns -->
                         <!-- column one (profile) -->
                         <div class="column card-left">
                           <img
+                            v-if="currentUserId == post.user_id"
                             src="../assets/profileIcon.png"
                             loading="lazy"
                             width="54"
@@ -518,6 +519,7 @@ export default {
     replyingToId: '', //The id of the user you are replying to
     replyingMessage: '', //The message of the post your are replying to
     listReplies: '', //id of post in which to list replies for
+    currentUserId: '',
 
     //Filters
     filterByFiles: false,
@@ -558,6 +560,7 @@ export default {
     if (this.course) {
       this.initPosts(this.course);
     }
+    this.initCurrentUserId();
   },
 
   updated() {
@@ -642,6 +645,11 @@ export default {
       return file.src.includes('png');
     },
 
+    initCurrentUserId() {
+      this.currentUserId = firebase.auth().currentUser.uid;
+      console.log('hey');
+      console.log(this.currentUserId);
+    },
     // If the file is a video
     isVideo(file) {
       return file.src.includes('MP4') || file.src.includes('mp4');

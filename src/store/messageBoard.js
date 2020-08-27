@@ -31,7 +31,7 @@ const actions = {
       .doc(user.uid)
       .get()
       .then((doc) => {
-        post.username = doc.data().username;
+        post.username = doc.data().firstName + ' ' + doc.data().lastName;
 
         if (post.isReply) {
           db.collection('posts')
