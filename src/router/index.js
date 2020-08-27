@@ -6,6 +6,7 @@ import Password from '@/components/auth/ResetPassword.vue';
 import VerificationEmailSent from '@/components/auth/VerificationEmailSent.vue';
 import MessageBoard from '@/views/MessageBoard.vue';
 import Courses from '@/views/Courses.vue';
+import Profile from '@/views/Profile.vue';
 
 Vue.use(VueRouter);
 
@@ -39,6 +40,11 @@ const routes = [
     path: '/courses',
     name: 'Courses',
     component: Courses,
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
   },
 ];
 

@@ -68,7 +68,7 @@ export default {
             if (firebase.auth().currentUser.emailVerified) {
               this.$router.push({ name: 'Courses' });
             } else {
-              this.feedback('The email or passoword is incorrect');
+              this.feedback = 'The email or passoword is incorrect';
             }
           })
           .catch((err) => {

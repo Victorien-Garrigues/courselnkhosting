@@ -26,13 +26,25 @@
           name="email"
           required
         />
-        <input
-          v-model="username"
-          type="text"
-          placeholder="Enter Name"
-          name="name"
-          required
-        />
+
+        <div class="name" style="display: flex;">
+          <input
+            style="margin-right: 5px;"
+            v-model="firstName"
+            type="text"
+            placeholder="First name"
+            name="name"
+            required
+          />
+          <input
+            v-model="lastName"
+            type="text"
+            placeholder="Last name"
+            name="name"
+            required
+          />
+        </div>
+
         <input
           v-model="password"
           type="password"
@@ -40,11 +52,12 @@
           name="psw"
           required
         />
+
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
         <p>
           By signing up you agree to our
-          <a href="#" style="color:dodgerblue">Terms & Privacy</a>.
+          <a href="#" style="color: dodgerblue;">Terms & Privacy</a>.
         </p>
 
         <div class="clearfix">
@@ -55,7 +68,7 @@
           Already have an account?
           <router-link
             class="noUnderline"
-            style="color:dodgerblue"
+            style="color: dodgerblue;"
             :to="{ name: 'Login' }"
             >Login</router-link
           >
@@ -74,7 +87,8 @@ export default {
   data: () => ({
     schools: [],
     email: null,
-    username: null,
+    firstName: null,
+    lastName: null,
     password: null,
     university: 0,
     feedback: null,
@@ -100,15 +114,17 @@ export default {
     //Signs the user up
     signup() {
       if (
-        this.username &&
+        this.firstName &&
+        this.lastName &&
         this.email &&
         this.password &&
         this.university != 0
       ) {
         //If a valid university email was entered
         if (
-          (this.university == 'Western' && this.email.endsWith('@uwo.ca')) ||
-          (this.university == 'McGill' &&
+          (this.university == 'pOFdIKe2KVcQ8IbEl6sw' &&
+            this.email.endsWith('@uwo.ca')) ||
+          (this.university == '5Uo24jSg4nGg3sVOzeec' &&
             this.email.endsWith('@mail.mcgill.ca'))
         ) {
           this.feedback = null;
@@ -130,8 +146,11 @@ export default {
               db.collection('users')
                 .doc(cred.user.uid)
                 .set({
-                  username: this.username,
+                  firstName: this.firstName,
+                  lastName: this.lastName,
                   school_id: this.university,
+                  courses: [],
+                  faculties: [],
                 });
             })
             .catch((err) => {
