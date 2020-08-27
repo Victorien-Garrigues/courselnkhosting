@@ -83,6 +83,7 @@ export default {
     this.getSchools();
   },
   methods: {
+    //Gets list of all schools
     async getSchools() {
       var tempSchools = [];
       await db
@@ -95,6 +96,8 @@ export default {
         });
       this.schools = tempSchools;
     },
+
+    //Signs the user up
     signup() {
       if (
         this.username &&
@@ -102,6 +105,7 @@ export default {
         this.password &&
         this.university != 0
       ) {
+        //If a valid university email was entered
         if (
           (this.university == 'Western' && this.email.endsWith('@uwo.ca')) ||
           (this.university == 'McGill' &&

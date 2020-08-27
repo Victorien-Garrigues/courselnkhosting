@@ -5,18 +5,20 @@ import db from '@/db';
 const posts = db.collection('posts');
 
 const mutations = {
+  // Sets the course selected by the user
   setCourse(state, course_id) {
     state.course = course_id;
   },
 };
 
 const state = {
-  course: [],
-  posts: [],
-  replies: [],
+  course: [], //the selected course
+  posts: [], //the posts associated with the selected course
+  replies: [], //the replies to a post
 };
 
 const actions = {
+  // Finished creating the post and adds it to firebase
   async createPost(_, post) {
     const result = posts.doc();
     const user = firebase.auth().currentUser;
@@ -38,6 +40,8 @@ const actions = {
             .then(function(querySnapshot) {
               querySnapshot.forEach(function(doc) {
                 post.replyUsername = doc.data().username;
+
+                // If the post is replying to a reply
                 if (doc.data().isReply) {
                   post.originalPost_id = doc.data().parent_id;
                 } else {
@@ -65,6 +69,8 @@ const actions = {
         console.log('Error getting documents: ', error);
       });
   },
+
+  //Deletes a post
   async deletePost(_, post_id) {
     await posts.doc(post_id).update({
       files: [],
@@ -73,6 +79,7 @@ const actions = {
     });
   },
 
+  //Binds posts to the firebase collection of posts that have a given course_id
   initPosts: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
       'posts',
@@ -82,6 +89,8 @@ const actions = {
         .orderBy('created_at', 'asc')
     );
   }),
+
+  //Binds replies to the firebase collection of posts that are repling to a given post
   initReplies: firestoreAction(({ bindFirestoreRef }, originalPost_id) => {
     bindFirestoreRef(
       'replies',

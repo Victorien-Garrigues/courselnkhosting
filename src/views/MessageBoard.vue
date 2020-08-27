@@ -23,11 +23,20 @@
 
           <!-- search design -->
           <form style="display: flex;" class="search-form-outside">
+            <!-- Files filter -->
             <button
               @click.prevent="filterByFiles = !filterByFiles"
               class="button"
             >
               Files
+            </button>
+
+            <!-- Clips filter -->
+            <button
+              @click.prevent="filterByClips = !filterByClips"
+              class="button"
+            >
+              Clips
             </button>
             <b-field>
               <b-input
@@ -68,6 +77,7 @@
                         :key="index"
                         v-for="(file, index) in post.files"
                       >
+                        <!-- Displays a light box image view when images are clicked -->
                         <img
                           v-if="isImage(file)"
                           v-lazy="file.src || file.thumb"
@@ -75,6 +85,7 @@
                         />
 
                         <div style="display: flex;" v-else class="fileType">
+                          <!-- If the file is a video -> display video image -->
                           <img v-if="isVideo(file)" src="../assets/video.png" />
                           <img v-else src="../assets/file.png" />
                           <a :href="file.src">{{ file.name }} </a>
@@ -92,18 +103,21 @@
                       <div class="clipPosition">
                         <table style="width:100%">
                           <tr>
+                            <!-- adds and unadds a clip -->
                             <button
                               @click="addClip(post.id)"
                               class="clipButton is-success"
                             ></button>
                           </tr>
                           <tr>
+                            <!-- Deletes post -->
                             <button
                               @click="deletePost(post.id)"
                               class="deleteButton is-danger"
                             ></button>
                           </tr>
                           <tr>
+                            <!-- Reply button -->
                             <button
                               @click="reply(post)"
                               class="replyButton is-primary"
@@ -147,7 +161,6 @@
                   </div>
                   <div v-if="listReplies == post.id">
                     <!--  Start of List Of  Replies -->
-
                     <div
                       v-for="(reply, index) in replies"
                       :key="index"
@@ -199,12 +212,10 @@
                         </div>
                       </div>
                     </div>
+                    <!--  End of List Of  Replies -->
                   </div>
-                  <!--  End of List Of  Replies -->
                 </div>
               </div>
-
-              <!--  End of List Of  Replies -->
             </div>
           </div>
           <div id="bottom"></div>
@@ -213,6 +224,7 @@
           <i class="fa fa-cloud-upload"></i>
         </label>
 
+        <!-- Dropzone -> only show if the user drags onto the page or a files is dropped -->
         <vue-dropzone
           v-if="showDropArea || fileDropped"
           ref="imgDropZone"
@@ -221,6 +233,8 @@
           @vdropzone-drop="fileDropped = true"
           @vdropzone-complete="afterComplete"
         ></vue-dropzone>
+
+        <!-- If replying to someone -->
         <div class="wrapper">
           <div v-if="post.isReply" class="reply">
             <button @click="post.isReply = false" class="button is-danger">
@@ -234,12 +248,8 @@
             <label for="file-upload" class="custom-file-upload">
               <i class="fa fa-cloud-upload"></i>
             </label>
-            <vue-dropzone
-              ref="sideDropZone"
-              id="attach"
-              :options="dropzoneOptions"
-              @vdropzone-complete="afterAttach"
-            ></vue-dropzone>
+
+            <!-- if the post has files -->
             <div v-if="post.files.length > 0" class="image-div">
               <div
                 style="display: inline-block;"
@@ -249,14 +259,19 @@
                 <img :src="file.src" class="image" />
               </div>
             </div>
+
             <div class="wrapper">
+              <!-- If the post is a reply -->
               <div v-if="post.isReply" class="reply">
+                <!-- Cancel reply button -->
                 <button @click="post.isReply = false" class="button is-danger">
                   X
                 </button>
                 <p>Reply to {{ replyingTo }}</p>
                 <p>{{ replyingMessage }}</p>
               </div>
+
+              <!-- Text input area -->
               <div class="text-area">
                 <ResizeAuto>
                   <template v-slot:default="{ resize }">
@@ -268,15 +283,19 @@
                     ></textarea>
                   </template>
                 </ResizeAuto>
+
+                <!-- Dropzone with attachment icon beside text area -->
                 <vue-dropzone
                   ref="imgDropZone"
                   id="attach"
                   :include-styling="false"
                   :options="dropzoneOptions"
-                  @vdropzone-complete="afterComplete()"
+                  @vdropzone-complete="afterAttach"
                 ></vue-dropzone>
               </div>
             </div>
+
+            <!-- Add Post Button -->
             <button
               @click="onCreatePost()"
               class="button is-success bottom"
@@ -319,19 +338,19 @@ export default {
     LightBox,
   },
   data: () => ({
-    media: [],
-    searchTerm: '',
-    addedManually: false,
-    showDropArea: false,
-    scroll: true,
-    fileDropped: false,
-    replyingTo: '',
-    replyingToId: '',
-    replyingMessage: '',
-    repliedUsername: '',
-    listReplies: '',
-    currentCourse: '',
-    filterByFiles: false,
+    media: [], //Clickable images in a post
+    searchTerm: '', //Users input in search bar
+    showDropArea: false, //Whether the drop area should be shown
+    scroll: true, //If the posts container should scroll to the bottom
+    fileDropped: false, //If the user dropped a file in the drop zone
+    replyingTo: '', //The name of the user you are replying to
+    replyingToId: '', //The id of the user you are replying to
+    replyingMessage: '', //The message of the post your are replying to
+    listReplies: '', //id of post in which to list replies for
+    filterByFiles: false, //If the user is filtering by files
+    filterByClips: false, //If the user is filtering by clips
+
+    //Drop zone options
     dropzoneOptions: {
       url: 'https://httpbin.org/post',
       thumbnailWidth: 150,
@@ -341,6 +360,8 @@ export default {
       duplicateCheck: true,
       addRemoveLinks: true,
     },
+
+    // Post info for adding a post
     post: {
       content: '',
       files: [],
@@ -356,31 +377,47 @@ export default {
   },
 
   updated() {
-    this.scrollToBottom();
+    this.scrollToBottom(); //Scrolls to bottom of page
   },
   watch: {
+    // if the parameter changes reinit posts
     '$route.params.name': function() {
       this.initPosts(this.$route.params.name);
     },
+
+    //if the course changes reinit posts
     course() {
       if (this.course) {
         this.initPosts(this.course);
       }
     },
+
+    // if the user views the replies of a different post
     listReplies() {
       this.initReplies(this.listReplies);
     },
   },
   computed: {
     ...mapState('messageBoard', ['posts', 'replies', 'course']),
+
+    // Filters post depending on which filters the user applies
     filteredPosts() {
+      // If typing in the search bar
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, 'gi');
         return this.posts.filter((post) => post.content.match(regexp));
       }
 
+      // If filtering by files
       if (this.filterByFiles) {
         return this.posts.filter((post) => post.files[0]);
+      }
+
+      // If filter by number of clips
+      if (this.filterByClips) {
+        return this.posts.slice().sort((a, b) => {
+          return a.clips - b.clips;
+        });
       }
       return this.posts;
     },
@@ -393,12 +430,18 @@ export default {
       'deletePost',
       'initReplies',
     ]),
+
+    // If the file is an image
     isImage(file) {
       return file.src.includes('png');
     },
+
+    // If the file is a video
     isVideo(file) {
       return file.src.includes('MP4') || file.src.includes('mp4');
     },
+
+    // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
       if (this.scroll) {
@@ -408,6 +451,8 @@ export default {
         }
       }
     },
+
+    // Adds reply to a post
     async addReply(id) {
       db.collection('posts')
         .doc(id)
@@ -415,6 +460,8 @@ export default {
           replies: firebase.firestore.FieldValue.increment(1),
         });
     },
+
+    // Adds clip to a pots
     async addClip(id) {
       const user = firebase.auth().currentUser;
 
@@ -425,11 +472,13 @@ export default {
         .get()
         .then((doc) => {
           for (const clip in doc.data().clips) {
+            //Checks if the user has already clipped the post
             if (doc.data().clips[clip] == id) {
               alreadyClipped = true;
-              console.log('User has already clipped this');
             }
           }
+
+          // If the user hasnt clipped the post then clip it else unclip it
           if (!alreadyClipped) {
             db.collection('posts')
               .doc(id)
@@ -441,14 +490,28 @@ export default {
               .update({
                 clips: firebase.firestore.FieldValue.arrayUnion(id),
               });
+          } else {
+            db.collection('posts')
+              .doc(id)
+              .update({
+                clips: firebase.firestore.FieldValue.increment(-1),
+              });
+            db.collection('users')
+              .doc(user.uid)
+              .update({
+                clips: firebase.firestore.FieldValue.arrayRemove(id),
+              });
           }
         });
     },
+
+    //Adds the files to post.files and to firebase storage if the file was dropped
     async afterComplete(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
 
+        // If is an image
         if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
           const fileRef = storageRef.child(`images/${file.name}.png`);
           await fileRef.put(file);
@@ -467,11 +530,14 @@ export default {
         console.log(error);
       }
     },
+
+    //Adds the files to firebase storage if the file was manually added
     async afterAttach(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
 
+        //If the file is an image
         if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
           const fileRef = storageRef.child(`images/${file.name}.png`);
           await fileRef.put(file);
@@ -482,12 +548,15 @@ export default {
           await fileRef.put(file);
           const downloadURL = await fileRef.getDownloadURL();
 
+          //Adds the file to the dropzone to be viewed
           this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
         }
       } catch (error) {
         console.log(error);
       }
     },
+
+    //Shows the lightbox of the files images
     openGallery(index, files) {
       this.media = [];
       for (const file in files) {
@@ -499,28 +568,34 @@ export default {
       }
       this.$refs.lightbox.showImage(index);
     },
-    showReplies(post) {
-      this.listReplies = post.id;
-    },
+
     viewReplies(id) {
       this.listReplies = id;
     },
+
+    // if the user clicks reply to a post
     reply(post) {
       this.post.isReply = true;
       this.replyingTo = post.username;
       this.replyingMessage = post.content;
       this.post.parent_id = post.id;
     },
+
+    // If replying to a reply
     childReply(post) {
       this.reply(post);
     },
+
+    //Creates the post
     async onCreatePost() {
+      //If the user has added content or files
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
 
         this.createPost(this.post);
 
+        //if the post is a reply -> adds the reply to the post
         if (this.post.isReply) {
           db.collection('posts')
             .doc(this.post.parent_id)
@@ -534,6 +609,8 @@ export default {
               }
             });
         }
+
+        //Resets the post
         this.post = {
           content: '',
           files: [],
@@ -542,6 +619,8 @@ export default {
         };
       }
     },
+
+    //Sets the time since the post was created
     getCreated(index) {
       function timeSince(date) {
         const seconds = Math.floor((new Date() - date) / 1000);

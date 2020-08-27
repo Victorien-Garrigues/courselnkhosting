@@ -48,6 +48,7 @@
           v-model="searchTerm"
         />
 
+        <!-- Create course -->
         <div style="margin-bottom: 2em;">
           <p>Don't see the course you're looking for?</p>
           <button
@@ -58,6 +59,8 @@
             Create Course
           </button>
         </div>
+
+        <!-- If the user is creating a course -->
         <div style="margin: 2em 0;" v-if="isCreating">
           <h3>Course Code</h3>
           <input
@@ -68,13 +71,19 @@
             placeholder="Enter Course Code"
           />
           <p class="feedback">{{ this.feedback }}</p>
+
+          <!-- Create course button -->
           <button @click="createCourse()" class="button is-success">
             Create Course
           </button>
+
+          <!-- Cancel button -->
           <button @click="isCreating = false" class="button is-danger">
             Cancel
           </button>
         </div>
+
+        <!-- Displays the courses for the user to add -->
         <ul class="menu-list">
           <p>Click On Course To Add</p>
           <li v-for="course in filteredCourses" :key="course.id">
@@ -128,6 +137,7 @@
           </router-link>
         </li>
       </ul>
+
       <!-- Add Faculties Button -->
       <button
         v-if="!isAdding && !isEditing"
@@ -205,10 +215,10 @@ export default {
     isFaculty: false, //If user is adding, or editing faculties
     isCourse: false, //If user is adding, or editing courses
 
-    userDoc: null,
-    courseCode: '',
-    feedback: '',
-    alreadyAddedMessage: '',
+    userDoc: null, //the users document in the users collection
+    courseCode: '', //the coureCode of the course
+    feedback: '', //If the user enters a course that already exitst is shows a message
+    alreadyAddedMessage: '', //if the user has already added that course or faculty
     searchTerm: '',
   }),
   mounted() {
@@ -245,6 +255,7 @@ export default {
       }
     },
 
+    //Shows all faculties from the users school
     async showFaculties() {
       this.isFaculty = true;
       this.isAdding = true;
@@ -255,6 +266,7 @@ export default {
         await this.initAllFaculties(this.userDoc.school_id);
       }
     },
+
     //returns the document from the users collection of the current user
     async getUserDoc() {
       await db
@@ -373,6 +385,8 @@ export default {
       await this.initFaculties();
       this.reset();
     },
+
+    // Creates a course
     async createCourse() {
       if (!this.userDoc) {
         await this.getUserDoc();
@@ -380,6 +394,7 @@ export default {
 
       if (this.courseCode.length > 3) {
         for (const course in this.allCourses) {
+          // If the course already exists
           if (
             this.allCourses[course].courseCode.toLowerCase() ===
             this.courseCode.toLowerCase()
@@ -407,6 +422,8 @@ export default {
       this.feedback = '';
       this.reset();
     },
+
+    // Resets data
     reset() {
       this.feedback = '';
       this.alreadyAddedMessage = '';
