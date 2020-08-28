@@ -205,7 +205,6 @@
 import { mapState, mapActions } from 'vuex';
 import firebase from '@/firebase';
 import db from '@/db';
-let uuid = require('uuid');
 
 export default {
   data: () => ({
@@ -302,7 +301,25 @@ export default {
         .doc(firebase.auth().currentUser.uid)
         .update({
           courses: userCourses,
+        })
+        .then(() => {
+          //Increments userCount of course
+          db.collection('courses')
+            .doc(course.id)
+            .update({
+              userCount: firebase.firestore.FieldValue.increment(1),
+            });
+
+          // Add a post saying that a user has joined the group
+          db.collection('posts')
+            .doc()
+            .add({
+              content: this.userDoc.firstName + '' + this.userDoc.lastName,
+              course_id: course.id,
+              createdAt: new Date(),
+            });
         });
+
       await this.initCourses();
       this.reset();
     },
@@ -331,6 +348,23 @@ export default {
         .doc(firebase.auth().currentUser.uid)
         .update({
           faculties: userFaculties,
+        })
+        .then(() => {
+          //Increments userCount of course
+          db.collection('faculties')
+            .doc(faculty.id)
+            .update({
+              userCount: firebase.firestore.FieldValue.increment(1),
+            });
+
+          // Add a post saying that a user has joined the group
+          db.collection('posts')
+            .doc()
+            .add({
+              content: this.userDoc.firstName + '' + this.userDoc.lastName,
+              course_id: faculty.id,
+              createdAt: new Date(),
+            });
         });
       await this.initFaculties();
       this.reset();
@@ -350,8 +384,7 @@ export default {
       }
 
       //Updates those changes in firebase
-      await db
-        .collection('users')
+      db.collection('users')
         .doc(firebase.auth().currentUser.uid)
         .update({
           courses: userCourses,
@@ -359,6 +392,13 @@ export default {
 
       await this.initCourses();
       this.reset();
+
+      //Subtracts 1 from courses user count
+      db.collection('courses')
+        .doc(course_id)
+        .update({
+          userCount: firebase.firestore.FieldValue.increment(-1),
+        });
     },
 
     //Removes a course to the users courses array
@@ -384,6 +424,13 @@ export default {
 
       await this.initFaculties();
       this.reset();
+
+      //Subtracts 1 from courses user count
+      db.collection('courses')
+        .doc(faculty_id)
+        .update({
+          userCount: firebase.firestore.FieldValue.increment(-1),
+        });
     },
 
     // Creates a course
@@ -407,13 +454,12 @@ export default {
         const course = {
           courseCode: this.courseCode,
           school_id: this.userDoc.school_id,
-          id: uuid.v1(),
         };
 
         await db
           .collection('courses')
-          .doc(course.id)
-          .set({
+          .doc()
+          .add({
             courseCode: course.courseCode,
             school_id: course.school_id,
           });
