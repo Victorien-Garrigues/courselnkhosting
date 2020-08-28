@@ -51,68 +51,65 @@
         </li>
       </ul>
 
+      <div style="width: 100%; height: 5px;"></div>
+
       <!-- Add Course Button -->
       <button
         v-if="!isAdding && !isEditing"
         @click="showCourses()"
-        class="button is-primary"
-      >Add Course</button>
+        class="addButton is-primary"
+      >ADD COURSE +</button>
 
       <!-- Lists All Courses For The User To Add -->
       <div v-if="isAdding">
-        <input class="input" type="text" placeholder="Search Courses" v-model="searchTerm" />
+        <p class="menu-label" style="margin: 10px;">Add a course</p>
+        <input
+          class="input"
+          type="text"
+          style="width: 20%; margin: 10px;"
+          placeholder="Search Courses"
+          v-model="searchTerm"
+        />
+        <div style="height: 200px; overflow: auto;">
+          <!-- Displays the courses for the user to add -->
+          <ul class="menu-list">
+            <li v-for="course in filteredCourses" :key="course.id">
+              <button class="plusButton" @click="addCourse(course)">{{ course.courseCode }}</button>
+            </li>
+          </ul>
+        </div>
 
         <!-- Create course -->
-        <div style="margin-bottom: 2em;">
+        <div v-if="!isCreating" style="padding: 15px;">
           <p>Don't see the course you're looking for?</p>
-          <button
-            v-if="!isCreating"
-            @click="isCreating = true"
-            class="button is-success"
-          >Create Course</button>
+          <button @click="isCreating = true" class="createButton is-success">Create Course</button>
         </div>
 
         <!-- If the user is creating a course -->
-        <div style="margin: 2em 0;" v-if="isCreating">
-          <h3>Course Code</h3>
+        <div v-if="isCreating" style="padding: 15px;">
+          <p>Create a new course by entering its course code</p>
           <input
-            style="margin-bottom: 1em;"
+            style="margin-bottom: 1em; width: 20%; margin:10px"
             v-model="courseCode"
             class="input is-focused"
             type="text"
-            placeholder="Enter Course Code"
+            placeholder="AAAA 000"
           />
+          <!-- Cancel button -->
+          <button @click="isCreating = false" class="delButton2 is-danger"></button>
+
           <p class="feedback">{{ this.feedback }}</p>
 
           <!-- Create course button -->
-          <button @click="createCourse()" class="button is-success">Create Course</button>
-
-          <!-- Cancel button -->
-          <button @click="isCreating = false" class="button is-danger">Cancel</button>
+          <button @click="createCourse()" class="createButton is-success">Create Course</button>
         </div>
-
-        <!-- Displays the courses for the user to add -->
-        <ul class="menu-list">
-          <p>Click On Course To Add</p>
-          <li v-for="course in filteredCourses" :key="course.id">
-            <button
-              style="margin-top: 0.5em;"
-              class="button"
-              @click="addCourse(course)"
-            >{{ course.courseCode }}</button>
-          </li>
-        </ul>
       </div>
 
       <!-- Lists All The Users Courses To Be Removed When Clicked -->
       <ul v-if="isEditing" class="menu-list">
-        <p>Click On Class To Delete</p>
+        <p class="menu-label removeName">Remove a course from your class list</p>
         <li v-for="course in courses" :key="course.id">
-          <button
-            style="margin-top: 0.5em;"
-            class="button"
-            @click="removeCourse(course.course_id)"
-          >{{ course.courseCode }}</button>
+          <button class="delButton" @click="removeCourse(course.course_id)">{{ course.courseCode }}</button>
         </li>
       </ul>
     </div>
@@ -120,7 +117,22 @@
     <!-- Lists the user faculties -->
     <div v-if="!isCourse" class="courses">
       <ul style="margin-top: 2em ;" v-if="!isEditing && !isAdding" class="menu-list">
-        <p class="menu-label">Your Faculties</p>
+        <div class="row courseList">
+          <div class="column listName">
+            <p class="menu-label">Your Faculties</p>
+          </div>
+
+          <!-- Edit Faculties Button -->
+          <div class="column listEdit2">
+            <button
+              v-if="!isAdding && !isEditing"
+              @click="(isEditing = true), (isFaculty = true)"
+              class="editButton is-danger"
+            ></button>
+          </div>
+          <div class="void"></div>
+        </div>
+
         <li v-for="faculty in faculties" :key="faculty.id">
           <router-link
             @click.native="
@@ -134,41 +146,32 @@
         </li>
       </ul>
 
+      <div style="width: 100%; height: 5px;"></div>
+
       <!-- Add Faculties Button -->
       <button
         v-if="!isAdding && !isEditing"
         @click="showFaculties()"
-        class="button is-primary"
-      >Add Faculty</button>
-
-      <!-- Edit Faculties Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="(isEditing = true), (isFaculty = true)"
-        class="button is-danger"
-      >Edit Faculty</button>
+        class="addButton is-primary"
+      >ADD FACULTY +</button>
 
       <!-- Lists All Faculties For The User To Add -->
       <div v-if="isAdding">
         <ul class="menu-list">
-          <p>Click On Faculty To Add</p>
+          <p class="menu-label" style="margin: 10px;">Add a faculty</p>
           <li v-for="faculty in allFaculties" :key="faculty.id">
-            <button
-              style="margin-top: 0.5em;"
-              class="button"
-              @click="addFaculty(faculty)"
-            >{{ faculty.name }}</button>
+            <button class="plusButton" @click="addFaculty(faculty)">{{ faculty.name }}</button>
           </li>
         </ul>
       </div>
 
       <!-- Lists All The Users Faculties To Be Removed When Clicked -->
       <ul v-if="isEditing" class="menu-list">
-        <p>Click On Faculty To Delete</p>
+        <p class="menu-label removeName">Remove a faculty from your university list</p>
         <li v-for="faculty in faculties" :key="faculty.id">
           <button
             style="margin-top: 0.5em;"
-            class="button"
+            class="delButton"
             @click="removeFaculty(faculty.faculty_id)"
           >{{ faculty.name }}</button>
         </li>
@@ -180,7 +183,7 @@
       style="margin-top: 2em;"
       v-if="isEditing || isAdding"
       @click="reset()"
-      class="button is-primary"
+      class="doneButton is-primary"
     >Done</button>
 
     <h3 class="feedback">{{ this.alreadyAddedMessage }}</h3>
@@ -488,6 +491,77 @@ export default {
   background-image: url("../assets/editIcon-hover.png");
 }
 
+/* ADD BUTTON */
+.addButton {
+  background-color: #edf2f7;
+  border: none;
+  color: #555555;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  background-color: #e2e6eb;
+}
+
+/* DELETE BUTTON */
+.delButton {
+  margin: 3px;
+  padding: 10px 10px;
+  padding-right: 50px;
+  cursor: pointer;
+  background-color: #edf2f7;
+  border: none;
+  color: #555555;
+  font-size: 16px;
+}
+
+.delButton:hover {
+  background-image: url("../assets/courseDelIcon.png");
+  background-repeat: no-repeat;
+  background-position: 80% 45%;
+}
+
+/* DONE BUTTON */
+.doneButton {
+  background-color: #edf2f7;
+  border: none;
+  color: #555555;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 10px 10px;
+  cursor: pointer;
+}
+
+.doneButton:hover {
+  background-color: #e2e6eb;
+}
+
+/* PLUS BUTTON */
+.plusButton {
+  background-color: #edf2f7;
+  border: none;
+  color: #555555;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  padding: 10px 10px;
+  margin-left: 10px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.plusButton:hover {
+  background-color: #e2e6eb;
+}
+
 .courseList {
   width: 20%;
 }
@@ -501,9 +575,61 @@ export default {
   width: 90%;
 }
 
+.removeName {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: -10px;
+}
+
 .listEdit {
   width: 10%;
   margin-left: -48%;
   margin-top: -9px;
+}
+
+.listEdit2 {
+  width: 10%;
+  margin-left: -45%;
+  margin-top: -9px;
+}
+
+/* CREATE BUTTON */
+.createButton {
+  margin: 3px;
+  padding: 10px 10px;
+  padding-right: 50px;
+  cursor: pointer;
+  background-color: #edf2f7;
+  border: none;
+  color: #555555;
+  font-size: 16px;
+  background-image: url("../assets/createIcon-hover.png");
+  background-repeat: no-repeat;
+  background-position: 95% 50%;
+}
+
+.createButton:hover {
+  background-image: url("../assets/createIcon.png");
+  background-repeat: no-repeat;
+  background-position: 95% 50%;
+  background-color: #e2e6eb;
+}
+
+/* DELETE BUTTON 2 */
+.delButton2 {
+  margin: 3px;
+  margin-top: 10px;
+  padding: 17px 17px;
+  cursor: pointer;
+  background-color: #edf2f7;
+  background-image: url("../assets/courseDelIcon.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.delButton2:hover {
+  background-color: #e2e6eb;
 }
 </style>
