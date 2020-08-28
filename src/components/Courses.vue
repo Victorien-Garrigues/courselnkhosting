@@ -1,24 +1,5 @@
 <template>
   <section class="menu background-body">
-    <!-- start of navbar design -->
-    <div class="navbar">
-      <!-- brand design -->
-      <div class="container">
-        <a href="#">
-          <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
-        </a>
-      </div>
-
-      <!-- profile design -->
-      <div>
-        <router-link class="button" :to="{
-            name: 'Profile',
-          }">Profile</router-link>
-      </div>
-    </div>
-
-    <!-- END OF NAVBAR -->
-
     <div v-if="!isFaculty" class="faculties">
       <!-- Lists all of the users courses -->
       <ul v-if="!isEditing && !isAdding" class="menu-list">
@@ -35,6 +16,7 @@
               class="editButton is-danger"
             ></button>
           </div>
+
           <div class="void"></div>
         </div>
 
@@ -233,14 +215,21 @@ export default {
 
     //Shows all courses from the users school
     async showCourses() {
+      console.log("show");
+
       this.isCourse = true;
       this.isAdding = true;
-      if (!this.allCourses[0]) {
-        if (!this.userDoc) {
-          await this.getUserDoc();
-        }
-        await this.initAllCourses(this.userDoc.school_id);
+      console.log(this.allCourses);
+      console.log(this.userDoc);
+      //   if (!this.allCourses[0]) {
+      if (!this.userDoc) {
+        await this.getUserDoc();
       }
+      await this.initAllCourses(this.userDoc.school_id).then(() => {
+        console.log(this.allCourses);
+      });
+
+      //}
     },
 
     //Shows all faculties from the users school
@@ -279,6 +268,7 @@ export default {
           return;
         }
       }
+
       userCourses.push({
         courseCode: course.courseCode,
         course_id: course.id,
@@ -300,13 +290,11 @@ export default {
             });
 
           // Add a post saying that a user has joined the group
-          db.collection("posts")
-            .doc()
-            .add({
-              content: this.userDoc.firstName + "" + this.userDoc.lastName,
-              course_id: course.id,
-              createdAt: new Date(),
-            });
+          db.collection("posts").add({
+            content: this.userDoc.firstName + "" + this.userDoc.lastName,
+            course_id: course.id,
+            createdAt: new Date(),
+          });
         });
 
       await this.initCourses();
@@ -347,13 +335,11 @@ export default {
             });
 
           // Add a post saying that a user has joined the group
-          db.collection("posts")
-            .doc()
-            .add({
-              content: this.userDoc.firstName + "" + this.userDoc.lastName,
-              course_id: faculty.id,
-              createdAt: new Date(),
-            });
+          db.collection("posts").add({
+            content: this.userDoc.firstName + "" + this.userDoc.lastName,
+            course_id: faculty.id,
+            createdAt: new Date(),
+          });
         });
       await this.initFaculties();
       this.reset();
@@ -440,7 +426,7 @@ export default {
           school_id: this.userDoc.school_id,
         };
 
-        await db.collection("courses").doc().add({
+        await db.collection("courses").add({
           courseCode: course.courseCode,
           school_id: course.school_id,
         });
@@ -567,12 +553,12 @@ export default {
 }
 
 .void {
-  width: 80%;
+  width: 60%;
   height: 39px;
 }
 
 .listName {
-  width: 90%;
+  width: 150px;
 }
 
 .removeName {
@@ -582,9 +568,9 @@ export default {
 }
 
 .listEdit {
-  width: 10%;
-  margin-left: -48%;
-  margin-top: -9px;
+  width: 100px;
+  margin-left: 0px;
+  margin-top: 0px;
 }
 
 .listEdit2 {

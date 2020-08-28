@@ -40,8 +40,7 @@
       <div class="row">
         <!-- FIRST COLUMN -->
         <div class="column left">
-          <h2>course 123</h2>
-          <p>course 321</p>
+          <Courses />
         </div>
 
         <!-- SECOND COLUMN -->
@@ -365,6 +364,7 @@
                 <vue-dropzone
                   ref="imgDropZone"
                   class="docButton"
+                  id="attach"
                   :include-styling="false"
                   :options="dropzoneOptions"
                   @vdropzone-complete="afterAttach"
@@ -374,50 +374,50 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- THIRD COLUMN -->
-      <div class="column right">
-        <!-- Files filter -->
-        <button
-          @click.prevent="filterByFiles = !filterByFiles"
-          id="tags"
-          :class="{ clicked: filterByFiles }"
-        >Files</button>
+    <!-- THIRD COLUMN -->
+    <div class="column right">
+      <!-- Files filter -->
+      <button
+        @click.prevent="filterByFiles = !filterByFiles"
+        id="tags"
+        :class="{ clicked: filterByFiles }"
+      >Files</button>
 
-        <!-- Clips filter -->
-        <button
-          @click.prevent="filterByClips = !filterByClips"
-          id="tags"
-          :class="{ clicked: filterByClips }"
-        >Clips</button>
+      <!-- Clips filter -->
+      <button
+        @click.prevent="filterByClips = !filterByClips"
+        id="tags"
+        :class="{ clicked: filterByClips }"
+      >Clips</button>
 
-        <!-- General Tag -->
-        <button
-          @click.prevent="filterByGeneral = !filterByGeneral"
-          id="tags"
-          :class="{ clicked: filterByGeneral }"
-        >General</button>
+      <!-- General Tag -->
+      <button
+        @click.prevent="filterByGeneral = !filterByGeneral"
+        id="tags"
+        :class="{ clicked: filterByGeneral }"
+      >General</button>
 
-        <button
-          @click.prevent="filterByNotes = !filterByNotes"
-          id="tags"
-          :class="{ clicked: filterByNotes }"
-        >Notes</button>
+      <button
+        @click.prevent="filterByNotes = !filterByNotes"
+        id="tags"
+        :class="{ clicked: filterByNotes }"
+      >Notes</button>
 
-        <button
-          @click.prevent="filterByExam = !filterByExam"
-          id="tags"
-          :class="{ clicked: filterByExam }"
-        >Exam</button>
+      <button
+        @click.prevent="filterByExam = !filterByExam"
+        id="tags"
+        :class="{ clicked: filterByExam }"
+      >Exam</button>
 
-        <button
-          @click.prevent="filterByAssignment = !filterByAssignment"
-          id="tags"
-          :class="{ clicked: filterByAssignment }"
-        >Assignment</button>
-        <h2>Side</h2>
-        <p>Smth will probably go here</p>
-      </div>
+      <button
+        @click.prevent="filterByAssignment = !filterByAssignment"
+        id="tags"
+        :class="{ clicked: filterByAssignment }"
+      >Assignment</button>
+      <h2>Side</h2>
+      <p>Smth will probably go here</p>
     </div>
     <!-- END OF TABLE -->
     <LightBox ref="lightbox" :media="media" :show-light-box="false" />
@@ -432,6 +432,7 @@ import firebase from "@/firebase";
 import vue2Dropzone from "vue2-dropzone";
 import "vue2-dropzone/dist/vue2Dropzone.min.css";
 import ResizeAuto from "@/components/ResizeAuto";
+import Courses from "@/components/Courses";
 import db from "@/db";
 import LightBox from "vue-image-lightbox";
 
@@ -442,6 +443,7 @@ export default {
     vueDropzone: vue2Dropzone,
     ResizeAuto,
     LightBox,
+    Courses,
   },
   data: () => ({
     media: [], //Clickable images in a post
@@ -597,7 +599,6 @@ export default {
     },
 
     initUserId() {
-      console.log(firebase.auth().currentUser.uid);
       this.currentUserId = firebase.auth().currentUser.uid;
     },
 
