@@ -17,10 +17,27 @@
       </div>
     </div>
 
+    <!-- END OF NAVBAR -->
+
     <div v-if="!isFaculty" class="faculties">
       <!-- Lists all of the users courses -->
       <ul v-if="!isEditing && !isAdding" class="menu-list">
-        <p class="menu-label">Your Courses</p>
+        <div class="row courseList">
+          <div class="column listName">
+            <p class="menu-label">Your Courses</p>
+          </div>
+
+          <!-- Edit Courses Button -->
+          <div class="column listEdit">
+            <button
+              v-if="!isAdding && !isEditing"
+              @click="(isEditing = true), (isCourse = true)"
+              class="editButton is-danger"
+            ></button>
+          </div>
+          <div class="void"></div>
+        </div>
+
         <li v-for="course in courses" :key="course.id">
           <router-link
             @click.native="
@@ -40,13 +57,6 @@
         @click="showCourses()"
         class="button is-primary"
       >Add Course</button>
-
-      <!-- Edit Courses Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="(isEditing = true), (isCourse = true)"
-        class="button is-danger"
-      >Edit Courses</button>
 
       <!-- Lists All Courses For The User To Add -->
       <div v-if="isAdding">
@@ -181,7 +191,6 @@
 import { mapState, mapActions } from "vuex";
 import firebase from "@/firebase";
 import db from "@/db";
-let uuid = require("uuid");
 
 export default {
   data: () => ({
@@ -273,9 +282,30 @@ export default {
       });
 
       //Updates those changes in firebase
-      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
-        courses: userCourses,
-      });
+      await db
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid)
+        .update({
+          courses: userCourses,
+        })
+        .then(() => {
+          //Increments userCount of course
+          db.collection("courses")
+            .doc(course.id)
+            .update({
+              userCount: firebase.firestore.FieldValue.increment(1),
+            });
+
+          // Add a post saying that a user has joined the group
+          db.collection("posts")
+            .doc()
+            .add({
+              content: this.userDoc.firstName + "" + this.userDoc.lastName,
+              course_id: course.id,
+              createdAt: new Date(),
+            });
+        });
+
       await this.initCourses();
       this.reset();
     },
@@ -299,9 +329,29 @@ export default {
       });
 
       //Updates those changes in firebase
-      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
-        faculties: userFaculties,
-      });
+      await db
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid)
+        .update({
+          faculties: userFaculties,
+        })
+        .then(() => {
+          //Increments userCount of course
+          db.collection("faculties")
+            .doc(faculty.id)
+            .update({
+              userCount: firebase.firestore.FieldValue.increment(1),
+            });
+
+          // Add a post saying that a user has joined the group
+          db.collection("posts")
+            .doc()
+            .add({
+              content: this.userDoc.firstName + "" + this.userDoc.lastName,
+              course_id: faculty.id,
+              createdAt: new Date(),
+            });
+        });
       await this.initFaculties();
       this.reset();
     },
@@ -320,12 +370,19 @@ export default {
       }
 
       //Updates those changes in firebase
-      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
+      db.collection("users").doc(firebase.auth().currentUser.uid).update({
         courses: userCourses,
       });
 
       await this.initCourses();
       this.reset();
+
+      //Subtracts 1 from courses user count
+      db.collection("courses")
+        .doc(course_id)
+        .update({
+          userCount: firebase.firestore.FieldValue.increment(-1),
+        });
     },
 
     //Removes a course to the users courses array
@@ -348,6 +405,13 @@ export default {
 
       await this.initFaculties();
       this.reset();
+
+      //Subtracts 1 from courses user count
+      db.collection("courses")
+        .doc(faculty_id)
+        .update({
+          userCount: firebase.firestore.FieldValue.increment(-1),
+        });
     },
 
     // Creates a course
@@ -371,10 +435,9 @@ export default {
         const course = {
           courseCode: this.courseCode,
           school_id: this.userDoc.school_id,
-          id: uuid.v1(),
         };
 
-        await db.collection("courses").doc(course.id).set({
+        await db.collection("courses").doc().add({
           courseCode: course.courseCode,
           school_id: course.school_id,
         });
@@ -406,5 +469,41 @@ export default {
 .background-body {
   height: 100%;
   background-color: #edf2f7;
+}
+
+/* EDIT BUTTON */
+.editButton {
+  margin: 3px;
+  padding: 10px 10px;
+  cursor: pointer;
+  background-color: #edf2f7;
+  background-image: url("../assets/editIcon.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.editButton:hover {
+  background-image: url("../assets/editIcon-hover.png");
+}
+
+.courseList {
+  width: 20%;
+}
+
+.void {
+  width: 80%;
+  height: 39px;
+}
+
+.listName {
+  width: 90%;
+}
+
+.listEdit {
+  width: 10%;
+  margin-left: -48%;
+  margin-top: -9px;
 }
 </style>

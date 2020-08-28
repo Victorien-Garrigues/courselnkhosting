@@ -66,7 +66,7 @@
                         />
 
                         <div v-if="currentUserId != post.user_id" class="row">
-                          <div class="column icon-placement">
+                          <div class="icon-placement">
                             <!-- adds and unadds a clip -->
                             <button @click="addClip(post.id)" class="clipButton is-success"></button>
                           </div>
@@ -462,12 +462,14 @@ export default {
     filterByNotes: false,
     filterByExam: false,
     filterByAssignment: false,
+    filterByQuestions: false,
 
     //Which Tags are clicked
     generalTag: false,
     notesTag: false,
     examTag: false,
     assignmentTag: false,
+    questionsTag: false,
 
     //Drop zone options
     dropzoneOptions: {
@@ -564,6 +566,11 @@ export default {
           this.checkForTag(post, "assignment")
         );
       }
+
+      // If filter by number of clips
+      if (this.filterByQuestions) {
+        return this.posts.filter((post) => this.checkForTag(post, "questions"));
+      }
       return this.posts;
     },
   },
@@ -583,8 +590,6 @@ export default {
 
     initCurrentUserId() {
       this.currentUserId = firebase.auth().currentUser.uid;
-      console.log("hey");
-      console.log(this.currentUserId);
     },
     // If the file is a video
     isVideo(file) {
@@ -770,6 +775,7 @@ export default {
         this.notesTag = false;
         this.examTag = false;
         this.notesTag = false;
+        this.questionsTag = false;
 
         //Resets the post
         this.post = {

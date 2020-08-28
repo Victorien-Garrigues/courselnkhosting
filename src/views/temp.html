@@ -1,0 +1,450 @@
+<body>
+    <template>
+        <!-- FIRST COLUMN -->
+        <div class="column left">
+            <h2>course 123</h2>
+            <p>course 321</p>
+        </div>
+
+        <!-- SECOND COLUMN -->
+          <div class="column middle">
+            <!-- start of chat container design -->
+            <div class="container is-fluid postContainer">
+              <div class="posts is-multiline">
+                <div v-for="(post, index) in filteredPosts" :key="index">
+                  <!-- this is the post card -->
+                  <div :id="post.id">
+                    <div v-if="!post.deleted" class="card-content">
+                      <div class="row">
+                        <!-- columns -->
+                        <!-- column one (profile) -->
+                        <div class="column card-left">
+                          <img
+                            src="../assets/profileIcon.png"
+                            loading="lazy"
+                            width="54"
+                            alt="profile pic"
+                          />
+                        </div>
+
+                        <!-- column two (main post) -->
+                        <div class="column card-middle">
+                          <div class="row">
+                            <div class="column info-column">
+                              <p class="non-post">{{ post.username }}</p>
+                            <div class="media">
+                              <div class="media-left"></div>
+                              <div class="media-content">
+                                <div class="reply" v-if="post.isReply">
+                                  <button v-scroll-to="'#' + post.parent_id">
+                                    Replying to {{ post.replyUsername }}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- post itself -->
+                            <p>{{ post.content }}</p>
+
+                            <div class="card-image" v-if="post.files[0]">
+                              <figure
+                                style="display: inline-block"
+                                class="image"
+                                :key="index"
+                                v-for="(file, index) in post.files"
+                              >
+                                <!-- Displays a light box image view when images are clicked -->
+                                <img
+                                  v-if="isImage(file)"
+                                  v-lazy="file.src || file.thumb"
+                                  @click="openGallery(index, post.files)"
+                                />
+
+                                <div
+                                  style="display: flex"
+                                  v-else
+                                  class="fileType"
+                                >
+                                  <!-- If the file is a video -> display video image -->
+                                  <img
+                                    v-if="isVideo(file)"
+                                    src="../assets/video.png"
+                                  />
+                                  <img v-else src="../assets/file.png" />
+                                  <a :href="file.src">{{ file.name }}</a>
+                                </div>
+                              </figure>
+                            </div>
+
+                            <div v-if="post.replies > 0" class="post-info">
+                              <button
+                                class="button is-success"
+                                @click="viewReplies(post.id)"
+                                style="margin-right: 2em"
+                              >
+                                {{ post.replies }} Replies
+                              </button>
+                            </div>
+                            <p>{{ post.clips }} Clips</p>
+                          </div>
+
+                          <!-- column three (icons) -->
+                          <div class="column card-right">
+                            <div class="row">
+                              <div class="column icon-placement">
+                                <!-- adds and unadds a clip -->
+                                <button
+                                  @click="addClip(post.id)"
+                                  class="clipButton is-success"
+                                ></button>
+                              </div>
+                              <div class="column icon-placement">
+                                <!-- Deletes post -->
+                                <button
+                                  @click="deletePost(post.id)"
+                                  class="deleteButton is-danger"
+                                ></button>
+                              </div>
+                              <div class="column icon-placement">
+                                <!-- Reply button -->
+                                <button
+                                  @click="reply(post)"
+                                  class="replyButton is-primary"
+                                ></button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div v-if="post.replies > 0" class="post-info">
+                            <button
+                              class="button is-success"
+                              @click="viewReplies(post.id)"
+                              style="margin-right: 2em"
+                            >{{ post.replies }} Replies</button>
+                          </div>
+                          <p>{{ post.clips }} Clips</p>
+                        </div>
+
+                        <!-- column three (icons) -->
+                        <div class="column card-right">
+                          <div class="row">
+                            <div class="column icon-placement">
+                              <!-- adds and unadds a clip -->
+                              <button @click="addClip(post.id)" class="clipButton is-success"></button>
+                            </div>
+                            <div class="column icon-placement">
+                              <!-- Reply button -->
+                              <button @click="reply(post)" class="replyButton is-primary"></button>
+                            </div>
+                            <div class="column icon-placement">
+                              <!-- Deletes post -->
+                              <button
+                                v-if="post.user_id == firebase.auth().currentUser.uid"
+                                @click="deletePost(post.id)"
+                                class="deleteButton is-danger"
+                              ></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="listReplies == post.id">
+                      <!--  Start of List Of  Replies -->
+                      <div
+                        v-for="(reply, index) in replies"
+                        :key="index"
+                        class="replies"
+                      >
+                        <div :id="post.id">
+                          <div v-if="!post.deleted" class="card-content">
+                            <div class="row cardcol">
+                              <!-- columns -->
+                              <!-- column one (profile) -->
+                              <div class="column card-left">
+                                <img
+                                  src="../assets/profileIcon.png"
+                                  loading="lazy"
+                                  width="54"
+                                  alt
+                                />
+                              </div>
+
+                              <!-- column two (main) -->
+                              <div class="column card-middle">
+                                <div class="row">
+                                  <div class="column info-column">
+                                    <p class="non-post">{{ post.username }}</p>
+                                  </div>
+                                  <div class="column info-column">
+                                    <time class="non-post">{{
+                                      getCreated(index)
+                                    }}</time>
+                                  </div>
+                                </div>
+
+                                <div class="media">
+                                  <div class="media-left"></div>
+                                  <div class="media-content">
+                                    <div class="reply" v-if="post.isReply">
+                                      <button v-scroll-to="'#' + post.parent_id">
+                                        Replying to {{ post.replyUsername }}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- post itself -->
+                                <p>{{ post.content }}</p>
+
+                                <div class="card-image" v-if="post.files[0]">
+                                  <figure
+                                    style="display: inline-block"
+                                    class="image"
+                                    :key="index"
+                                    v-for="(file, index) in post.files"
+                                  >
+                                    <!-- Displays a light box image view when images are clicked -->
+                                    <img
+                                      v-if="isImage(file)"
+                                      v-lazy="file.src || file.thumb"
+                                      @click="openGallery(index, post.files)"
+                                    />
+
+                                    <div
+                                      style="display: flex"
+                                      v-else
+                                      class="fileType"
+                                    >
+                                      <!-- If the file is a video -> display video image -->
+                                      <img
+                                        v-if="isVideo(file)"
+                                        src="../assets/video.png"
+                                      />
+                                      <img v-else src="../assets/file.png" />
+                                      <a :href="file.src">{{ file.name }}</a>
+                                    </div>
+                                  </figure>
+                                </div>
+
+                                <div v-if="post.replies > 0" class="post-info">
+                                  <button
+                                    class="button is-success"
+                                    @click="viewReplies(post.id)"
+                                    style="margin-right: 2em"
+                                  >
+                                    {{ post.replies }} Replies
+                                  </button>
+                                </div>
+                                <p>{{ post.clips }} Clips</p>
+                              </div>
+
+                              <!-- column three (icons) -->
+                              <div class="column card-right">
+                                <div class="row">
+                                  <div class="column icon-placement">
+                                    <!-- adds and unadds a clip -->
+                                    <button
+                                      @click="addClip(post.id)"
+                                      class="clipButton is-success"
+                                    ></button>
+                                  </div>
+                                  <div class="column icon-placement">
+                                    <!-- Deletes post -->
+                                    <button
+                                      @click="deletePost(post.id)"
+                                      class="deleteButton is-danger"
+                                    ></button>
+                                  </div>
+                                  <div class="column icon-placement">
+                                    <!-- Reply button -->
+                                    <button
+                                      @click="reply(post)"
+                                      class="replyButton is-primary"
+                                    ></button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!--  End of List Of  Replies -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="bottom"></div>
+
+            <!-- Tags -->
+            <div style="display: flex" class="tags">
+              <button
+                @click.prevent="generalTag = !generalTag"
+                class
+                :class="{ clicked: generalTag }"
+                id="tag"
+              >General</button>
+              <button
+                @click.prevent="notesTag = !notesTag"
+                id="tag"
+                :class="{ clicked: notesTag }"
+              >Notes</button>
+              <button @click.prevent="examTag = !examTag" id="tag" :class="{ clicked: examTag }">Exam</button>
+              <button
+                @click.prevent="assignmentTag = !assignmentTag"
+                id="tag"
+                :class="{ clicked: assignmentTag }"
+              >Assignment</button>
+            </div>
+
+            <label for="file-upload" class="custom-file-upload">
+              <i class="fa fa-cloud-upload"></i>
+            </label>
+
+            <!-- Dropzone -> only show if the user drags onto the page or a files is dropped -->
+            <vue-dropzone
+              v-if="showDropArea || fileDropped"
+              ref="imgDropZone"
+              id="dropzone"
+              :options="dropzoneOptions"
+              @vdropzone-drop="fileDropped = true"
+              @vdropzone-complete="afterComplete"
+            ></vue-dropzone>
+
+            <!-- If replying to someone -->
+            <div class="wrapper">
+              <div v-if="post.isReply" class="reply">
+                <button @click="post.isReply = false" class="button is-danger">X</button>
+                <p>Reply to {{ replyingTo }}</p>
+                <p>{{ replyingMessage }}</p>
+              </div>
+
+              <form>
+                <label for="file-upload" class="custom-file-upload">
+                  <i class="fa fa-cloud-upload"></i>
+                </label>
+
+                <!-- if the post has files -->
+                <div v-if="post.files.length > 0" class="image-div">
+                  <div style="display: inline-block" v-for="file in post.files" :key="file.src">
+                    <img :src="file.src" class="image" />
+                  </div>
+                </div>
+
+                <form>
+                  <label for="file-upload" class="custom-file-upload">
+                    <i class="fa fa-cloud-upload"></i>
+                  </label>
+
+                  <!-- if the post has files -->
+                  <div v-if="post.files.length > 0" class="image-div">
+                    <div
+                      style="display: inline-block"
+                      v-for="file in post.files"
+                      :key="file.src"
+                    >
+                      <img :src="file.src" class="image" />
+                    </div>
+                  </div>
+
+                  <div class="wrapper buttons are-small">
+                    <!-- If the post is a reply -->
+                    <div v-if="post.isReply" class="reply">
+                      <!-- Cancel reply button -->
+                      <button
+                        @click="post.isReply = false"
+                        class="button is-danger"
+                      >
+                        X
+                      </button>
+                      <p>Reply to {{ replyingTo }}</p>
+                      <p>{{ replyingMessage }}</p>
+                    </div>
+
+                    <!-- Text input area -->
+                    <div class="text-area">
+                      <ResizeAuto>
+                        <template v-slot:default="{ resize }">
+                          <textarea
+                            v-model="post.content"
+                            class="textarea"
+                            rows="1"
+                            @input="resize"
+                          ></textarea>
+                        </template>
+                      </ResizeAuto>
+
+                      <!-- Dropzone with attachment icon beside text area -->
+                      <vue-dropzone
+                        ref="imgDropZone"
+                        id="attach"
+                        :include-styling="false"
+                        :options="dropzoneOptions"
+                        @vdropzone-complete="afterAttach"
+                      ></vue-dropzone>
+                    </div>
+                  </div>
+
+                  <!-- Add Post Button -->
+                  <button
+                    @click="onCreatePost()"
+                    class="button is-success bottom"
+                    style="margin-top: 1em"
+                    v-scroll-to="'#bottom'"
+                  >
+                    Add Post
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        <!-- THIRD COLUMN -->
+        <div class="column right">
+          <!-- Files filter -->
+          <button
+            @click.prevent="filterByFiles = !filterByFiles"
+            id="tags"
+            :class="{ clicked: filterByFiles }"
+          >Files</button>
+
+          <!-- Clips filter -->
+          <button
+            @click.prevent="filterByClips = !filterByClips"
+            id="tags"
+            :class="{ clicked: filterByClips }"
+          >Clips</button>
+
+          <!-- General Tag -->
+          <button
+            @click.prevent="filterByGeneral = !filterByGeneral"
+            id="tags"
+            :class="{ clicked: filterByGeneral }"
+          >General</button>
+
+          <button
+            @click.prevent="filterByNotes = !filterByNotes"
+            id="tags"
+            :class="{ clicked: filterByNotes }"
+          >Notes</button>
+
+          <button
+            @click.prevent="filterByExam = !filterByExam"
+            id="tags"
+            :class="{ clicked: filterByExam }"
+          >Exam</button>
+
+          <button
+            @click.prevent="filterByAssignment = !filterByAssignment"
+            id="tags"
+            :class="{ clicked: filterByAssignment }"
+          >Assignment</button>
+
+            <h2>Side</h2>
+            <p>Smth will probably go here</p>
+          </div>
+        </div>
+    </template>
+</body>

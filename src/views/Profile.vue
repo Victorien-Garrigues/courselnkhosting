@@ -92,7 +92,7 @@ export default {
           this.firstName = doc.data().firstName;
           this.lastName = doc.data().lastName;
 
-          db.collection('Schools')
+          db.collection('schools')
             .doc(doc.data().school_id)
             .get()
             .then((doc) => {
