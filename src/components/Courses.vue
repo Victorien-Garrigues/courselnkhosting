@@ -250,15 +250,15 @@ export default {
       this.isAdding = true;
       console.log(this.allCourses);
       console.log(this.userDoc);
-      if (!this.allCourses[0]) {
-        if (!this.userDoc) {
-          this.getUserDoc();
-          console.log(this.userDoc);
-        }
-        console.log('man');
-
-        await this.initAllCourses(this.userDoc.school_id);
+      //   if (!this.allCourses[0]) {
+      if (!this.userDoc) {
+        await this.getUserDoc();
       }
+      await this.initAllCourses(this.userDoc.school_id).then(() => {
+        console.log(this.allCourses);
+      });
+
+      //}
     },
 
     //Shows all faculties from the users school
@@ -286,9 +286,6 @@ export default {
 
     //Adds a course to the users courses array
     async addCourse(course) {
-      console.log('wow');
-      console.log(course);
-      console.log(course.id);
       if (!this.userDoc) {
         await this.getUserDoc();
       }
@@ -322,13 +319,11 @@ export default {
             });
 
           // Add a post saying that a user has joined the group
-          db.collection('posts')
-            .doc()
-            .add({
-              content: this.userDoc.firstName + '' + this.userDoc.lastName,
-              course_id: course.id,
-              createdAt: new Date(),
-            });
+          db.collection('posts').add({
+            content: this.userDoc.firstName + '' + this.userDoc.lastName,
+            course_id: course.id,
+            createdAt: new Date(),
+          });
         });
 
       await this.initCourses();
@@ -369,13 +364,11 @@ export default {
             });
 
           // Add a post saying that a user has joined the group
-          db.collection('posts')
-            .doc()
-            .add({
-              content: this.userDoc.firstName + '' + this.userDoc.lastName,
-              course_id: faculty.id,
-              createdAt: new Date(),
-            });
+          db.collection('posts').add({
+            content: this.userDoc.firstName + '' + this.userDoc.lastName,
+            course_id: faculty.id,
+            createdAt: new Date(),
+          });
         });
       await this.initFaculties();
       this.reset();
@@ -467,13 +460,10 @@ export default {
           school_id: this.userDoc.school_id,
         };
 
-        await db
-          .collection('courses')
-          .doc()
-          .add({
-            courseCode: course.courseCode,
-            school_id: course.school_id,
-          });
+        await db.collection('courses').add({
+          courseCode: course.courseCode,
+          school_id: course.school_id,
+        });
         this.addCourse(course);
       }
       this.feedback = '';
