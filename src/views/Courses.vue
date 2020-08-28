@@ -1,11 +1,26 @@
 <template>
-  <section class="menu">
+  <section class="menu background-body">
+    <!-- start of navbar design -->
+    <div class="navbar">
+      <!-- brand design -->
+      <div class="container">
+        <a href="#">
+          <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
+        </a>
+      </div>
+
+      <!-- profile design -->
+      <div>
+        <router-link class="button" :to="{
+            name: 'Profile',
+          }">Profile</router-link>
+      </div>
+    </div>
+
     <div v-if="!isFaculty" class="faculties">
       <!-- Lists all of the users courses -->
       <ul v-if="!isEditing && !isAdding" class="menu-list">
-        <p class="menu-label">
-          Your Courses
-        </p>
+        <p class="menu-label">Your Courses</p>
         <li v-for="course in courses" :key="course.id">
           <router-link
             @click.native="
@@ -15,9 +30,7 @@
               name: 'MessageBoard',
               params: { name: course.courseCode.replace(/\s/g, '') },
             }"
-          >
-            {{ course.courseCode }}
-          </router-link>
+          >{{ course.courseCode }}</router-link>
         </li>
       </ul>
 
@@ -26,27 +39,18 @@
         v-if="!isAdding && !isEditing"
         @click="showCourses()"
         class="button is-primary"
-      >
-        Add Course
-      </button>
+      >Add Course</button>
 
       <!-- Edit Courses Button -->
       <button
         v-if="!isAdding && !isEditing"
         @click="(isEditing = true), (isCourse = true)"
         class="button is-danger"
-      >
-        Edit Courses
-      </button>
+      >Edit Courses</button>
 
       <!-- Lists All Courses For The User To Add -->
       <div v-if="isAdding">
-        <input
-          class="input"
-          type="text"
-          placeholder="Search Courses"
-          v-model="searchTerm"
-        />
+        <input class="input" type="text" placeholder="Search Courses" v-model="searchTerm" />
 
         <!-- Create course -->
         <div style="margin-bottom: 2em;">
@@ -55,9 +59,7 @@
             v-if="!isCreating"
             @click="isCreating = true"
             class="button is-success"
-          >
-            Create Course
-          </button>
+          >Create Course</button>
         </div>
 
         <!-- If the user is creating a course -->
@@ -73,14 +75,10 @@
           <p class="feedback">{{ this.feedback }}</p>
 
           <!-- Create course button -->
-          <button @click="createCourse()" class="button is-success">
-            Create Course
-          </button>
+          <button @click="createCourse()" class="button is-success">Create Course</button>
 
           <!-- Cancel button -->
-          <button @click="isCreating = false" class="button is-danger">
-            Cancel
-          </button>
+          <button @click="isCreating = false" class="button is-danger">Cancel</button>
         </div>
 
         <!-- Displays the courses for the user to add -->
@@ -91,9 +89,7 @@
               style="margin-top: 0.5em;"
               class="button"
               @click="addCourse(course)"
-            >
-              {{ course.courseCode }}
-            </button>
+            >{{ course.courseCode }}</button>
           </li>
         </ul>
       </div>
@@ -106,23 +102,15 @@
             style="margin-top: 0.5em;"
             class="button"
             @click="removeCourse(course.course_id)"
-          >
-            {{ course.courseCode }}
-          </button>
+          >{{ course.courseCode }}</button>
         </li>
       </ul>
     </div>
 
     <!-- Lists the user faculties -->
     <div v-if="!isCourse" class="courses">
-      <ul
-        style="margin-top: 2em ;"
-        v-if="!isEditing && !isAdding"
-        class="menu-list"
-      >
-        <p class="menu-label">
-          Your Faculties
-        </p>
+      <ul style="margin-top: 2em ;" v-if="!isEditing && !isAdding" class="menu-list">
+        <p class="menu-label">Your Faculties</p>
         <li v-for="faculty in faculties" :key="faculty.id">
           <router-link
             @click.native="
@@ -132,9 +120,7 @@
               name: 'MessageBoard',
               params: { name: faculty.name.replace(/\s/g, '') },
             }"
-          >
-            {{ faculty.name }}
-          </router-link>
+          >{{ faculty.name }}</router-link>
         </li>
       </ul>
 
@@ -143,18 +129,14 @@
         v-if="!isAdding && !isEditing"
         @click="showFaculties()"
         class="button is-primary"
-      >
-        Add Faculty
-      </button>
+      >Add Faculty</button>
 
       <!-- Edit Faculties Button -->
       <button
         v-if="!isAdding && !isEditing"
         @click="(isEditing = true), (isFaculty = true)"
         class="button is-danger"
-      >
-        Edit Faculty
-      </button>
+      >Edit Faculty</button>
 
       <!-- Lists All Faculties For The User To Add -->
       <div v-if="isAdding">
@@ -165,9 +147,7 @@
               style="margin-top: 0.5em;"
               class="button"
               @click="addFaculty(faculty)"
-            >
-              {{ faculty.name }}
-            </button>
+            >{{ faculty.name }}</button>
           </li>
         </ul>
       </div>
@@ -180,9 +160,7 @@
             style="margin-top: 0.5em;"
             class="button"
             @click="removeFaculty(faculty.faculty_id)"
-          >
-            {{ faculty.name }}
-          </button>
+          >{{ faculty.name }}</button>
         </li>
       </ul>
     </div>
@@ -193,19 +171,17 @@
       v-if="isEditing || isAdding"
       @click="reset()"
       class="button is-primary"
-    >
-      Done
-    </button>
+    >Done</button>
 
     <h3 class="feedback">{{ this.alreadyAddedMessage }}</h3>
   </section>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import firebase from '@/firebase';
-import db from '@/db';
-let uuid = require('uuid');
+import { mapState, mapActions } from "vuex";
+import firebase from "@/firebase";
+import db from "@/db";
+let uuid = require("uuid");
 
 export default {
   data: () => ({
@@ -216,22 +192,22 @@ export default {
     isCourse: false, //If user is adding, or editing courses
 
     userDoc: null, //the users document in the users collection
-    courseCode: '', //the coureCode of the course
-    feedback: '', //If the user enters a course that already exitst is shows a message
-    alreadyAddedMessage: '', //if the user has already added that course or faculty
-    searchTerm: '',
+    courseCode: "", //the coureCode of the course
+    feedback: "", //If the user enters a course that already exitst is shows a message
+    alreadyAddedMessage: "", //if the user has already added that course or faculty
+    searchTerm: "",
   }),
   mounted() {
     this.initCourses(); //Gets all the users courses
     this.initFaculties(); //Gets all the users faculties
   },
   computed: {
-    ...mapState('courses', ['courses', 'allCourses']),
-    ...mapState('faculties', ['faculties', 'allFaculties']),
+    ...mapState("courses", ["courses", "allCourses"]),
+    ...mapState("faculties", ["faculties", "allFaculties"]),
 
     filteredCourses() {
       if (this.searchTerm) {
-        const regexp = new RegExp(this.searchTerm, 'gi');
+        const regexp = new RegExp(this.searchTerm, "gi");
         return this.allCourses.filter((course) =>
           course.courseCode.match(regexp)
         );
@@ -240,8 +216,8 @@ export default {
     },
   },
   methods: {
-    ...mapActions('courses', ['initCourses', 'initAllCourses']),
-    ...mapActions('faculties', ['initFaculties', 'initAllFaculties']),
+    ...mapActions("courses", ["initCourses", "initAllCourses"]),
+    ...mapActions("faculties", ["initFaculties", "initAllFaculties"]),
 
     //Shows all courses from the users school
     async showCourses() {
@@ -270,7 +246,7 @@ export default {
     //returns the document from the users collection of the current user
     async getUserDoc() {
       await db
-        .collection('users')
+        .collection("users")
         .doc(firebase.auth().currentUser.uid)
         .get()
         .then((doc) => {
@@ -287,7 +263,7 @@ export default {
       // updates courses locally
       for (const index in userCourses) {
         if (userCourses[index].course_id === course.id) {
-          this.alreadyAddedMessage = 'You have already added this course';
+          this.alreadyAddedMessage = "You have already added this course";
           return;
         }
       }
@@ -297,12 +273,9 @@ export default {
       });
 
       //Updates those changes in firebase
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .update({
-          courses: userCourses,
-        });
+      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
+        courses: userCourses,
+      });
       await this.initCourses();
       this.reset();
     },
@@ -316,7 +289,7 @@ export default {
       // updates courses locally
       for (const index in userFaculties) {
         if (userFaculties[index].faculty_id === faculty.id) {
-          this.alreadyAddedMessage = 'You have already added this faculty';
+          this.alreadyAddedMessage = "You have already added this faculty";
           return;
         }
       }
@@ -326,12 +299,9 @@ export default {
       });
 
       //Updates those changes in firebase
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .update({
-          faculties: userFaculties,
-        });
+      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
+        faculties: userFaculties,
+      });
       await this.initFaculties();
       this.reset();
     },
@@ -350,12 +320,9 @@ export default {
       }
 
       //Updates those changes in firebase
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .update({
-          courses: userCourses,
-        });
+      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
+        courses: userCourses,
+      });
 
       await this.initCourses();
       this.reset();
@@ -375,12 +342,9 @@ export default {
       }
 
       //Updates those changes in firebase
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .update({
-          faculties: userFaculties,
-        });
+      await db.collection("users").doc(firebase.auth().currentUser.uid).update({
+        faculties: userFaculties,
+      });
 
       await this.initFaculties();
       this.reset();
@@ -399,7 +363,7 @@ export default {
             this.allCourses[course].courseCode.toLowerCase() ===
             this.courseCode.toLowerCase()
           ) {
-            this.feedback = 'The course already exists';
+            this.feedback = "The course already exists";
             return;
           }
         }
@@ -410,23 +374,20 @@ export default {
           id: uuid.v1(),
         };
 
-        await db
-          .collection('courses')
-          .doc(course.id)
-          .set({
-            courseCode: course.courseCode,
-            school_id: course.school_id,
-          });
+        await db.collection("courses").doc(course.id).set({
+          courseCode: course.courseCode,
+          school_id: course.school_id,
+        });
         this.addCourse(course);
       }
-      this.feedback = '';
+      this.feedback = "";
       this.reset();
     },
 
     // Resets data
     reset() {
-      this.feedback = '';
-      this.alreadyAddedMessage = '';
+      this.feedback = "";
+      this.alreadyAddedMessage = "";
       this.isEditing = false;
       this.isAdding = false;
       this.isCourse = false;
@@ -440,5 +401,10 @@ export default {
 .feedback {
   color: red;
   text-align: left;
+}
+
+.background-body {
+  height: 100%;
+  background-color: #edf2f7;
 }
 </style>
