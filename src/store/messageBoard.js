@@ -1,8 +1,8 @@
-import { firestoreAction } from 'vuexfire';
-import firebase from '@/firebase';
-import db from '@/db';
+import { firestoreAction } from "vuexfire";
+import firebase from "@/firebase";
+import db from "@/db";
 
-const posts = db.collection('posts');
+const posts = db.collection("posts");
 
 const mutations = {
   // Sets the course selected by the user
@@ -27,15 +27,15 @@ const actions = {
     post.created_at = firebase.firestore.FieldValue.serverTimestamp();
     post.replies = 0;
     post.clips = 0;
-    db.collection('users')
+    db.collection("users")
       .doc(user.uid)
       .get()
       .then((doc) => {
-        post.username = doc.data().firstName + ' ' + doc.data().lastName;
+        post.username = doc.data().firstName + " " + doc.data().lastName;
 
         if (post.isReply) {
-          db.collection('posts')
-            .where('id', '==', post.parent_id)
+          db.collection("posts")
+            .where("id", "==", post.parent_id)
             .get()
             .then(function(querySnapshot) {
               querySnapshot.forEach(function(doc) {
@@ -55,7 +55,7 @@ const actions = {
               });
             })
             .catch(function(error) {
-              console.log('Error getting documents: ', error);
+              console.log("Error getting documents: ", error);
             });
         } else {
           try {
@@ -66,7 +66,7 @@ const actions = {
         }
       })
       .catch(function(error) {
-        console.log('Error getting documents: ', error);
+        console.log("Error getting documents: ", error);
       });
   },
 
@@ -74,7 +74,7 @@ const actions = {
   async deletePost(_, post_id) {
     await posts.doc(post_id).update({
       files: [],
-      content: '',
+      content: "",
       deleted: true,
     });
   },
@@ -82,22 +82,22 @@ const actions = {
   //Binds posts to the firebase collection of posts that have a given course_id
   initPosts: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
-      'posts',
+      "posts",
       db
-        .collection('posts')
-        .where('course_id', '==', course_id)
-        .orderBy('created_at', 'asc')
+        .collection("posts")
+        .where("course_id", "==", course_id)
+        .orderBy("created_at", "asc")
     );
   }),
 
   //Binds replies to the firebase collection of posts that are repling to a given post
   initReplies: firestoreAction(({ bindFirestoreRef }, originalPost_id) => {
     bindFirestoreRef(
-      'replies',
+      "replies",
       db
-        .collection('posts')
-        .where('originalPost_id', '==', originalPost_id)
-        .orderBy('created_at', 'asc')
+        .collection("posts")
+        .where("originalPost_id", "==", originalPost_id)
+        .orderBy("created_at", "asc")
     );
   }),
 };

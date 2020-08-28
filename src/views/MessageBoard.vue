@@ -23,65 +23,6 @@
 
           <!-- search design -->
           <form style="display: flex;" class="search-form-outside">
-            <!-- Files filter -->
-            <button
-              @click.prevent="filterByFiles = !filterByFiles"
-              id="tags"
-              :class="{ clicked: filterByFiles }"
-            >
-              Files
-            </button>
-
-            <!-- Clips filter -->
-            <button
-              @click.prevent="filterByClips = !filterByClips"
-              id="tags"
-              :class="{ clicked: filterByClips }"
-            >
-              Clips
-            </button>
-
-            <!-- General Tag -->
-            <button
-              @click.prevent="filterByGeneral = !filterByGeneral"
-              id="tags"
-              :class="{ clicked: filterByGeneral }"
-            >
-              General
-            </button>
-
-            <button
-              @click.prevent="filterByNotes = !filterByNotes"
-              id="tags"
-              :class="{ clicked: filterByNotes }"
-            >
-              Notes
-            </button>
-
-            <button
-              @click.prevent="filterByExam = !filterByExam"
-              id="tags"
-              :class="{ clicked: filterByExam }"
-            >
-              Exam
-            </button>
-
-            <button
-              @click.prevent="filterByAssignment = !filterByAssignment"
-              id="tags"
-              :class="{ clicked: filterByAssignment }"
-            >
-              Assignment
-            </button>
-
-            <button
-              @click.prevent="filterByQuestions = !filterByQuestions"
-              id="tags"
-              :class="{ clicked: filterByQuestions }"
-            >
-              Questions
-            </button>
-
             <b-field>
               <b-input
                 v-model="searchTerm"
@@ -89,20 +30,18 @@
               ></b-input>
             </b-field>
           </form>
-        </div>
 
-        <!-- profile design (to be added) -->
-        <div>
-          <router-link
-            class="button"
-            :to="{
-              name: 'Profile',
-            }"
-          >
-            Profile
-          </router-link>
+          <!-- profile design -->
+          <div>
+            <router-link
+              class="button"
+              :to="{
+                name: 'Profile',
+              }"
+              >Profile</router-link
+            >
+          </div>
         </div>
-        <!-- ^^^ right here -->
 
         <!-- end of navbar design -->
 
@@ -121,9 +60,9 @@
               <div class="posts is-multiline">
                 <div v-for="(post, index) in filteredPosts" :key="index">
                   <!-- this is the post card -->
-                  <div style="dislpay: block;" :id="post.id">
-                    <div v-if="!post.deleted" class="card-content">
-                      <div class="row">
+                  <div :id="post.id">
+                    <div v-if="!post.deleted">
+                      <div class="cardTable">
                         <!-- columns -->
                         <!-- column one (profile) -->
                         <div class="column card-left">
@@ -134,6 +73,23 @@
                             width="54"
                             alt
                           />
+
+                          <div v-if="currentUserId != post.user_id" class="row">
+                            <div class="column icon-placement">
+                              <!-- adds and unadds a clip -->
+                              <button
+                                @click="addClip(post.id)"
+                                class="clipButton is-success"
+                              ></button>
+                            </div>
+                            <div class="column icon-placement">
+                              <!-- Reply button -->
+                              <button
+                                @click="reply(post)"
+                                class="replyButton is-primary"
+                              ></button>
+                            </div>
+                          </div>
                         </div>
 
                         <!-- column two (main) -->
@@ -143,9 +99,9 @@
                               <p class="non-post">{{ post.username }}</p>
                             </div>
                             <div class="column info-column">
-                              <time class="non-post">{{
-                                getCreated(index)
-                              }}</time>
+                              <time class="non-post">
+                                {{ getCreated(index) }}
+                              </time>
                             </div>
                           </div>
 
@@ -207,7 +163,15 @@
 
                         <!-- column three (icons) -->
                         <div class="column card-right">
-                          <div class="row">
+                          <img
+                            v-if="currentUserId != post.user_id"
+                            src="../assets/profileIcon.png"
+                            loading="lazy"
+                            width="54"
+                            alt
+                          />
+
+                          <div v-if="currentUserId == post.user_id" class="row">
                             <div class="column icon-placement">
                               <!-- adds and unadds a clip -->
                               <button
@@ -244,7 +208,7 @@
                     >
                       <div :id="post.id">
                         <div v-if="!post.deleted" class="card-content">
-                          <div class="row cardcol">
+                          <div class="row">
                             <!-- columns -->
                             <!-- column one (profile) -->
                             <div class="column card-left">
@@ -263,9 +227,9 @@
                                   <p class="non-post">{{ post.username }}</p>
                                 </div>
                                 <div class="column info-column">
-                                  <time class="non-post">{{
-                                    getCreated(index)
-                                  }}</time>
+                                  <time class="non-post">
+                                    {{ getCreated(index) }}
+                                  </time>
                                 </div>
                               </div>
 
@@ -360,142 +324,195 @@
                 </div>
               </div>
             </div>
-            <div id="bottom"></div>
 
-            <label for="file-upload" class="custom-file-upload">
-              <i class="fa fa-cloud-upload"></i>
-            </label>
+            <div class="type-menu">
+              <!-- uploading files (outside of table) -->
+              <label for="file-upload" class="custom-file-upload">
+                <i class="fa fa-cloud-upload"></i>
+              </label>
 
-            <!-- Dropzone -> only show if the user drags onto the page or a files is dropped -->
-            <vue-dropzone
-              v-if="showDropArea || fileDropped"
-              ref="imgDropZone"
-              id="dropzone"
-              :options="dropzoneOptions"
-              @vdropzone-drop="fileDropped = true"
-              @vdropzone-complete="afterComplete"
-            ></vue-dropzone>
+              <vue-dropzone
+                v-if="showDropArea || fileDropped"
+                ref="imgDropZone"
+                id="dropzone"
+                :options="dropzoneOptions"
+                @vdropzone-drop="fileDropped = true"
+                @vdropzone-complete="afterComplete"
+              ></vue-dropzone>
 
-            <!-- If replying to someone -->
-            <div class="wrapper">
-              <div v-if="post.isReply" class="reply">
-                <button @click="post.isReply = false" class="button is-danger">
-                  X
-                </button>
-                <p>Reply to {{ replyingTo }}</p>
-                <p>{{ replyingMessage }}</p>
-              </div>
-
-              <form>
-                <label for="file-upload" class="custom-file-upload">
-                  <i class="fa fa-cloud-upload"></i>
-                </label>
-
-                <!-- if the post has files -->
-                <div v-if="post.files.length > 0" class="image-div">
-                  <div
-                    style="display: inline-block"
-                    v-for="file in post.files"
-                    :key="file.src"
-                  >
-                    <img :src="file.src" class="image" />
-                  </div>
-                </div>
-
-                <div class="wrapper buttons are-small">
-                  <!-- If the post is a reply -->
-                  <div v-if="post.isReply" class="reply">
-                    <!-- Cancel reply button -->
+              <!-- table -->
+              <div class="row">
+                <div class="column chat-left">
+                  <!-- tags -->
+                  <div style="display: flex" class="tags">
                     <button
-                      @click="post.isReply = false"
-                      class="button is-danger"
+                      @click.prevent="generalTag = !generalTag"
+                      class
+                      :class="{ clicked: generalTag }"
+                      id="tag"
                     >
-                      X
+                      General
                     </button>
-                    <p>Reply to {{ replyingTo }}</p>
-                    <p>{{ replyingMessage }}</p>
+                    <button
+                      @click.prevent="notesTag = !notesTag"
+                      id="tag"
+                      :class="{ clicked: notesTag }"
+                    >
+                      Notes
+                    </button>
+                    <button
+                      @click.prevent="examTag = !examTag"
+                      id="tag"
+                      :class="{ clicked: examTag }"
+                    >
+                      Exam
+                    </button>
+                    <button
+                      @click.prevent="assignmentTag = !assignmentTag"
+                      id="tag"
+                      :class="{ clicked: assignmentTag }"
+                    >
+                      Assignment
+                    </button>
                   </div>
 
-                  <!-- Text input area -->
-                  <div class="text-area">
-                    <ResizeAuto>
-                      <template v-slot:default="{ resize }">
-                        <textarea
-                          v-model="post.content"
-                          class="textarea"
-                          rows="1"
-                          @input="resize"
-                        ></textarea>
-                      </template>
-                    </ResizeAuto>
+                  <!-- post itself -->
+                  <div class="wrapper">
+                    <div v-if="post.isReply" class="reply">
+                      <button
+                        @click="post.isReply = false"
+                        class="button is-danger"
+                      >
+                        X
+                      </button>
+                      <p>Reply to {{ replyingTo }}</p>
+                      <p>{{ replyingMessage }}</p>
+                    </div>
 
-                    <!-- Dropzone with attachment icon beside text area -->
-                    <vue-dropzone
-                      ref="imgDropZone"
-                      id="attach"
-                      :include-styling="false"
-                      :options="dropzoneOptions"
-                      @vdropzone-complete="afterAttach"
-                    ></vue-dropzone>
+                    <form>
+                      <label for="file-upload" class="custom-file-upload">
+                        <i class="fa fa-cloud-upload"></i>
+                      </label>
+
+                      <!-- if the post has files -->
+                      <div v-if="post.files.length > 0" class="image-div">
+                        <div
+                          style="display: inline-block"
+                          v-for="file in post.files"
+                          :key="file.src"
+                        >
+                          <img :src="file.src" class="image" />
+                        </div>
+                      </div>
+
+                      <div class="wrapper buttons are-small">
+                        <!-- If the post is a reply -->
+                        <div v-if="post.isReply" class="reply">
+                          <!-- Cancel reply button -->
+                          <button
+                            @click="post.isReply = false"
+                            class="button is-danger"
+                          >
+                            X
+                          </button>
+                          <p>Reply to {{ replyingTo }}</p>
+                          <p>{{ replyingMessage }}</p>
+                        </div>
+
+                        <!-- Text input area -->
+                        <div class="text-area">
+                          <ResizeAuto>
+                            <template v-slot:default="{ resize }">
+                              <textarea
+                                v-model="post.content"
+                                class="textarea"
+                                rows="1"
+                                @input="resize"
+                              ></textarea>
+                            </template>
+                          </ResizeAuto>
+                        </div>
+                      </div>
+                    </form>
                   </div>
+                  <div id="bottom"></div>
                 </div>
 
-                <!-- Add Post Button -->
-                <button
-                  @click="onCreatePost()"
-                  class="button is-success bottom"
-                  style="margin-top: 1em"
-                  v-scroll-to="'#bottom'"
-                >
-                  Add Post
-                </button>
-              </form>
+                <div class="column chat-right">
+                  <!-- Add Post Button -->
+                  <button
+                    @click="onCreatePost()"
+                    class="sendButton is-success bottom"
+                    v-scroll-to="'#bottom'"
+                  ></button>
+                </div>
+                <div class="column chat-right">
+                  <!-- Dropzone with attachment icon beside text area -->
+                  <vue-dropzone
+                    ref="imgDropZone"
+                    class="docButton"
+                    :include-styling="false"
+                    :options="dropzoneOptions"
+                    @vdropzone-complete="afterAttach"
+                  ></vue-dropzone>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- THIRD COLUMN -->
         <div class="column right">
-          <!-- Tags -->
-          <div style="display: flex" class="tags">
-            <button
-              @click.prevent="generalTag = !generalTag"
-              class
-              :class="{ clicked: generalTag }"
-              id="tag"
-            >
-              General
-            </button>
-            <button
-              @click.prevent="notesTag = !notesTag"
-              id="tag"
-              :class="{ clicked: notesTag }"
-            >
-              Notes
-            </button>
-            <button
-              @click.prevent="examTag = !examTag"
-              id="tag"
-              :class="{ clicked: examTag }"
-            >
-              Exam
-            </button>
-            <button
-              @click.prevent="assignmentTag = !assignmentTag"
-              id="tag"
-              :class="{ clicked: assignmentTag }"
-            >
-              Assignment
-            </button>
-            <button
-              @click.prevent="questionsTag = !questionsTag"
-              id="tag"
-              :class="{ clicked: questionsTag }"
-            >
-              Questions
-            </button>
-          </div>
+          <!-- Files filter -->
+          <button
+            @click.prevent="filterByFiles = !filterByFiles"
+            id="tags"
+            :class="{ clicked: filterByFiles }"
+          >
+            Files
+          </button>
 
+          <!-- Clips filter -->
+          <button
+            @click.prevent="filterByClips = !filterByClips"
+            id="tags"
+            :class="{ clicked: filterByClips }"
+          >
+            Clips
+          </button>
+
+          <!-- General Tag -->
+          <button
+            @click.prevent="filterByGeneral = !filterByGeneral"
+            id="tags"
+            :class="{ clicked: filterByGeneral }"
+          >
+            General
+          </button>
+
+          <button
+            @click.prevent="filterByNotes = !filterByNotes"
+            id="tags"
+            :class="{ clicked: filterByNotes }"
+          >
+            Notes
+          </button>
+
+          <button
+            @click.prevent="filterByExam = !filterByExam"
+            id="tags"
+            :class="{ clicked: filterByExam }"
+          >
+            Exam
+          </button>
+
+          <button
+            @click.prevent="filterByAssignment = !filterByAssignment"
+            id="tags"
+            :class="{ clicked: filterByAssignment }"
+          >
+            Assignment
+          </button>
           <h2>Side</h2>
           <p>Smth will probably go here</p>
         </div>
@@ -583,6 +600,7 @@ export default {
   updated() {
     this.scrollToBottom(); //Scrolls to bottom of page
   },
+
   watch: {
     // if the parameter changes reinit posts
     '$route.params.name': function() {
@@ -601,6 +619,7 @@ export default {
       this.initReplies(this.listReplies);
     },
   },
+
   computed: {
     ...mapState('messageBoard', ['posts', 'replies', 'course']),
 
@@ -673,6 +692,11 @@ export default {
     // If the file is a video
     isVideo(file) {
       return file.src.includes('MP4') || file.src.includes('mp4');
+    },
+
+    initUserId() {
+      console.log(firebase.auth().currentUser.uid);
+      this.currentUserId = firebase.auth().currentUser.uid;
     },
 
     // Scrolls to the bottom of posts
@@ -934,9 +958,7 @@ export default {
 </script>
 
 <style>
-.body-back,
-html {
-  margin: 0 !important;
+.body-back {
   width: 100%;
   min-height: 100vh;
   background-color: #f3f3f3;
@@ -962,14 +984,16 @@ html {
   border-radius: 5px;
   background-color: #f3f3f3;
 }
+
 .card img {
   border-radius: 5px;
 }
 
 .postContainer {
-  height: 60vh;
+  height: 300px;
   overflow: auto;
-  margin-bottom: 100px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .postContainer::-webkit-scrollbar {
@@ -1040,16 +1064,6 @@ input[type='file'] {
   margin-left: 1.5em;
 }
 
-.clipPosition {
-  position: absolute;
-  top: 25%;
-  right: 0;
-
-  z-index: 1;
-  margin-top: 10px;
-  margin-right: 10px;
-}
-
 .fileType img {
   max-width: 25px;
   max-height: 25px;
@@ -1108,6 +1122,40 @@ input[type='file'] {
   background-image: url('../assets/replyIcon-hover.png');
 }
 
+/* SEND BUTTON */
+.sendButton {
+  margin: 3px;
+  background-color: #edf2f7;
+  padding: 30px 30px;
+  cursor: pointer;
+  background-image: url('../assets/sendIcon.png');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.sendButton:hover {
+  background-image: url('../assets/sendIcon-hover.png');
+}
+
+/* DOC BUTTON */
+.docButton {
+  margin: 3px;
+  background-color: #edf2f7;
+  padding: 30px 30px;
+  cursor: pointer;
+  background-image: url('../assets/docIcon.png');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.docButton:hover {
+  background-image: url('../assets/docIcon-hover.png');
+}
+
 .column {
   float: left;
   padding: 10px;
@@ -1136,38 +1184,45 @@ input[type='file'] {
   margin: 0 2px;
 }
 
+.cardTable {
+  display: flex;
+  width: 100%;
+}
+
 .card-middle {
   background-color: #fff;
-  width: 60%;
   border-radius: 5px;
   margin-top: 5px;
   margin-bottom: 5px;
-  display: table-cell;
-}
-
-.cardcol {
-  width: 100%;
-  display: table;
+  flex: 0 0 70%;
+  padding: 16px;
 }
 
 .card-left {
-  width: 10%;
-  display: table-cell;
+  flex: 0 0 15%;
+  padding: 16px;
 }
 .card-right {
-  width: 30%;
-  display: table-cell;
-}
-.info-column {
-  width: 50%;
+  flex: 0 0 15%;
+  padding: 16px;
 }
 
-.icon-placement {
-  width: 40px;
+.info-column {
+  width: 50%;
 }
 
 .non-post {
   color: #a9a9a9;
   margin-top: -10%;
+}
+
+.chat-left {
+  width: 80%;
+  display: table-cell;
+}
+
+.chat-right {
+  width: 10%;
+  display: table-cell;
 }
 </style>
