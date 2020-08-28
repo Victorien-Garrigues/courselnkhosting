@@ -24,7 +24,7 @@
       <!-- Add Course Button -->
       <button
         v-if="!isAdding && !isEditing"
-        @click="showCourses()"
+        @click="showCourses"
         class="button is-primary"
       >
         Add Course
@@ -244,12 +244,19 @@ export default {
 
     //Shows all courses from the users school
     async showCourses() {
+      console.log('show');
+
       this.isCourse = true;
       this.isAdding = true;
+      console.log(this.allCourses);
+      console.log(this.userDoc);
       if (!this.allCourses[0]) {
         if (!this.userDoc) {
-          await this.getUserDoc();
+          this.getUserDoc();
+          console.log(this.userDoc);
         }
+        console.log('man');
+
         await this.initAllCourses(this.userDoc.school_id);
       }
     },
@@ -279,6 +286,9 @@ export default {
 
     //Adds a course to the users courses array
     async addCourse(course) {
+      console.log('wow');
+      console.log(course);
+      console.log(course.id);
       if (!this.userDoc) {
         await this.getUserDoc();
       }
@@ -290,6 +300,7 @@ export default {
           return;
         }
       }
+
       userCourses.push({
         courseCode: course.courseCode,
         course_id: course.id,

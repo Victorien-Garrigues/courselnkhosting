@@ -46,7 +46,9 @@
 </template>
 
 <script>
-import firebase from 'firebase';
+import firebase from '@/firebase';
+import db from '@/db';
+import router from '@/router/index.js';
 export default {
   name: 'Login',
   data() {
@@ -54,19 +56,35 @@ export default {
       email: null,
       password: null,
       feedback: null,
+      course: null,
     };
   },
   methods: {
     //Logs the user in if the correct email and password were entered
-    login() {
+    async login() {
       if (this.email && this.password) {
+        const user = firebase.auth().currentUser;
         this.feedback = null;
         firebase
           .auth()
           .signInWithEmailAndPassword(this.email, this.password)
           .then(() => {
-            if (firebase.auth().currentUser.emailVerified) {
-              this.$router.push({ name: 'Courses' });
+            if (user.emailVerified) {
+              this.setInitialCourse(user.uid).then(() => {
+                if (this.course) {
+                  this.$store.commit(
+                    'messageBoard/setCourse',
+                    this.course.course_id
+                  );
+
+                  router.push({
+                    name: 'MessageBoard',
+                    params: { name: this.course.courseCode.replace(/\s/g, '') },
+                  });
+                } else {
+                  this.$router.push({ name: 'MessageBoard' });
+                }
+              });
             } else {
               this.feedback = 'The email or passoword is incorrect';
             }
@@ -77,6 +95,16 @@ export default {
       } else {
         this.feedback = 'Please Fill In Both Fields';
       }
+    },
+
+    async setInitialCourse(id) {
+      await db
+        .collection('users')
+        .doc(id)
+        .get()
+        .then((doc) => {
+          this.course = doc.data().courses[0];
+        });
     },
   },
 };

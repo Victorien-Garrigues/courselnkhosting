@@ -20,13 +20,15 @@ const actions = {
   },
 
   //Binds the 'allCourses' state with all the course from the users school
-  initAllCourses: firestoreAction(({ bindFirestoreRef }, school_id) => {
+  initAllCourses: firestoreAction(({ bindFirestoreRef, state }, school_id) => {
     bindFirestoreRef(
+      console.log('cool'),
       'allCourses',
       db
         .collection('courses')
         .where('school_id', '==', school_id)
-        .orderBy('courseCode')
+        .orderBy('courseCode'),
+      console.log(state.allCourses)
     );
   }),
 };

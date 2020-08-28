@@ -49,8 +49,7 @@
         <div class="row">
           <!-- FIRST COLUMN -->
           <div class="column left">
-            <h2>course 123</h2>
-            <p>course 321</p>
+            <Courses />
           </div>
 
           <!-- SECOND COLUMN -->
@@ -451,6 +450,7 @@
                   <vue-dropzone
                     ref="imgDropZone"
                     class="docButton"
+                    id="attach"
                     :include-styling="false"
                     :options="dropzoneOptions"
                     @vdropzone-complete="afterAttach"
@@ -530,6 +530,7 @@ import firebase from '@/firebase';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import ResizeAuto from '@/components/ResizeAuto';
+import Courses from '@/components/Courses';
 import db from '@/db';
 import LightBox from 'vue-image-lightbox';
 
@@ -540,6 +541,7 @@ export default {
     vueDropzone: vue2Dropzone,
     ResizeAuto,
     LightBox,
+    Courses,
   },
   data: () => ({
     media: [], //Clickable images in a post
@@ -695,7 +697,6 @@ export default {
     },
 
     initUserId() {
-      console.log(firebase.auth().currentUser.uid);
       this.currentUserId = firebase.auth().currentUser.uid;
     },
 

@@ -101,7 +101,7 @@ export default {
     async getSchools() {
       var tempSchools = [];
       await db
-        .collection('Schools')
+        .collection('schools')
         .get()
         .then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
