@@ -52,10 +52,10 @@
                 <!-- this is the post card -->
                 <div :id="post.id">
                   <div v-if="!post.deleted">
-                    <div class="cardTable">
+                    <div class="flex-container">
                       <!-- columns -->
                       <!-- column one (profile) -->
-                      <div class="column card-left">
+                      <div class="card-left">
                         <img
                           v-if="currentUserId == post.user_id"
                           src="../assets/profileIcon.png"
@@ -77,7 +77,7 @@
                       </div>
 
                       <!-- column two (main) -->
-                      <div class="column card-middle">
+                      <div class="card-middle">
                         <div class="row">
                           <div class="column info-column">
                             <p class="non-post">{{ post.username }}</p>
@@ -135,7 +135,7 @@
                       </div>
 
                       <!-- column three (icons) -->
-                      <div class="column card-right">
+                      <div class="card-right">
                         <img
                           v-if="currentUserId != post.user_id"
                           src="../assets/profileIcon.png"
@@ -305,12 +305,6 @@
 
                 <!-- post itself -->
                 <div class="wrapper">
-                  <div v-if="post.isReply" class="reply">
-                    <button @click="post.isReply = false" class="button is-danger">X</button>
-                    <p>Reply to {{ replyingTo }}</p>
-                    <p>{{ replyingMessage }}</p>
-                  </div>
-
                   <form>
                     <label for="file-upload" class="custom-file-upload">
                       <i class="fa fa-cloud-upload"></i>
@@ -333,7 +327,7 @@
                       </div>
 
                       <!-- Text input area -->
-                      <div class="text-area">
+                      <div>
                         <ResizeAuto>
                           <template v-slot:default="{ resize }">
                             <textarea
@@ -359,12 +353,12 @@
                   v-scroll-to="'#bottom'"
                 ></button>
               </div>
+
               <div class="column chat-right">
                 <!-- Dropzone with attachment icon beside text area -->
                 <vue-dropzone
                   ref="imgDropZone"
                   class="docButton"
-                  id="attach"
                   :include-styling="false"
                   :options="dropzoneOptions"
                   @vdropzone-complete="afterAttach"
@@ -378,46 +372,94 @@
 
     <!-- THIRD COLUMN -->
     <div class="column right">
-      <!-- Files filter -->
-      <button
-        @click.prevent="filterByFiles = !filterByFiles"
-        id="tags"
-        :class="{ clicked: filterByFiles }"
-      >Files</button>
+      <div class="whiteBox">
+        <h2>Post Filters</h2>
 
-      <!-- Clips filter -->
-      <button
-        @click.prevent="filterByClips = !filterByClips"
-        id="tags"
-        :class="{ clicked: filterByClips }"
-      >Clips</button>
+        <!-- Files filter -->
+        <div class="row">
+          <div class="column">
+            <p>Attachment</p>
+          </div>
+          <div class="column">
+            <label class="switch">
+              <input
+                type="checkbox"
+                @click.prevent="filterByFiles = !filterByFiles"
+                id="tags"
+                :class="{ clicked: filterByFiles }"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
 
-      <!-- General Tag -->
-      <button
-        @click.prevent="filterByGeneral = !filterByGeneral"
-        id="tags"
-        :class="{ clicked: filterByGeneral }"
-      >General</button>
+        <!-- Clips filter -->
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>Clips</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterByClips = !filterByClips"
+              id="tags"
+              :class="{ clicked: filterByClips }"
+            ></button>
+          </div>
+        </div>
 
-      <button
-        @click.prevent="filterByNotes = !filterByNotes"
-        id="tags"
-        :class="{ clicked: filterByNotes }"
-      >Notes</button>
+        <!-- General Tag -->
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>General</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterByGeneral = !filterByGeneral"
+              id="tags"
+              :class="{ clicked: filterByGeneral }"
+            ></button>
+          </div>
+        </div>
 
-      <button
-        @click.prevent="filterByExam = !filterByExam"
-        id="tags"
-        :class="{ clicked: filterByExam }"
-      >Exam</button>
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>Notes</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterByNotes = !filterByNotes"
+              id="tags"
+              :class="{ clicked: filterByNotes }"
+            ></button>
+          </div>
+        </div>
 
-      <button
-        @click.prevent="filterByAssignment = !filterByAssignment"
-        id="tags"
-        :class="{ clicked: filterByAssignment }"
-      >Assignment</button>
-      <h2>Side</h2>
-      <p>Smth will probably go here</p>
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>Exam</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterByExam = !filterByExam"
+              id="tags"
+              :class="{ clicked: filterByExam }"
+            ></button>
+          </div>
+        </div>
+
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>Assignment</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterByAssignment = !filterByAssignment"
+              id="tags"
+              :class="{ clicked: filterByAssignment }"
+            ></button>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- END OF TABLE -->
     <LightBox ref="lightbox" :media="media" :show-light-box="false" />
@@ -929,10 +971,10 @@ input[type="file"] {
   resize: vertical;
   margin: 0.5rem;
   padding: 0.5rem;
-  border-color: #edf2f7;
-  background-color: #edf2f7;
+  border-color: #f3f3f3;
+  background-color: #f3f3f3;
   border-width: 0.25rem;
-  border-radius: 0.2rem;
+  border-radius: 2rem;
   max-height: 18rem;
   min-width: 15rem;
   appearance: none;
@@ -947,7 +989,11 @@ input[type="file"] {
   height: 50px;
   padding: 20px 20px;
   cursor: pointer;
-  background: url("../assets/attach.png") center/cover;
+  background: url("../assets/docIcon.png") center/cover;
+}
+
+#attach:hover {
+  background: url("../assets/docIcon-hover.png") center/cover;
 }
 
 #attach .dz-success-mark,
@@ -976,7 +1022,6 @@ input[type="file"] {
 
 /* CLIP BUTTON */
 .clipButton {
-  margin: 3px;
   background-color: white;
   padding: 17px 17px;
   cursor: pointer;
@@ -993,7 +1038,6 @@ input[type="file"] {
 
 /* DELETE BUTTON */
 .deleteButton {
-  margin: 3px;
   background-color: white;
   padding: 17px 17px;
   cursor: pointer;
@@ -1010,7 +1054,6 @@ input[type="file"] {
 
 /* REPLY BUTTON */
 .replyButton {
-  margin: 3px;
   background-color: white;
   padding: 17px 17px;
   cursor: pointer;
@@ -1028,7 +1071,7 @@ input[type="file"] {
 /* SEND BUTTON */
 .sendButton {
   margin: 3px;
-  background-color: #edf2f7;
+  background-color: #f3f3f3;
   padding: 30px 30px;
   cursor: pointer;
   background-image: url("../assets/sendIcon.png");
@@ -1045,7 +1088,7 @@ input[type="file"] {
 /* DOC BUTTON */
 .docButton {
   margin: 3px;
-  background-color: #edf2f7;
+  background-color: #f3f3f3;
   padding: 30px 30px;
   cursor: pointer;
   background-image: url("../assets/docIcon.png");
@@ -1092,21 +1135,28 @@ input[type="file"] {
   width: 100%;
 }
 
+.flex-container {
+  display: flex;
+  align-items: stretch;
+  background-color: #f3f3f3;
+  align-items: center;
+}
+
 .card-middle {
   background-color: #fff;
   border-radius: 5px;
   margin-top: 5px;
   margin-bottom: 5px;
-  flex: 0 0 70%;
+  flex-basis: 70%;
   padding: 16px;
 }
 
 .card-left {
-  flex: 0 0 15%;
+  flex-basis: 15%;
   padding: 16px;
 }
 .card-right {
-  flex: 0 0 15%;
+  flex-basis: 15%;
   padding: 16px;
 }
 
@@ -1120,12 +1170,80 @@ input[type="file"] {
 }
 
 .chat-left {
-  width: 80%;
+  width: 70%;
   display: table-cell;
 }
 
 .chat-right {
   width: 10%;
   display: table-cell;
+  margin-top: 40px;
+}
+
+.whiteBox {
+  background-color: white;
+  padding: 10px;
+  border-radius: 0.3rem;
+  min-height: 330px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 35px;
+  height: 21px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 </style>
