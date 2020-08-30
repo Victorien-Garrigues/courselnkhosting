@@ -7,7 +7,6 @@
           <div class="column listName">
             <p class="menu-label">Your Courses</p>
           </div>
-
           <!-- Edit Courses Button -->
           <div class="column listEdit">
             <button
@@ -48,7 +47,7 @@
         <input
           class="input"
           type="text"
-          style="width: 20%; margin: 10px;"
+          style="width: 150px; margin: 10px;"
           placeholder="Search Courses"
           v-model="searchTerm"
         />
@@ -71,7 +70,7 @@
         <div v-if="isCreating" style="padding: 15px;">
           <p>Create a new course by entering its course code</p>
           <input
-            style="margin-bottom: 1em; width: 20%; margin:10px"
+            style="margin-bottom: 1em; width: 100px; margin:10px"
             v-model="courseCode"
             class="input is-focused"
             type="text"
@@ -457,7 +456,7 @@ export default {
 
 .background-body {
   height: 100%;
-  background-color: #edf2f7;
+  background-color: #f3f3f3;
 }
 
 /* EDIT BUTTON */
@@ -465,7 +464,7 @@ export default {
   margin: 3px;
   padding: 10px 10px;
   cursor: pointer;
-  background-color: #edf2f7;
+  background-color: #f3f3f3;
   background-image: url("../assets/editIcon.png");
   background-repeat: no-repeat;
   background-position: 50% 50%;
@@ -568,15 +567,15 @@ export default {
 }
 
 .listEdit {
-  width: 100px;
-  margin-left: 0px;
-  margin-top: 0px;
+  width: 20%;
+  margin-left: 110px;
+  margin-top: -48px;
 }
 
 .listEdit2 {
   width: 10%;
-  margin-left: -45%;
-  margin-top: -9px;
+  margin-left: 118px;
+  margin-top: -48px;
 }
 
 /* CREATE BUTTON */
