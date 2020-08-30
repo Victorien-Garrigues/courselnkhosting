@@ -1,58 +1,84 @@
 <template>
-  <section>
-    <div style="display: flex;">
-      <div class="profileImage">
-        <img :src="this.profile.profileImage" alt="profile Image" />
-        <vue-dropzone
-          ref="imgDropZone"
-          id="profile-pic"
-          :include-styling="false"
-          :options="dropzoneOptions"
-          @vdropzone-complete="setImage"
-        >
-        </vue-dropzone>
+  <section class="body-background">
+    <!-- start of navbar design -->
+    <div class="navbar">
+      <!-- brand design -->
+      <div class="container">
+        <a href="#">
+          <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
+        </a>
       </div>
 
-      <div class="info">
+      <!-- profile design -->
+      <div>
+        <router-link class="button" :to="{
+                name: 'Profile',
+              }">Profile</router-link>
+      </div>
+    </div>
+    <!-- end of navbar design -->
+
+    <!-- two columns (for side menu) -->
+    <div class="row">
+      <div class="column" style="width: 20%">
+        <Courses />
+        <!-- side menu -->
+      </div>
+      <div class="column" style="width: 80%">
         <div style="display: flex;">
-          <button v-if="!isEditingName" @click="isEditingName = true">
-            Edit
-          </button>
+          <div class="profileImage">
+            <img :src="this.profile.profileImage" alt="profile Image" />
+            <vue-dropzone
+              ref="imgDropZone"
+              id="profile-pic"
+              :include-styling="false"
+              :options="dropzoneOptions"
+              @vdropzone-complete="setImage"
+            ></vue-dropzone>
+          </div>
 
-          <p v-if="this.profile && !isEditingName">
-            Name: {{ this.profile.firstName }} {{ this.profile.lastName }}
-          </p>
+          <div class="info">
+            <div style="display: flex;">
+              <p
+                v-if="this.profile && !isEditingName"
+                class="nameDesign"
+              >Name: {{ this.profile.firstName }} {{ this.profile.lastName }}</p>
+              <button v-if="!isEditingName" @click="isEditingName = true" class="editButton3"></button>
+            </div>
+
+            <div v-if="isEditingName" class="editing" style="display: flex;">
+              <input type="text" id="fname" name="fname" v-model="firstName" />
+              <input type="text" id="lname" name="lname" v-model="lastName" />
+
+              <button @click="saveName()">Save</button>
+              <p class="feedback">{{ this.feedback }}</p>
+            </div>
+
+            <p v-if="this.email">Email: {{ this.email }}</p>
+            <p v-if="this.school">School: {{ this.school }}</p>
+            <button @click.prevent="resetPassword()">Change Password</button>
+            <p v-if="changedPassword">
+              An email has been sent to your university email with instructions on
+              how to change your password
+            </p>
+          </div>
         </div>
-
-        <div v-if="isEditingName" class="editing" style="display: flex;">
-          <input type="text" id="fname" name="fname" v-model="firstName" />
-          <input type="text" id="lname" name="lname" v-model="lastName" />
-
-          <button @click="saveName()">Save</button>
-          <p class="feedback">{{ this.feedback }}</p>
-        </div>
-
-        <p v-if="this.email">Email: {{ this.email }}</p>
-        <p v-if="this.school">School: {{ this.school }}</p>
-        <button @click.prevent="resetPassword()">Change Password</button>
-        <p v-if="changedPassword">
-          An email has been sent to your university email with instructions on
-          how to change your password
-        </p>
       </div>
     </div>
   </section>
 </template>
 
 <script>
-import db from '@/db';
-import firebase from '@/firebase';
-import vue2Dropzone from 'vue2-dropzone';
-import 'vue2-dropzone/dist/vue2Dropzone.min.css';
+import db from "@/db";
+import firebase from "@/firebase";
+import vue2Dropzone from "vue2-dropzone";
+import "vue2-dropzone/dist/vue2Dropzone.min.css";
+import Courses from "@/components/Courses";
 
 export default {
   components: {
     vueDropzone: vue2Dropzone,
+    Courses,
   },
   data: () => ({
     profile: null,
@@ -60,20 +86,20 @@ export default {
     school: null,
     isEditingName: false,
     changedPassword: false,
-    firstName: '',
-    lastName: '',
-    feedback: '',
+    firstName: "",
+    lastName: "",
+    feedback: "",
 
     //Drop zone options
     dropzoneOptions: {
-      url: 'https://httpbin.org/post',
+      url: "https://httpbin.org/post",
       thumbnailWidth: 150,
       thumbnailHeight: 150,
       maxFilesize: 5,
       maxFiles: 10,
       duplicateCheck: true,
       addRemoveLinks: true,
-      dictDefaultMessage: 'Edit Image',
+      dictDefaultMessage: "Edit Image",
       previewsContainer: false,
     },
   }),
@@ -84,7 +110,7 @@ export default {
   methods: {
     async initProfile() {
       await db
-        .collection('users')
+        .collection("users")
         .doc(firebase.auth().currentUser.uid)
         .get()
         .then((doc) => {
@@ -92,7 +118,7 @@ export default {
           this.firstName = doc.data().firstName;
           this.lastName = doc.data().lastName;
 
-          db.collection('schools')
+          db.collection("schools")
             .doc(doc.data().school_id)
             .get()
             .then((doc) => {
@@ -108,16 +134,16 @@ export default {
 
       if (this.firstName.length > 0 && this.lastName.length > 0) {
         await db
-          .collection('users')
+          .collection("users")
           .doc(firebase.auth().currentUser.uid)
           .update({
             firstName: this.firstName,
             lastName: this.lastName,
           });
       } else if (this.profile.firstName.length == 0) {
-        this.feedback = 'You must enter a first name';
+        this.feedback = "You must enter a first name";
       } else {
-        this.feedback = 'You must enter a last name';
+        this.feedback = "You must enter a last name";
       }
     },
 
@@ -125,12 +151,12 @@ export default {
       const storageRef = firebase.storage().ref();
 
       // If is an image
-      if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
+      if (file["type"] === "image/jpeg" || file["type"] === "image/png") {
         const fileRef = storageRef.child(`images/${file.name}.png`);
         await fileRef.put(file);
         const downloadURL = await fileRef.getDownloadURL();
         await db
-          .collection('users')
+          .collection("users")
           .doc(firebase.auth().currentUser.uid)
           .update({
             profileImage: downloadURL,
@@ -149,7 +175,7 @@ export default {
           this.changedPassword = true;
         })
         .catch(() => {
-          this.feedback = 'The email entered is not valid';
+          this.feedback = "The email entered is not valid";
         });
     },
   },
@@ -157,11 +183,17 @@ export default {
 </script>
 
 <style>
+.body-background {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f3f3f3;
+}
+
 #profile-pic {
   width: 130px;
   height: 50px;
   cursor: pointer;
-  background: url('../assets/editProfile.png') no-repeat;
+  background: url("../assets/editProfile.png") no-repeat;
   background-position: 50% 50%;
 }
 
@@ -178,5 +210,26 @@ export default {
 
 .feedback {
   color: red;
+}
+
+/* EDIT BUTTON */
+.editButton3 {
+  margin: 3px;
+  padding: 10px 10px;
+  cursor: pointer;
+  background-color: #edf2f7;
+  background-image: url("../assets/editIcon.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.editButton3:hover {
+  background-image: url("../assets/editIcon-hover.png");
+}
+
+.nameDesign {
+  color: rgb(70, 70, 70);
 }
 </style>
