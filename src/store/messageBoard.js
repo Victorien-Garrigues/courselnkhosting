@@ -87,6 +87,7 @@ const actions = {
         .collection('posts')
         .where('course_id', '==', course_id)
         .orderBy('created_at', 'asc')
+        .limit(10)
     );
   }),
 

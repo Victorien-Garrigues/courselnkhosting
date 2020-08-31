@@ -55,7 +55,7 @@
           <!-- SECOND COLUMN -->
           <div class="column middle">
             <!-- start of chat container design -->
-            <div class="container is-fluid postContainer">
+            <div @scroll="onScroll" class="container is-fluid postContainer">
               <div class="posts is-multiline">
                 <div v-for="(post, index) in filteredPosts" :key="index">
                   <!-- this is the post card -->
@@ -439,7 +439,6 @@
                   <button
                     @click="onCreatePost()"
                     class="sendButton is-success bottom"
-                    v-scroll-to="'#bottom'"
                   ></button>
                 </div>
 
@@ -581,18 +580,17 @@ export default {
     media: [], //Clickable images in a post
     searchTerm: '', //Users input in search bar
     showDropArea: false, //Whether the drop area should be shown
-    scroll: true, //If the posts container should scroll to the bottom
     fileDropped: false, //If the user dropped a file in the drop zone
 
     replyingTo: '', //The name of the user you are replying to
     replyingToId: '', //The id of the user you are replying to
     replyingMessage: '', //The message of the post your are replying to
     listReplies: '', //id of post in which to list replies for
-    lastCourse: null,
-    userCount: null,
+    lastCourse: null, //The previous course that the user was on
+    userCount: null, //the number of users in the selected course
     otherCourses: [], //The courses that the user is not currently on
-    userId: '',
-    currentUser: null,
+    userId: '', //the Id of the current user
+    currentUser: null, //the current user
 
     //Filters
     filterByFiles: false,
@@ -633,12 +631,11 @@ export default {
   }),
 
   updated() {
-    // this.scrollToBottom(); //Scrolls to bottom of page
+    this.scrollToBottom(); //Scrolls to bottom of page
   },
 
   mounted() {
     if (this.user) {
-      console.log(this.user.id, 'userid');
       this.userId = this.user.id;
       this.currentUser = this.user;
       this.updateOtherCourses(this.course);
@@ -678,7 +675,6 @@ export default {
     },
 
     newPost() {
-      console.log(this.newPost, 'newPOst');
       if (!this.currentUser) {
         console.log('Error current user is undefined');
         return;
@@ -700,7 +696,6 @@ export default {
         return;
       }
 
-      console.log('unread');
       if (this.currentUser) {
         const userCourses = this.currentUser.courses;
         for (const index in userCourses) {
@@ -730,7 +725,6 @@ export default {
             if (course_ids.length == 0) {
               this.unbindNewestPost();
             } else {
-              console.log(course_ids, 'course_ids');
               this.newestPost(course_ids);
             }
           }
@@ -795,6 +789,8 @@ export default {
       if (this.filterByQuestions) {
         return this.posts.filter((post) => this.checkForTag(post, 'questions'));
       }
+
+      console.log(this.posts, 'posts');
       return this.posts;
     },
   },
@@ -836,8 +832,6 @@ export default {
         if (course_ids.length == 0) {
           this.unbindNewestPost();
         } else {
-          console.log(course_ids, 'course_ids');
-
           this.newestPost(course_ids);
         }
       } else {
@@ -869,19 +863,21 @@ export default {
             courses: this.currentUser.courses,
           });
       }
-
       this.lastCourse = course_id;
     },
 
     // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
-      if (this.scroll) {
-        container.scrollTop = container.scrollHeight;
-        if (container.scrollHeight > 400) {
-          this.scroll = false;
-        }
-      }
+      container.scrollTop = container.scrollHeight;
+    },
+
+    onScroll({ target: { scrollTop } }) {
+      console.log(scrollTop, 'Scroll Top');
+
+      // if (scrollTop + clientHeight >= scrollHeight) {
+      //   this.loadMorePosts();
+      // }
     },
 
     // Adds reply to a post
@@ -1019,6 +1015,7 @@ export default {
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
+      console.log('hey');
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
@@ -1047,6 +1044,7 @@ export default {
         this.notesTag = false;
         this.questionsTag = false;
 
+        this.scrollToBottom();
         //Resets the post
         this.post = {
           content: '',

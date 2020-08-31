@@ -259,7 +259,6 @@ export default {
 
     //Adds a course to the users courses array
     async addCourse(course) {
-      console.log(course);
       const userCourses = this.user.courses;
       // updates courses locally
       for (const index in userCourses) {
@@ -301,7 +300,7 @@ export default {
               ' joined the group',
             files: [],
             course_id: course.id,
-            createdAt: Date.now(),
+            created_at: Date.now(),
           });
         });
 
