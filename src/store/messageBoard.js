@@ -16,7 +16,6 @@ const state = {
   posts: [], //the posts associated with the selected course
   replies: [], //the replies to a post
   newPost: {}, //Newest Post
-  oldNewPost: {}, //Check to see if newPost has changed
 };
 
 const actions = {

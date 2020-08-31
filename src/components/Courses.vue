@@ -19,7 +19,7 @@
           <div class="void"></div>
         </div>
 
-        <li v-for="course in courses" :key="course.id">
+        <li v-for="course in user.courses" :key="course.id">
           <div style="display: flex;">
             <router-link
               @click.native="
@@ -107,7 +107,7 @@
         <p class="menu-label removeName">
           Remove a course from your class list
         </p>
-        <li v-for="course in courses" :key="course.id">
+        <li v-for="course in user.courses" :key="course.id">
           <button class="delButton" @click="removeCourse(course.course_id)">
             {{ course.courseCode }}
           </button>
@@ -218,20 +218,18 @@ export default {
     isCreating: false, //If user is creating a course or facultyss
     isFaculty: false, //If user is adding, or editing faculties
     isCourse: false, //If user is adding, or editing courses
-    userDoc: null, //the users document in the users collection
     courseCode: '', //the coureCode of the course
     feedback: '', //If the user enters a course that already exitst is shows a message
     alreadyAddedMessage: '', //if the user has already added that course or faculty
     searchTerm: '',
   }),
   mounted() {
-    this.initCourses(); //Gets all the users courses
     this.initFaculties(); //Gets all the users faculties
   },
   computed: {
-    ...mapState('courses', ['courses', 'allCourses']),
+    ...mapState('courses', ['allCourses']),
     ...mapState('faculties', ['faculties', 'allFaculties']),
-    ...mapState('users', ['user']),
+    ...mapState('user', ['user']),
 
     filteredCourses() {
       if (this.searchTerm) {
@@ -244,17 +242,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions('courses', ['initCourses', 'initAllCourses']),
+    ...mapActions('courses', ['initAllCourses']),
     ...mapActions('faculties', ['initFaculties', 'initAllFaculties']),
 
     //Shows all courses from the users school
     async showCourses() {
       this.isCourse = true;
       this.isAdding = true;
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-      await this.initAllCourses(this.userDoc.school_id);
+      await this.initAllCourses(this.user.school_id);
     },
 
     //Shows all faculties from the users school
@@ -262,31 +257,13 @@ export default {
       this.isFaculty = true;
       this.isAdding = true;
       if (!this.allFaculties[0]) {
-        if (!this.userDoc) {
-          await this.getUserDoc();
-        }
-        await this.initAllFaculties(this.userDoc.school_id);
+        await this.initAllFaculties(this.user.school_id);
       }
-    },
-
-    //returns the document from the users collection of the current user
-    async getUserDoc() {
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .get()
-        .then((doc) => {
-          this.userDoc = doc.data();
-        });
     },
 
     //Adds a course to the users courses array
     async addCourse(course) {
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-
-      const userCourses = await this.userDoc.courses;
+      const userCourses = this.user.courses;
       // updates courses locally
       for (const index in userCourses) {
         if (userCourses[index].course_id === course.id) {
@@ -320,22 +297,25 @@ export default {
 
           // Add a post saying that a user has joined the group
           db.collection('posts').add({
-            content: this.userDoc.firstName + '' + this.userDoc.lastName,
+            content:
+              this.user.firstName +
+              ' ' +
+              this.user.lastName +
+              ' joined the group',
+            files: [],
             course_id: course.id,
-            createdAt: new Date(),
+            createdAt: Date.now(),
           });
         });
 
-      await this.initCourses();
+      this.$store.commit('user/setCourses', userCourses);
+
       this.reset();
     },
 
     //Adds a faculty to the users faculties array
     async addFaculty(faculty) {
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-      const userFaculties = await this.userDoc.faculties;
+      const userFaculties = await this.user.faculties;
       // updates courses locally
       for (const index in userFaculties) {
         if (userFaculties[index].faculty_id === faculty.id) {
@@ -365,7 +345,7 @@ export default {
 
           // Add a post saying that a user has joined the group
           db.collection('posts').add({
-            content: this.userDoc.firstName + '' + this.userDoc.lastName,
+            content: this.user.firstName + '' + this.user.lastName,
             course_id: faculty.id,
             createdAt: new Date(),
           });
@@ -376,10 +356,7 @@ export default {
 
     //Removes a course to the users courses array
     async removeCourse(course_id) {
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-      const userCourses = await this.userDoc.courses;
+      const userCourses = this.user.courses;
       //Goes through the users courses and deletes the course the user selected
       for (const index in userCourses) {
         if (userCourses[index].course_id == course_id) {
@@ -389,13 +366,14 @@ export default {
 
       //Updates those changes in firebase
       db.collection('users')
-        .doc(firebase.auth().currentUser.uid)
+        .doc(this.user.id)
         .update({
           courses: userCourses,
           course_ids: firebase.firestore.FieldValue.arrayRemove(course_id),
         });
 
-      await this.initCourses();
+      this.$store.commit('user/setCourses', userCourses);
+
       this.reset();
 
       //Subtracts 1 from courses user count
@@ -408,10 +386,7 @@ export default {
 
     //Removes a course to the users courses array
     async removeFaculty(faculty_id) {
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-      const userFaculties = await this.userDoc.faculties;
+      const userFaculties = await this.user.faculties;
       //Goes through the users courses and deletes the course the user selected
       for (const index in userFaculties) {
         if (userFaculties[index].faculty_id == faculty_id) {
@@ -440,10 +415,6 @@ export default {
 
     // Creates a course
     async createCourse() {
-      if (!this.userDoc) {
-        await this.getUserDoc();
-      }
-
       if (this.courseCode.length > 3) {
         for (const course in this.allCourses) {
           // If the course already exists
@@ -458,7 +429,7 @@ export default {
 
         const course = {
           courseCode: this.courseCode,
-          school_id: this.userDoc.school_id,
+          school_id: this.user.school_id,
         };
 
         await db.collection('courses').add({

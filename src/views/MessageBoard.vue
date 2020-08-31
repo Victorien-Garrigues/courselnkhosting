@@ -66,14 +66,17 @@
                         <!-- column one (profile) -->
                         <div class="card-left">
                           <img
-                            v-if="currentUserId == post.user_id"
+                            v-if="currentUser.id == post.user_id"
                             src="../assets/profileIcon.png"
                             loading="lazy"
                             width="54"
                             alt
                           />
 
-                          <div v-if="currentUserId != post.user_id" class="row">
+                          <div
+                            v-if="currentUser.id != post.user_id"
+                            class="row"
+                          >
                             <div class="icon-placement">
                               <!-- adds and unadds a clip -->
                               <button
@@ -95,7 +98,9 @@
                         <div class="card-middle">
                           <div class="row">
                             <div class="column info-column">
-                              <p class="non-post">{{ post.username }}</p>
+                              <p v-if="post.username" class="non-post">
+                                {{ post.username }}
+                              </p>
                             </div>
                             <div class="column info-column">
                               <time class="non-post">{{
@@ -163,14 +168,17 @@
                         <!-- column three (icons) -->
                         <div class="card-right">
                           <img
-                            v-if="currentUserId != post.user_id"
+                            v-if="currentUser.id != post.user_id"
                             src="../assets/profileIcon.png"
                             loading="lazy"
                             width="54"
                             alt
                           />
 
-                          <div v-if="currentUserId == post.user_id" class="row">
+                          <div
+                            v-if="currentUser.id == post.user_id"
+                            class="row"
+                          >
                             <div class="column icon-placement">
                               <!-- adds and unadds a clip -->
                               <button
@@ -439,6 +447,7 @@
                   <!-- Dropzone with attachment icon beside text area -->
                   <vue-dropzone
                     ref="imgDropZone"
+                    id="attachDropzone"
                     class="docButton"
                     :include-styling="false"
                     :options="dropzoneOptions"
@@ -624,18 +633,28 @@ export default {
   }),
 
   updated() {
-    this.scrollToBottom(); //Scrolls to bottom of page
+    // this.scrollToBottom(); //Scrolls to bottom of page
   },
 
   mounted() {
-    this.userId = this.user.id;
-    this.currentUser = this.user;
+    if (this.user) {
+      this.userId = this.user.id;
+      this.currentUser = this.user;
+      this.updateOtherCourses(this.course);
+    } else {
+      console.log('User is undefined');
+    }
+    this.initPosts(this.course);
   },
 
   watch: {
     // if the parameter changes reinit posts
     '$route.params.name': function() {
       this.initPosts(this.$route.params.name);
+    },
+
+    user() {
+      this.currentUser = this.user;
     },
 
     //if the course changes reinit posts
@@ -659,9 +678,6 @@ export default {
     },
 
     newPost() {
-      console.log(this.newPost[0], 'newPost');
-      console.log(this.newPost[0].created_at, 'newPostTime');
-
       if (!this.currentUser) {
         console.log('Error current user is undefined');
         return;
@@ -670,7 +686,6 @@ export default {
       const userCourses = this.currentUser.courses;
       var isUnreadPost = false;
       for (const index in userCourses) {
-        console.log(userCourses[index].lastVisited);
         if (
           userCourses[index].course_id === this.newPost[0].course_id &&
           userCourses[index].lastVisited > this.newPost[0].created_at
@@ -698,10 +713,7 @@ export default {
               .update({
                 courses: userCourses,
               }),
-              this.$store.commit(
-                'courses/setCourses',
-                this.currentUser.courses
-              );
+              this.$store.commit('user/setCourses', this.currentUser.courses);
 
             this.otherCourses.splice(index, 1);
             var course_ids = [];
@@ -786,7 +798,6 @@ export default {
   methods: {
     ...mapActions('messageBoard', [
       'createPost',
-      'initCourse',
       'initPosts',
       'deletePost',
       'initReplies',
@@ -811,7 +822,7 @@ export default {
             courses: this.currentUser.courses,
           });
 
-        this.$store.commit('courses/setCourses', this.currentUser.courses);
+        this.$store.commit('user/setCourses', this.currentUser.courses);
 
         var course_ids = [];
         for (const index in this.otherCourses) {
@@ -1104,9 +1115,9 @@ export default {
         }
         return `${Math.floor(seconds)} seconds`;
       }
-      return timeSince(this.posts[index].created_at.seconds * 1000) < 0
+      return timeSince(this.posts[index].created_at) < 0
         ? '0 seconds ago'
-        : `${timeSince(this.posts[index].created_at.seconds * 1000)} ago`;
+        : `${timeSince(this.posts[index].created_at)} ago`;
     },
   },
 };
