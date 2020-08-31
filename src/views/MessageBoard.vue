@@ -638,13 +638,13 @@ export default {
 
   mounted() {
     if (this.user) {
+      console.log(this.user.id, 'userid');
       this.userId = this.user.id;
       this.currentUser = this.user;
       this.updateOtherCourses(this.course);
     } else {
       console.log('User is undefined');
     }
-    this.initPosts(this.course);
   },
 
   watch: {
@@ -678,6 +678,7 @@ export default {
     },
 
     newPost() {
+      console.log(this.newPost, 'newPOst');
       if (!this.currentUser) {
         console.log('Error current user is undefined');
         return;
@@ -688,7 +689,7 @@ export default {
       for (const index in userCourses) {
         if (
           userCourses[index].course_id === this.newPost[0].course_id &&
-          userCourses[index].lastVisited > this.newPost[0].created_at
+          userCourses[index].lastVisited < this.newPost[0].created_at
         ) {
           isUnreadPost = true;
         }
@@ -699,6 +700,7 @@ export default {
         return;
       }
 
+      console.log('unread');
       if (this.currentUser) {
         const userCourses = this.currentUser.courses;
         for (const index in userCourses) {
@@ -728,6 +730,7 @@ export default {
             if (course_ids.length == 0) {
               this.unbindNewestPost();
             } else {
+              console.log(course_ids, 'course_ids');
               this.newestPost(course_ids);
             }
           }
@@ -816,6 +819,7 @@ export default {
             this.otherCourses.push(this.currentUser.courses[index]);
           }
         }
+
         db.collection('users')
           .doc(this.userId)
           .update({
@@ -832,6 +836,8 @@ export default {
         if (course_ids.length == 0) {
           this.unbindNewestPost();
         } else {
+          console.log(course_ids, 'course_ids');
+
           this.newestPost(course_ids);
         }
       } else {

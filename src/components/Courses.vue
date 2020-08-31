@@ -138,7 +138,7 @@
           <div class="void"></div>
         </div>
 
-        <li v-for="faculty in faculties" :key="faculty.id">
+        <li v-for="faculty in user.faculties" :key="faculty.id">
           <router-link
             @click.native="
               $store.commit('messageBoard/setCourse', faculty.faculty_id)
@@ -180,7 +180,7 @@
         <p class="menu-label removeName">
           Remove a faculty from your university list
         </p>
-        <li v-for="faculty in faculties" :key="faculty.id">
+        <li v-for="faculty in user.faculties" :key="faculty.id">
           <button
             style="margin-top: 0.5em;"
             class="delButton"
@@ -223,12 +223,10 @@ export default {
     alreadyAddedMessage: '', //if the user has already added that course or faculty
     searchTerm: '',
   }),
-  mounted() {
-    this.initFaculties(); //Gets all the users faculties
-  },
+
   computed: {
     ...mapState('courses', ['allCourses']),
-    ...mapState('faculties', ['faculties', 'allFaculties']),
+    ...mapState('faculties', ['allFaculties']),
     ...mapState('user', ['user']),
 
     filteredCourses() {
@@ -243,7 +241,7 @@ export default {
   },
   methods: {
     ...mapActions('courses', ['initAllCourses']),
-    ...mapActions('faculties', ['initFaculties', 'initAllFaculties']),
+    ...mapActions('faculties', ['initAllFaculties']),
 
     //Shows all courses from the users school
     async showCourses() {
@@ -256,13 +254,12 @@ export default {
     async showFaculties() {
       this.isFaculty = true;
       this.isAdding = true;
-      if (!this.allFaculties[0]) {
-        await this.initAllFaculties(this.user.school_id);
-      }
+      await this.initAllFaculties(this.user.school_id);
     },
 
     //Adds a course to the users courses array
     async addCourse(course) {
+      console.log(course);
       const userCourses = this.user.courses;
       // updates courses locally
       for (const index in userCourses) {
@@ -276,13 +273,13 @@ export default {
         courseCode: course.courseCode,
         course_id: course.id,
         unreadPosts: true,
-        lastVisited: new Date(),
+        lastVisited: Date.now(),
       });
 
       //Updates those changes in firebase
       await db
         .collection('users')
-        .doc(firebase.auth().currentUser.uid)
+        .doc(this.user.id)
         .update({
           courses: userCourses,
           course_ids: firebase.firestore.FieldValue.arrayUnion(course.id),
@@ -313,25 +310,54 @@ export default {
       this.reset();
     },
 
+    async removeCourse(course_id) {
+      const userCourses = this.user.courses;
+      //Goes through the users courses and deletes the course the user selected
+      for (const index in userCourses) {
+        if (userCourses[index].course_id == course_id) {
+          userCourses.splice(index, 1);
+        }
+      }
+      //Updates those changes in firebase
+      db.collection('users')
+        .doc(this.user.id)
+        .update({
+          courses: userCourses,
+          course_ids: firebase.firestore.FieldValue.arrayRemove(course_id),
+        });
+      this.$store.commit('user/setCourses', userCourses);
+      this.reset();
+      //Subtracts 1 from courses user count
+      db.collection('courses')
+        .doc(course_id)
+        .update({
+          userCount: firebase.firestore.FieldValue.increment(-1),
+        });
+    },
+
     //Adds a faculty to the users faculties array
     async addFaculty(faculty) {
-      const userFaculties = await this.user.faculties;
+      console.log(faculty, 'faculty');
+      const userFaculties = this.user.faculties;
       // updates courses locally
       for (const index in userFaculties) {
-        if (userFaculties[index].faculty_id === faculty.id) {
-          this.alreadyAddedMessage = 'You have already added this faculty';
+        if (userFaculties[index].course_id === faculty.id) {
+          this.alreadyAddedMessage = 'You have already added this course';
           return;
         }
       }
+
       userFaculties.push({
         name: faculty.name,
         faculty_id: faculty.id,
+        unreadPosts: true,
+        lastVisited: Date.now(),
       });
 
       //Updates those changes in firebase
       await db
         .collection('users')
-        .doc(firebase.auth().currentUser.uid)
+        .doc(this.user.id)
         .update({
           faculties: userFaculties,
         })
@@ -342,71 +368,32 @@ export default {
             .update({
               userCount: firebase.firestore.FieldValue.increment(1),
             });
-
-          // Add a post saying that a user has joined the group
-          db.collection('posts').add({
-            content: this.user.firstName + '' + this.user.lastName,
-            course_id: faculty.id,
-            createdAt: new Date(),
-          });
-        });
-      await this.initFaculties();
-      this.reset();
-    },
-
-    //Removes a course to the users courses array
-    async removeCourse(course_id) {
-      const userCourses = this.user.courses;
-      //Goes through the users courses and deletes the course the user selected
-      for (const index in userCourses) {
-        if (userCourses[index].course_id == course_id) {
-          userCourses.splice(index, 1);
-        }
-      }
-
-      //Updates those changes in firebase
-      db.collection('users')
-        .doc(this.user.id)
-        .update({
-          courses: userCourses,
-          course_ids: firebase.firestore.FieldValue.arrayRemove(course_id),
         });
 
-      this.$store.commit('user/setCourses', userCourses);
+      this.$store.commit('user/setFaculties', userFaculties);
 
       this.reset();
-
-      //Subtracts 1 from courses user count
-      db.collection('courses')
-        .doc(course_id)
-        .update({
-          userCount: firebase.firestore.FieldValue.increment(-1),
-        });
     },
 
     //Removes a course to the users courses array
     async removeFaculty(faculty_id) {
-      const userFaculties = await this.user.faculties;
+      const userFaculties = this.user.faculties;
       //Goes through the users courses and deletes the course the user selected
       for (const index in userFaculties) {
         if (userFaculties[index].faculty_id == faculty_id) {
           userFaculties.splice(index, 1);
         }
       }
-
       //Updates those changes in firebase
-      await db
-        .collection('users')
-        .doc(firebase.auth().currentUser.uid)
+      db.collection('users')
+        .doc(this.user.id)
         .update({
           faculties: userFaculties,
         });
-
-      await this.initFaculties();
+      this.$store.commit('user/setFaculties', userFaculties);
       this.reset();
-
       //Subtracts 1 from courses user count
-      db.collection('courses')
+      db.collection('faculties')
         .doc(faculty_id)
         .update({
           userCount: firebase.firestore.FieldValue.increment(-1),

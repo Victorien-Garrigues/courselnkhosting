@@ -33,6 +33,10 @@ const mutations = {
   setCourses(state, courses) {
     state.user.courses = courses;
   },
+
+  setFaculties(state, faculties) {
+    state.user.faculties = faculties;
+  },
 };
 
 const actions = {
