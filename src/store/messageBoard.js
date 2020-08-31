@@ -1,13 +1,13 @@
-import { firestoreAction } from "vuexfire";
-import firebase from "@/firebase";
-import db from "@/db";
+import { firestoreAction } from 'vuexfire';
+import firebase from '@/firebase';
+import db from '@/db';
 
-const posts = db.collection("posts");
+const posts = db.collection('posts');
 
 const mutations = {
   // Sets the course selected by the user
-  setCourse(state, course_id) {
-    state.course = course_id;
+  setCourse(state, course) {
+    state.course = course;
   },
 };
 
@@ -15,6 +15,8 @@ const state = {
   course: [], //the selected course
   posts: [], //the posts associated with the selected course
   replies: [], //the replies to a post
+  newPost: {}, //Newest Post
+  oldNewPost: {}, //Check to see if newPost has changed
 };
 
 const actions = {
@@ -24,18 +26,17 @@ const actions = {
     const user = firebase.auth().currentUser;
     post.id = result.id;
     post.user_id = user.uid;
-    post.created_at = firebase.firestore.FieldValue.serverTimestamp();
+    post.created_at = Date.now();
     post.replies = 0;
     post.clips = 0;
-    db.collection("users")
+    db.collection('users')
       .doc(user.uid)
       .get()
       .then((doc) => {
-        post.username = doc.data().firstName + " " + doc.data().lastName;
-
+        post.username = doc.data().firstName + ' ' + doc.data().lastName;
         if (post.isReply) {
-          db.collection("posts")
-            .where("id", "==", post.parent_id)
+          db.collection('posts')
+            .where('id', '==', post.parent_id)
             .get()
             .then(function(querySnapshot) {
               querySnapshot.forEach(function(doc) {
@@ -55,7 +56,7 @@ const actions = {
               });
             })
             .catch(function(error) {
-              console.log("Error getting documents: ", error);
+              console.log('Error getting documents: ', error);
             });
         } else {
           try {
@@ -66,7 +67,7 @@ const actions = {
         }
       })
       .catch(function(error) {
-        console.log("Error getting documents: ", error);
+        console.log('Error getting documents: ', error);
       });
   },
 
@@ -74,7 +75,7 @@ const actions = {
   async deletePost(_, post_id) {
     await posts.doc(post_id).update({
       files: [],
-      content: "",
+      content: '',
       deleted: true,
     });
   },
@@ -82,23 +83,39 @@ const actions = {
   //Binds posts to the firebase collection of posts that have a given course_id
   initPosts: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
-      "posts",
+      'posts',
       db
-        .collection("posts")
-        .where("course_id", "==", course_id)
-        .orderBy("created_at", "asc")
+        .collection('posts')
+        .where('course_id', '==', course_id)
+        .orderBy('created_at', 'asc')
     );
   }),
 
   //Binds replies to the firebase collection of posts that are repling to a given post
   initReplies: firestoreAction(({ bindFirestoreRef }, originalPost_id) => {
     bindFirestoreRef(
-      "replies",
+      'replies',
       db
-        .collection("posts")
-        .where("originalPost_id", "==", originalPost_id)
-        .orderBy("created_at", "asc")
+        .collection('posts')
+        .where('originalPost_id', '==', originalPost_id)
+        .orderBy('created_at', 'asc')
     );
+  }),
+
+  //Gets the newest post from that course
+  newestPost: firestoreAction(({ bindFirestoreRef }, course_ids) => {
+    bindFirestoreRef(
+      'newPost',
+      db
+        .collection('posts')
+        .where('course_id', 'in', course_ids)
+        .orderBy('created_at', 'desc')
+        .limit(1)
+    );
+  }),
+
+  unbindNewestPost: firestoreAction(({ unbindFirestoreRef }) => {
+    unbindFirestoreRef('newPost');
   }),
 };
 

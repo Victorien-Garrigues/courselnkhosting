@@ -151,6 +151,7 @@ export default {
                   school_id: this.university,
                   courses: [],
                   faculties: [],
+                  course_ids: [],
                   profileImage:
                     'https://firebasestorage.googleapis.com/v0/b/courselnk.appspot.com/o/images%2F775162441-MR-2031-8E033EFCEBB928DC12A2A0AA3CEC4C33-21885-1527376486_680x0.jpg.png?alt=media&token=b1b32dfd-2a90-4f34-a9cc-ef5056a2afea',
                 });
