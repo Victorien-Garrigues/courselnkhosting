@@ -13,9 +13,9 @@ const mutations = {
 
 const state = {
   course: [], //the selected course
-  posts: [], //the posts associated with the selected course
+  newPost: [], //the posts associated with the selected course
   replies: [], //the replies to a post
-  newPost: {}, //Newest Post
+  newNotificaton: {}, //Newest Post
 };
 
 const actions = {
@@ -80,15 +80,16 @@ const actions = {
   },
 
   //Binds posts to the firebase collection of posts that have a given course_id
-  initPosts: firestoreAction(({ bindFirestoreRef }, course_id) => {
+  initNewPost: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
-      'posts',
+      'newPost',
       db
         .collection('posts')
         .where('course_id', '==', course_id)
-        .orderBy('created_at', 'asc')
-        .limit(10)
-    );
+        .orderBy('created_at', 'desc')
+        .limit(1)
+    ),
+      console.log(course_id, 'newPOstCourse)id');
   }),
 
   //Binds replies to the firebase collection of posts that are repling to a given post
@@ -103,9 +104,9 @@ const actions = {
   }),
 
   //Gets the newest post from that course
-  newestPost: firestoreAction(({ bindFirestoreRef }, course_ids) => {
+  newestNotification: firestoreAction(({ bindFirestoreRef }, course_ids) => {
     bindFirestoreRef(
-      'newPost',
+      'newNotification',
       db
         .collection('posts')
         .where('course_id', 'in', course_ids)
@@ -114,8 +115,8 @@ const actions = {
     );
   }),
 
-  unbindNewestPost: firestoreAction(({ unbindFirestoreRef }) => {
-    unbindFirestoreRef('newPost');
+  unbindPosts: firestoreAction(({ unbindFirestoreRef }) => {
+    unbindFirestoreRef('newNotification');
   }),
 };
 

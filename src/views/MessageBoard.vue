@@ -40,6 +40,15 @@
               }"
               >Profile</router-link
             >
+
+            <router-link
+              :to="{
+                name: 'Login',
+              }"
+              @click="logout"
+              class="button"
+              >Logout</router-link
+            >
           </div>
         </div>
 
@@ -123,7 +132,7 @@
                           <!-- post itself -->
                           <p>{{ post.content }}</p>
 
-                          <div class="card-image" v-if="post.files[0]">
+                          <div class="card-image">
                             <figure
                               style="display: inline-block"
                               class="image"
@@ -254,7 +263,7 @@
                               <!-- post itself -->
                               <p>{{ post.content }}</p>
 
-                              <div class="card-image" v-if="post.files[0]">
+                              <div class="card-image">
                                 <figure
                                   style="display: inline-block"
                                   class="image"
@@ -591,6 +600,9 @@ export default {
     otherCourses: [], //The courses that the user is not currently on
     userId: '', //the Id of the current user
     currentUser: null, //the current user
+    posts: [], //the loaded posts
+    scroll: true, //whether to scroll to the bottom on updated()
+    lastScroll: null, //the previous scroll position
 
     //Filters
     filterByFiles: false,
@@ -630,39 +642,46 @@ export default {
     },
   }),
 
-  updated() {
-    this.scrollToBottom(); //Scrolls to bottom of page
-  },
-
   mounted() {
     if (this.user) {
       this.userId = this.user.id;
       this.currentUser = this.user;
       this.updateOtherCourses(this.course);
+      this.loadPosts(this.course);
+      this.initNewPost(this.course);
     } else {
       console.log('User is undefined');
     }
   },
 
   watch: {
+    posts: function() {
+      this.$nextTick(() => {
+        if (this.scroll) {
+          this.scrollToBottom();
+        }
+      });
+    },
     // if the parameter changes reinit posts
     '$route.params.name': function() {
-      this.initPosts(this.$route.params.name);
+      this.initNewPost(this.$route.params.name);
     },
 
     user() {
       this.currentUser = this.user;
     },
-
     //if the course changes reinit posts
     course() {
+      this.scroll = true;
+      this.lastScroll = null;
+      this.posts = [];
       if (this.course) {
         if (!this.lastCourse) {
           this.lastCourse = this.course;
         }
-
+        this.initNewPost(this.course);
         this.setLastVisited(this.course);
-        this.initPosts(this.course);
+        this.loadPosts(this.course);
         this.updateOtherCourses(this.course);
 
         db.collection('courses')
@@ -673,8 +692,17 @@ export default {
           });
       }
     },
-
     newPost() {
+      console.log(this.newPost[0], 'newPOst');
+      if (this.newPost[0]) {
+        this.posts.push(this.newPost[0]);
+        this.$nextTick(() => {
+          console.log('tick');
+          this.scrollToBottom();
+        });
+      }
+    },
+    newNotification() {
       if (!this.currentUser) {
         console.log('Error current user is undefined');
         return;
@@ -682,10 +710,11 @@ export default {
 
       const userCourses = this.currentUser.courses;
       var isUnreadPost = false;
+
       for (const index in userCourses) {
         if (
-          userCourses[index].course_id === this.newPost[0].course_id &&
-          userCourses[index].lastVisited < this.newPost[0].created_at
+          userCourses[index].course_id === this.newNotification[0].course_id &&
+          userCourses[index].lastVisited < this.newNotification[0].created_at
         ) {
           isUnreadPost = true;
         }
@@ -697,10 +726,10 @@ export default {
       }
 
       if (this.currentUser) {
-        const userCourses = this.currentUser.courses;
         for (const index in userCourses) {
           if (
-            userCourses[index].course_id === this.newPost[0].course_id &&
+            userCourses[index].course_id ===
+              this.newNotification[0].course_id &&
             !userCourses[index].unreadPosts
           ) {
             userCourses[index].unreadPosts = true;
@@ -723,9 +752,9 @@ export default {
             }
 
             if (course_ids.length == 0) {
-              this.unbindNewestPost();
+              this.unbindPosts();
             } else {
-              this.newestPost(course_ids);
+              this.newestNotification(course_ids);
             }
           }
         }
@@ -740,7 +769,12 @@ export default {
   },
 
   computed: {
-    ...mapState('messageBoard', ['posts', 'replies', 'course', 'newPost']),
+    ...mapState('messageBoard', [
+      'replies',
+      'course',
+      'newPost',
+      'newNotification',
+    ]),
     ...mapState('user', ['user']),
 
     // Filters post depending on which filters the user applies
@@ -789,7 +823,6 @@ export default {
       if (this.filterByQuestions) {
         return this.posts.filter((post) => this.checkForTag(post, 'questions'));
       }
-
       console.log(this.posts, 'posts');
       return this.posts;
     },
@@ -797,13 +830,36 @@ export default {
   methods: {
     ...mapActions('messageBoard', [
       'createPost',
-      'initPosts',
+      'initNewPost',
       'deletePost',
       'initReplies',
-      'newestPost',
-      'unbindNewestPost',
+      'newestNotification',
+      'unbindPosts',
     ]),
     ...mapActions('user', ['logout']),
+
+    async loadPosts(course) {
+      const tempPosts = [];
+      console.log(this.newPost[0].created_at);
+      if (course) {
+        db.collection('posts')
+          .where('course_id', '==', course)
+          .orderBy('created_at', 'desc')
+          .limit(10)
+          .startAfter(this.newPost[0].created_at)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              tempPosts.unshift(doc.data());
+            });
+          })
+          .catch(function(error) {
+            console.log('Error getting documents: ', error);
+          });
+        this.posts = tempPosts;
+      }
+    },
+
     updateOtherCourses(course_id) {
       if (this.currentUser) {
         this.otherCourses = [];
@@ -830,9 +886,9 @@ export default {
         }
 
         if (course_ids.length == 0) {
-          this.unbindNewestPost();
+          this.unbindPosts();
         } else {
-          this.newestPost(course_ids);
+          this.newestNotification(course_ids);
         }
       } else {
         console.log('Error, Could not get current user');
@@ -872,12 +928,49 @@ export default {
       container.scrollTop = container.scrollHeight;
     },
 
-    onScroll({ target: { scrollTop } }) {
-      console.log(scrollTop, 'Scroll Top');
+    //Watches where the user is in the posts container
+    onScroll({ target: { scrollTop, scrollHeight } }) {
+      if (this.lastScroll && this.lastScroll > scrollTop) {
+        this.scroll = false;
+      }
 
-      // if (scrollTop + clientHeight >= scrollHeight) {
-      //   this.loadMorePosts();
-      // }
+      if (scrollTop == 0 && this.lastScroll) {
+        this.appendPosts(scrollHeight);
+      }
+
+      this.lastScroll = scrollTop;
+    },
+
+    async appendPosts(scrollHeight) {
+      var container = this.$el.querySelector('.postContainer');
+      const tempPosts = [];
+      console.log(this.posts.length);
+      if (this.course) {
+        await db
+          .collection('posts')
+          .where('course_id', '==', this.course)
+          .orderBy('created_at', 'desc')
+          .startAfter(this.posts[0].created_at)
+          .limit(10)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              tempPosts.push(doc.data());
+            });
+          })
+          .catch(function(error) {
+            console.log('Error getting documents: ', error);
+          });
+
+        for (const index in tempPosts) {
+          this.posts.unshift(tempPosts[index]);
+        }
+
+        this.$nextTick(() => {
+          console.log('tick');
+          container.scrollTop = container.scrollHeight - scrollHeight;
+        });
+      }
     },
 
     // Adds reply to a post
@@ -1015,7 +1108,6 @@ export default {
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
-      console.log('hey');
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
