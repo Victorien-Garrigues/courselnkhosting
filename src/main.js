@@ -7,6 +7,7 @@ import 'buefy/dist/buefy.css';
 import VueScrollTo from 'vue-scrollto';
 import VueLazyLoad from 'vue-lazyload';
 
+Vue.use(require('vue-moment'));
 Vue.config.productionTip = false;
 Vue.use(Buefy);
 Vue.use(VueLazyLoad);

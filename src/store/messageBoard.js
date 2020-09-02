@@ -71,14 +71,59 @@ const actions = {
   },
 
   //Deletes a post
-  async deletePost(_, post_id) {
+  async deletePost(_, { post_id, name }) {
+    console.log(post_id);
+    console.log(name);
     await posts.doc(post_id).update({
       files: [],
-      content: '',
+      content: name + ' deleted this post',
       deleted: true,
     });
   },
 
+  // Adds clip to a post
+  async addClip(_, { post_id, user_id }) {
+    console.log('addClip');
+    console.log(post_id);
+    console.log(user_id);
+    var alreadyClipped = false;
+    db.collection('users')
+      .doc(user_id)
+      .get()
+      .then((doc) => {
+        for (const clip in doc.data().clips) {
+          //Checks if the user has already clipped the post
+          if (doc.data().clips[clip] == post_id) {
+            alreadyClipped = true;
+          }
+        }
+
+        // If the user hasnt clipped the post then clip it else unclip it
+        if (!alreadyClipped) {
+          db.collection('posts')
+            .doc(post_id)
+            .update({
+              clips: firebase.firestore.FieldValue.increment(1),
+            });
+          db.collection('users')
+            .doc(user_id)
+            .update({
+              clips: firebase.firestore.FieldValue.arrayUnion(post_id),
+            });
+        } else {
+          db.collection('posts')
+            .doc(post_id)
+            .update({
+              clips: firebase.firestore.FieldValue.increment(-1),
+            });
+          db.collection('users')
+            .doc(user_id)
+            .update({
+              clips: firebase.firestore.FieldValue.arrayRemove(post_id),
+            });
+        }
+      });
+  },
   //Binds posts to the firebase collection of posts that have a given course_id
   initNewPost: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(

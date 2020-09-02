@@ -12,24 +12,17 @@
           <!-- brand design -->
           <div class="container">
             <a href="#">
-              <img
-                src="@/assets/mainLogo.png"
-                width="200"
-                height="50"
-                alt="main page logo"
-              />
+              <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
             </a>
           </div>
 
           <!-- search design -->
           <form style="display: flex;" class="search-form-outside">
             <b-field>
-              <b-input
-                v-model="searchTerm"
-                placeholder="Search Posts"
-              ></b-input>
+              <b-input v-model="searchTerm" placeholder="Search Posts"></b-input>
             </b-field>
           </form>
+          <p>{{ this.userCount }} Members</p>
 
           <!-- profile design -->
           <div>
@@ -82,23 +75,14 @@
                             alt
                           />
 
-                          <div
-                            v-if="currentUser.id != post.user_id"
-                            class="row"
-                          >
+                          <div v-if="currentUser.id != post.user_id" class="row">
                             <div class="icon-placement">
                               <!-- adds and unadds a clip -->
-                              <button
-                                @click="addClip(post.id)"
-                                class="clipButton is-success"
-                              ></button>
+                              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
                             </div>
                             <div class="column icon-placement">
                               <!-- Reply button -->
-                              <button
-                                @click="reply(post)"
-                                class="replyButton is-primary"
-                              ></button>
+                              <button @click="reply(post)" class="replyButton is-primary"></button>
                             </div>
                           </div>
                         </div>
@@ -113,7 +97,7 @@
                             </div>
                             <div class="column info-column">
                               <time class="non-post">{{
-                                getCreated(index)
+                                post.created_at | moment('ddd, MMM D YYYY hh:mma')
                               }}</time>
                             </div>
                           </div>
@@ -146,16 +130,9 @@
                                 @click="openGallery(index, post.files)"
                               />
 
-                              <div
-                                style="display: flex"
-                                v-else
-                                class="fileType"
-                              >
+                              <div style="display: flex" v-else class="fileType">
                                 <!-- If the file is a video -> display video image -->
-                                <img
-                                  v-if="isVideo(file)"
-                                  src="../assets/video.png"
-                                />
+                                <img v-if="isVideo(file)" src="../assets/video.png" />
                                 <img v-else src="../assets/file.png" />
                                 <a :href="file.src">{{ file.name }}</a>
                               </div>
@@ -184,30 +161,18 @@
                             alt
                           />
 
-                          <div
-                            v-if="currentUser.id == post.user_id"
-                            class="row"
-                          >
+                          <div v-if="currentUser.id == post.user_id" class="row">
                             <div class="column icon-placement">
                               <!-- adds and unadds a clip -->
-                              <button
-                                @click="addClip(post.id)"
-                                class="clipButton is-success"
-                              ></button>
+                              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
                             </div>
                             <div class="column icon-placement">
                               <!-- Deletes post -->
-                              <button
-                                @click="deletePost(post.id)"
-                                class="deleteButton is-danger"
-                              ></button>
+                              <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
                             </div>
                             <div class="column icon-placement">
                               <!-- Reply button -->
-                              <button
-                                @click="reply(post)"
-                                class="replyButton is-primary"
-                              ></button>
+                              <button @click="reply(post)" class="replyButton is-primary"></button>
                             </div>
                           </div>
                         </div>
@@ -217,23 +182,14 @@
 
                   <div v-if="listReplies == post.id">
                     <!--  Start of List Of  Replies -->
-                    <div
-                      v-for="(reply, index) in replies"
-                      :key="index"
-                      class="replies"
-                    >
+                    <div v-for="(reply, index) in replies" :key="index" class="replies">
                       <div :id="post.id">
                         <div v-if="!post.deleted" class="card-content">
                           <div class="row">
                             <!-- columns -->
                             <!-- column one (profile) -->
                             <div class="column card-left">
-                              <img
-                                src="../assets/profileIcon.png"
-                                loading="lazy"
-                                width="54"
-                                alt
-                              />
+                              <img src="../assets/profileIcon.png" loading="lazy" width="54" alt />
                             </div>
 
                             <!-- column two (main) -->
@@ -244,7 +200,7 @@
                                 </div>
                                 <div class="column info-column">
                                   <time class="non-post">{{
-                                    getCreated(index)
+                                    post.created_at | moment('dddd, MMMM Do YYYY')
                                   }}</time>
                                 </div>
                               </div>
@@ -277,16 +233,9 @@
                                     @click="openGallery(index, post.files)"
                                   />
 
-                                  <div
-                                    style="display: flex"
-                                    v-else
-                                    class="fileType"
-                                  >
+                                  <div style="display: flex" v-else class="fileType">
                                     <!-- If the file is a video -> display video image -->
-                                    <img
-                                      v-if="isVideo(file)"
-                                      src="../assets/video.png"
-                                    />
+                                    <img v-if="isVideo(file)" src="../assets/video.png" />
                                     <img v-else src="../assets/file.png" />
                                     <a :href="file.src">{{ file.name }}</a>
                                   </div>
@@ -311,23 +260,17 @@
                                 <div class="column icon-placement">
                                   <!-- adds and unadds a clip -->
                                   <button
-                                    @click="addClip(post.id)"
+                                    @click="onAddClip(post.id, index)"
                                     class="clipButton is-success"
                                   ></button>
                                 </div>
                                 <div class="column icon-placement">
                                   <!-- Deletes post -->
-                                  <button
-                                    @click="deletePost(post.id)"
-                                    class="deleteButton is-danger"
-                                  ></button>
+                                  <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
                                 </div>
                                 <div class="column icon-placement">
                                   <!-- Reply button -->
-                                  <button
-                                    @click="reply(post)"
-                                    class="replyButton is-primary"
-                                  ></button>
+                                  <button @click="reply(post)" class="replyButton is-primary"></button>
                                 </div>
                               </div>
                             </div>
@@ -369,18 +312,10 @@
                     >
                       General
                     </button>
-                    <button
-                      @click.prevent="notesTag = !notesTag"
-                      id="tag"
-                      :class="{ clicked: notesTag }"
-                    >
+                    <button @click.prevent="notesTag = !notesTag" id="tag" :class="{ clicked: notesTag }">
                       Notes
                     </button>
-                    <button
-                      @click.prevent="examTag = !examTag"
-                      id="tag"
-                      :class="{ clicked: examTag }"
-                    >
+                    <button @click.prevent="examTag = !examTag" id="tag" :class="{ clicked: examTag }">
                       Exam
                     </button>
                     <button
@@ -401,11 +336,7 @@
 
                       <!-- if the post has files -->
                       <div v-if="post.files.length > 0" class="image-div">
-                        <div
-                          style="display: inline-block"
-                          v-for="file in post.files"
-                          :key="file.src"
-                        >
+                        <div style="display: inline-block" v-for="file in post.files" :key="file.src">
                           <img :src="file.src" class="image" />
                         </div>
                       </div>
@@ -414,10 +345,7 @@
                         <!-- If the post is a reply -->
                         <div v-if="post.isReply" class="reply">
                           <!-- Cancel reply button -->
-                          <button
-                            @click="post.isReply = false"
-                            class="button is-danger"
-                          >
+                          <button @click="post.isReply = false" class="button is-danger">
                             X
                           </button>
                           <p>Reply to {{ replyingTo }}</p>
@@ -445,10 +373,7 @@
 
                 <div class="column chat-right">
                   <!-- Add Post Button -->
-                  <button
-                    @click="onCreatePost()"
-                    class="sendButton is-success bottom"
-                  ></button>
+                  <button @click="onCreatePost()" class="sendButton is-success bottom"></button>
                 </div>
 
                 <div class="column chat-right">
@@ -576,8 +501,6 @@ import Courses from '@/components/Courses';
 import db from '@/db';
 import LightBox from 'vue-image-lightbox';
 
-// let uuid = require('uuid');
-
 export default {
   components: {
     vueDropzone: vue2Dropzone,
@@ -585,6 +508,7 @@ export default {
     LightBox,
     Courses,
   },
+
   data: () => ({
     media: [], //Clickable images in a post
     searchTerm: '', //Users input in search bar
@@ -655,6 +579,7 @@ export default {
   },
 
   watch: {
+    //Watches posts collection and scrolls if scroll is true
     posts: function() {
       this.$nextTick(() => {
         if (this.scroll) {
@@ -662,23 +587,23 @@ export default {
         }
       });
     },
-    // if the parameter changes reinit posts
-    '$route.params.name': function() {
-      this.initNewPost(this.$route.params.name);
-    },
 
+    //Changes this.currentUser when user changes
     user() {
       this.currentUser = this.user;
     },
-    //if the course changes reinit posts
+
+    //if the course changes reinit posts, change last visited of courses, update notifiction listeners
     course() {
       this.scroll = true;
       this.lastScroll = null;
       this.posts = [];
+
       if (this.course) {
         if (!this.lastCourse) {
           this.lastCourse = this.course;
         }
+
         this.initNewPost(this.course);
         this.setLastVisited(this.course);
         this.loadPosts(this.course);
@@ -692,16 +617,17 @@ export default {
           });
       }
     },
+
+    //the new post is added to posts
     newPost() {
-      console.log(this.newPost[0], 'newPOst');
-      if (this.newPost[0]) {
+      if (this.newPost[0] && this.posts[0].id != this.newPost[0].id) {
         this.posts.push(this.newPost[0]);
-        this.$nextTick(() => {
-          console.log('tick');
-          this.scrollToBottom();
-        });
+      } else if (this.posts[0].id == this.newPost[0].id) {
+        this.posts[0] = this.newPost[0];
       }
     },
+
+    //Updates the users courses if the notification is unread
     newNotification() {
       if (!this.currentUser) {
         console.log('Error current user is undefined');
@@ -711,6 +637,7 @@ export default {
       const userCourses = this.currentUser.courses;
       var isUnreadPost = false;
 
+      //Checks if the post has been read by the user
       for (const index in userCourses) {
         if (
           userCourses[index].course_id === this.newNotification[0].course_id &&
@@ -727,12 +654,14 @@ export default {
 
       if (this.currentUser) {
         for (const index in userCourses) {
+          //If the notification is from a course with no unread posts
           if (
-            userCourses[index].course_id ===
-              this.newNotification[0].course_id &&
+            userCourses[index].course_id === this.newNotification[0].course_id &&
             !userCourses[index].unreadPosts
           ) {
             userCourses[index].unreadPosts = true;
+
+            //Update users course
             db
               .collection('users')
               .doc(this.userId)
@@ -741,9 +670,10 @@ export default {
               }),
               this.$store.commit('user/setCourses', this.currentUser.courses);
 
-            this.otherCourses.splice(index, 1);
             var course_ids = [];
             this.otherCourses = [];
+
+            //Updates otherCourses if there are courses with no unread posts
             for (const index in userCourses) {
               if (!userCourses[index].unreadPosts) {
                 course_ids.push(userCourses[index].course_id);
@@ -751,6 +681,7 @@ export default {
               }
             }
 
+            //If all the users courses have unread posts unbind the listener, else keep listening with the updated courses
             if (course_ids.length == 0) {
               this.unbindPosts();
             } else {
@@ -762,19 +693,15 @@ export default {
         console.log('Error, could not get current user');
       }
     },
-    // if the user views the replies of a different post
+
+    // if the user views the replies of a different post list the replies
     listReplies() {
       this.initReplies(this.listReplies);
     },
   },
 
   computed: {
-    ...mapState('messageBoard', [
-      'replies',
-      'course',
-      'newPost',
-      'newNotification',
-    ]),
+    ...mapState('messageBoard', ['replies', 'course', 'newPost', 'newNotification']),
     ...mapState('user', ['user']),
 
     // Filters post depending on which filters the user applies
@@ -814,19 +741,17 @@ export default {
 
       // If filter by number of clips
       if (this.filterByAssignment) {
-        return this.posts.filter((post) =>
-          this.checkForTag(post, 'assignment')
-        );
+        return this.posts.filter((post) => this.checkForTag(post, 'assignment'));
       }
 
       // If filter by number fof clips
       if (this.filterByQuestions) {
         return this.posts.filter((post) => this.checkForTag(post, 'questions'));
       }
-      console.log(this.posts, 'posts');
       return this.posts;
     },
   },
+
   methods: {
     ...mapActions('messageBoard', [
       'createPost',
@@ -838,19 +763,24 @@ export default {
     ]),
     ...mapActions('user', ['logout']),
 
+    //Loads the first 10 most recent posts
     async loadPosts(course) {
       const tempPosts = [];
-      console.log(this.newPost[0].created_at);
+      var first = 0;
       if (course) {
         db.collection('posts')
           .where('course_id', '==', course)
           .orderBy('created_at', 'desc')
           .limit(10)
-          .startAfter(this.newPost[0].created_at)
           .get()
           .then(function(querySnapshot) {
+            //adds all documents besides the most recent as the the newPost() listener will get it
             querySnapshot.forEach(function(doc) {
-              tempPosts.unshift(doc.data());
+              if (first != 0) {
+                tempPosts.unshift(doc.data());
+              } else {
+                first = 1;
+              }
             });
           })
           .catch(function(error) {
@@ -860,6 +790,7 @@ export default {
       }
     },
 
+    //Updates otherCourses to listen for notifications
     updateOtherCourses(course_id) {
       if (this.currentUser) {
         this.otherCourses = [];
@@ -872,6 +803,7 @@ export default {
           }
         }
 
+        //updates the user collection
         db.collection('users')
           .doc(this.userId)
           .update({
@@ -904,6 +836,7 @@ export default {
       return file.src.includes('MP4') || file.src.includes('mp4');
     },
 
+    //Sets a timestamp for the last time a user visisted a course
     async setLastVisited(course_id) {
       if (this.lastCourse && this.lastCourse != course_id) {
         for (const index in this.currentUser.courses) {
@@ -913,6 +846,7 @@ export default {
           }
         }
 
+        //updates user collection in firebase
         db.collection('users')
           .doc(this.userId)
           .update({
@@ -930,10 +864,12 @@ export default {
 
     //Watches where the user is in the posts container
     onScroll({ target: { scrollTop, scrollHeight } }) {
+      //If the user scrolls up -> stop scrolling to the bottom of postsContainer on post updates
       if (this.lastScroll && this.lastScroll > scrollTop) {
         this.scroll = false;
       }
 
+      //If the user scrolls to the top of the postsContainer
       if (scrollTop == 0 && this.lastScroll) {
         this.appendPosts(scrollHeight);
       }
@@ -941,10 +877,54 @@ export default {
       this.lastScroll = scrollTop;
     },
 
+    // Adds clip to a post
+    async addClip(post_id, index) {
+      var alreadyClipped = false;
+      db.collection('users')
+        .doc(this.userId)
+        .get()
+        .then((doc) => {
+          for (const clip in doc.data().clips) {
+            //Checks if the user has already clipped the post
+            if (doc.data().clips[clip] == post_id) {
+              alreadyClipped = true;
+            }
+          }
+
+          // If the user hasnt clipped the post then clip it else unclip it
+          if (!alreadyClipped) {
+            this.posts[index].clips += 1;
+            db.collection('posts')
+              .doc(post_id)
+              .update({
+                clips: firebase.firestore.FieldValue.increment(1),
+              });
+            db.collection('users')
+              .doc(this.userId)
+              .update({
+                clips: firebase.firestore.FieldValue.arrayUnion(post_id),
+              });
+          } else {
+            this.posts[index].clips -= 1;
+
+            db.collection('posts')
+              .doc(post_id)
+              .update({
+                clips: firebase.firestore.FieldValue.increment(-1),
+              });
+            db.collection('users')
+              .doc(this.userId)
+              .update({
+                clips: firebase.firestore.FieldValue.arrayRemove(post_id),
+              });
+          }
+        });
+    },
+
+    //Appends the next 10 posts to posts
     async appendPosts(scrollHeight) {
       var container = this.$el.querySelector('.postContainer');
       const tempPosts = [];
-      console.log(this.posts.length);
       if (this.course) {
         await db
           .collection('posts')
@@ -962,12 +942,13 @@ export default {
             console.log('Error getting documents: ', error);
           });
 
+        //adds all the docs in tempPosts to the beggining of posts
         for (const index in tempPosts) {
           this.posts.unshift(tempPosts[index]);
         }
 
+        //Keeps scroll position
         this.$nextTick(() => {
-          console.log('tick');
           container.scrollTop = container.scrollHeight - scrollHeight;
         });
       }
@@ -982,94 +963,50 @@ export default {
         });
     },
 
-    // Adds clip to a pots
-    async addClip(id) {
-      var alreadyClipped = false;
-      db.collection('users')
-
-        .doc(this.userId)
-        .get()
-        .then((doc) => {
-          for (const clip in doc.data().clips) {
-            //Checks if the user has already clipped the post
-            if (doc.data().clips[clip] == id) {
-              alreadyClipped = true;
-            }
-          }
-
-          // If the user hasnt clipped the post then clip it else unclip it
-          if (!alreadyClipped) {
-            db.collection('posts')
-              .doc(id)
-              .update({
-                clips: firebase.firestore.FieldValue.increment(1),
-              });
-            db.collection('users')
-              .doc(this.userId)
-              .update({
-                clips: firebase.firestore.FieldValue.arrayUnion(id),
-              });
-          } else {
-            db.collection('posts')
-              .doc(id)
-              .update({
-                clips: firebase.firestore.FieldValue.increment(-1),
-              });
-            db.collection('users')
-              .doc(this.userId)
-              .update({
-                clips: firebase.firestore.FieldValue.arrayRemove(id),
-              });
-          }
-        });
-    },
-
-    //Adds the files to post.files and to firebase storage if the file was dropped
+    //Adds the files to post.files and to firebase storage if the file was drag and dropped
     async afterComplete(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
+        var fileRef = '';
 
         // If is an image
         if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
-          const fileRef = storageRef.child(`images/${file.name}.png`);
-          await fileRef.put(file);
-          const downloadURL = await fileRef.getDownloadURL();
-          this.post.files.push({ src: downloadURL, name: file.name });
+          fileRef = storageRef.child(`images/${file.name}.png`);
         } else {
-          const fileRef = storageRef.child(`files/${file.name}`);
-          await fileRef.put(file);
-          const downloadURL = await fileRef.getDownloadURL();
-          this.post.files.push({
-            src: downloadURL,
-            name: file.name,
-          });
+          fileRef = storageRef.child(`files/${file.name}`);
         }
+
+        await fileRef.put(file);
+        const downloadURL = await fileRef.getDownloadURL();
+        this.post.files.push({
+          src: downloadURL,
+          name: file.name,
+        });
       } catch (error) {
         console.log(error);
       }
     },
 
-    //Adds the files to firebase storage if the file was manually added
+    //Adds the files to firebase storage if they were added by clicking on the attach icon in order to display them in top dropzone
     async afterAttach(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
+        var fileRef = '';
 
         //If the file is an image
         if (file['type'] === 'image/jpeg' || file['type'] === 'image/png') {
-          const fileRef = storageRef.child(`images/${file.name}.png`);
-          await fileRef.put(file);
-          const downloadURL = await fileRef.getDownloadURL();
-          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+          fileRef = storageRef.child(`images/${file.name}.png`);
         } else {
-          const fileRef = storageRef.child(`files/${file.name}`);
-          await fileRef.put(file);
-          const downloadURL = await fileRef.getDownloadURL();
-
-          //Adds the file to the dropzone to be viewed
-          this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
+          fileRef = storageRef.child(`files/${file.name}`);
         }
+
+        await fileRef.put(file);
+        const downloadURL = await fileRef.getDownloadURL();
+
+        //Adds the file to the dropzone to be viewed
+        this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
       } catch (error) {
         console.log(error);
       }
@@ -1105,6 +1042,12 @@ export default {
       this.reply(post);
     },
 
+    search() {
+      if (this.searchTerm) {
+        const regexp = new RegExp(this.searchTerm, 'gi');
+        return this.posts.filter((post) => post.content.match(regexp));
+      }
+    },
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
@@ -1148,6 +1091,19 @@ export default {
       }
     },
 
+    onDelete(post_id) {
+      const name = this.currentUser.firstName + ' ' + this.currentUser.firstName;
+      for (const index in this.posts) {
+        if (this.posts[index].id == post_id) {
+          this.posts[index].files = [];
+          this.posts[index].content = name + ' deleted this post';
+          this.posts[index].deleted = true;
+        }
+      }
+      this.deletePost({ post_id: post_id, name: name });
+    },
+
+    //If the user adds a tag
     setTags() {
       if (this.generalTag) {
         this.post.tags.push('general');
@@ -1166,6 +1122,7 @@ export default {
       }
     },
 
+    //checks if a post has the specified tag
     checkForTag(post, tag) {
       for (const index in post.tags) {
         if (post.tags[index] === tag) {
@@ -1173,47 +1130,6 @@ export default {
         }
       }
       return false;
-    },
-
-    // toggleTag(tag) {
-    //   for (const index in this.post.tags) {
-    //     if (this.post.tags[index] === tag) {
-    //       this.post.tags.splice(index, 1);
-    //       return;
-    //     }
-    //   }
-    //   this.post.tags.push(tag);
-    // },
-
-    //Sets the time since the post was created
-    getCreated(index) {
-      function timeSince(date) {
-        const seconds = Math.floor((new Date() - date) / 1000);
-        let interval = Math.floor(seconds / 31536000);
-        if (interval > 1) {
-          return `${interval} years`;
-        }
-        interval = Math.floor(seconds / 2592000);
-        if (interval > 1) {
-          return `${interval} months`;
-        }
-        interval = Math.floor(seconds / 86400);
-        if (interval > 1) {
-          return `${interval} days`;
-        }
-        interval = Math.floor(seconds / 3600);
-        if (interval > 1) {
-          return `${interval} hours`;
-        }
-        interval = Math.floor(seconds / 60);
-        if (interval > 1) {
-          return `${interval} minutes`;
-        }
-        return `${Math.floor(seconds)} seconds`;
-      }
-      return timeSince(this.posts[index].created_at) < 0
-        ? '0 seconds ago'
-        : `${timeSince(this.posts[index].created_at)} ago`;
     },
   },
 };
