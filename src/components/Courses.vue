@@ -22,9 +22,7 @@
         <li v-for="course in user.courses" :key="course.id">
           <div style="display: flex;">
             <router-link
-              @click.native="
-                $store.commit('messageBoard/setCourse', course.course_id)
-              "
+              @click.native="$store.commit('messageBoard/setCourse', course.course_id)"
               :to="{
                 name: 'MessageBoard',
                 params: { name: course.courseCode.replace(/\s/g, '') },
@@ -40,11 +38,7 @@
       <div style="width: 100%; height: 5px;"></div>
 
       <!-- Add Course Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="showCourses()"
-        class="addButton is-primary"
-      >
+      <button v-if="!isAdding && !isEditing" @click="showCourses()" class="addButton is-primary">
         ADD COURSE +
       </button>
 
@@ -88,10 +82,7 @@
             placeholder="AAAA 000"
           />
           <!-- Cancel button -->
-          <button
-            @click="isCreating = false"
-            class="delButton2 is-danger"
-          ></button>
+          <button @click="isCreating = false" class="delButton2 is-danger"></button>
 
           <p class="feedback">{{ this.feedback }}</p>
 
@@ -117,11 +108,7 @@
 
     <!-- Lists the user faculties -->
     <div v-if="!isCourse" class="courses">
-      <ul
-        style="margin-top: 2em ;"
-        v-if="!isEditing && !isAdding"
-        class="menu-list"
-      >
+      <ul style="margin-top: 2em ;" v-if="!isEditing && !isAdding" class="menu-list">
         <div class="row courseList">
           <div class="column listName">
             <p class="menu-label">Your Faculties</p>
@@ -140,9 +127,7 @@
 
         <li v-for="faculty in user.faculties" :key="faculty.id">
           <router-link
-            @click.native="
-              $store.commit('messageBoard/setCourse', faculty.faculty_id)
-            "
+            @click.native="$store.commit('messageBoard/setCourse', faculty.faculty_id)"
             :to="{
               name: 'MessageBoard',
               params: { name: faculty.name.replace(/\s/g, '') },
@@ -155,11 +140,7 @@
       <div style="width: 100%; height: 5px;"></div>
 
       <!-- Add Faculties Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="showFaculties()"
-        class="addButton is-primary"
-      >
+      <button v-if="!isAdding && !isEditing" @click="showFaculties()" class="addButton is-primary">
         ADD FACULTY +
       </button>
 
@@ -181,11 +162,7 @@
           Remove a faculty from your university list
         </p>
         <li v-for="faculty in user.faculties" :key="faculty.id">
-          <button
-            style="margin-top: 0.5em;"
-            class="delButton"
-            @click="removeFaculty(faculty.faculty_id)"
-          >
+          <button style="margin-top: 0.5em;" class="delButton" @click="removeFaculty(faculty.faculty_id)">
             {{ faculty.name }}
           </button>
         </li>
@@ -232,9 +209,7 @@ export default {
     filteredCourses() {
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, 'gi');
-        return this.allCourses.filter((course) =>
-          course.courseCode.match(regexp)
-        );
+        return this.allCourses.filter((course) => course.courseCode.match(regexp));
       }
       return this.allCourses;
     },
@@ -293,11 +268,7 @@ export default {
 
           // Add a post saying that a user has joined the group
           db.collection('posts').add({
-            content:
-              this.user.firstName +
-              ' ' +
-              this.user.lastName +
-              ' joined the group',
+            content: this.user.firstName + ' ' + this.user.lastName + ' joined the group',
             files: [],
             course_id: course.id,
             created_at: Date.now(),
@@ -404,10 +375,7 @@ export default {
       if (this.courseCode.length > 3) {
         for (const course in this.allCourses) {
           // If the course already exists
-          if (
-            this.allCourses[course].courseCode.toLowerCase() ===
-            this.courseCode.toLowerCase()
-          ) {
+          if (this.allCourses[course].courseCode.toLowerCase() === this.courseCode.toLowerCase()) {
             this.feedback = 'The course already exists';
             return;
           }

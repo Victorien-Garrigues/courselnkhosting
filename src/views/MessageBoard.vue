@@ -58,225 +58,68 @@
           <div class="column middle">
             <!-- start of chat container design -->
             <div @scroll="onScroll" class="container is-fluid postContainer">
-              <div class="posts is-multiline">
-                <div v-for="(post, index) in filteredPosts" :key="index">
+              <div v-if="!isFilter" class="posts is-multiline">
+                <div v-for="(post, index) in posts" :key="index">
                   <!-- this is the post card -->
-                  <div :id="post.id">
-                    <div v-if="!post.deleted">
-                      <div class="flex-container">
-                        <!-- columns -->
-                        <!-- column one (profile) -->
-                        <div class="card-left">
-                          <img
-                            v-if="currentUser.id == post.user_id"
-                            src="../assets/profileIcon.png"
-                            loading="lazy"
-                            width="54"
-                            alt
-                          />
 
-                          <div v-if="currentUser.id != post.user_id" class="row">
-                            <div class="icon-placement">
-                              <!-- adds and unadds a clip -->
-                              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
-                            </div>
-                            <div class="column icon-placement">
-                              <!-- Reply button -->
-                              <button @click="reply(post)" class="replyButton is-primary"></button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- column two (main) -->
-                        <div class="card-middle">
-                          <div class="row">
-                            <div class="column info-column">
-                              <p v-if="post.username" class="non-post">
-                                {{ post.username }}
-                              </p>
-                            </div>
-                            <div class="column info-column">
-                              <time class="non-post">{{
-                                post.created_at | moment('ddd, MMM D YYYY hh:mma')
-                              }}</time>
-                            </div>
-                          </div>
-
-                          <div class="media">
-                            <div class="media-left"></div>
-                            <div class="media-content">
-                              <div class="reply" v-if="post.isReply">
-                                <button v-scroll-to="'#' + post.parent_id">
-                                  Replying to {{ post.replyUsername }}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-
-                          <!-- post itself -->
-                          <p>{{ post.content }}</p>
-
-                          <div class="card-image">
-                            <figure
-                              style="display: inline-block"
-                              class="image"
-                              :key="index"
-                              v-for="(file, index) in post.files"
-                            >
-                              <!-- Displays a light box image view when images are clicked -->
-                              <img
-                                v-if="isImage(file)"
-                                v-lazy="file.src || file.thumb"
-                                @click="openGallery(index, post.files)"
-                              />
-
-                              <div style="display: flex" v-else class="fileType">
-                                <!-- If the file is a video -> display video image -->
-                                <img v-if="isVideo(file)" src="../assets/video.png" />
-                                <img v-else src="../assets/file.png" />
-                                <a :href="file.src">{{ file.name }}</a>
-                              </div>
-                            </figure>
-                          </div>
-
-                          <div v-if="post.replies > 0" class="post-info">
-                            <button
-                              class="button is-success"
-                              @click="viewReplies(post.id)"
-                              style="margin-right: 2em"
-                            >
-                              {{ post.replies }} Replies
-                            </button>
-                          </div>
-                          <p>{{ post.clips }} Clips</p>
-                        </div>
-
-                        <!-- column three (icons) -->
-                        <div class="card-right">
-                          <img
-                            v-if="currentUser.id != post.user_id"
-                            src="../assets/profileIcon.png"
-                            loading="lazy"
-                            width="54"
-                            alt
-                          />
-
-                          <div v-if="currentUser.id == post.user_id" class="row">
-                            <div class="column icon-placement">
-                              <!-- adds and unadds a clip -->
-                              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
-                            </div>
-                            <div class="column icon-placement">
-                              <!-- Deletes post -->
-                              <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
-                            </div>
-                            <div class="column icon-placement">
-                              <!-- Reply button -->
-                              <button @click="reply(post)" class="replyButton is-primary"></button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <Post
+                    :post="post"
+                    :index="index"
+                    :currentUser="currentUser"
+                    @addClip="addClip"
+                    @onDelete="onDelete"
+                    @reply="reply"
+                    @openGallery="openGallery"
+                    @viewReplys="viewReplies"
+                  />
 
                   <div v-if="listReplies == post.id">
                     <!--  Start of List Of  Replies -->
                     <div v-for="(reply, index) in replies" :key="index" class="replies">
-                      <div :id="post.id">
-                        <div v-if="!post.deleted" class="card-content">
-                          <div class="row">
-                            <!-- columns -->
-                            <!-- column one (profile) -->
-                            <div class="column card-left">
-                              <img src="../assets/profileIcon.png" loading="lazy" width="54" alt />
-                            </div>
+                      <Post
+                        :post="reply"
+                        :index="index"
+                        :currentUser="currentUser"
+                        @addClip="addClip"
+                        @onDelete="onDelete"
+                        @reply="reply"
+                        @openGallery="openGallery"
+                        @viewReplys="viewReplies"
+                      />
+                    </div>
+                    <!--  End of List Of  Replies -->
+                  </div>
+                </div>
+              </div>
 
-                            <!-- column two (main) -->
-                            <div class="column card-middle">
-                              <div class="row">
-                                <div class="column info-column">
-                                  <p class="non-post">{{ post.username }}</p>
-                                </div>
-                                <div class="column info-column">
-                                  <time class="non-post">{{
-                                    post.created_at | moment('dddd, MMMM Do YYYY')
-                                  }}</time>
-                                </div>
-                              </div>
+              <!-- If there is a filter applied -->
+              <div v-else>
+                <div v-for="(post, index) in getTaggedPosts" :key="index">
+                  <!-- this is the post card -->
+                  <Post
+                    :post="post"
+                    :index="index"
+                    :currentUser="currentUser"
+                    @addClip="addClip"
+                    @onDelete="onDelete"
+                    @reply="reply"
+                    @openGallery="openGallery"
+                    @viewReplys="viewReplies"
+                  />
 
-                              <div class="media">
-                                <div class="media-left"></div>
-                                <div class="media-content">
-                                  <div class="reply" v-if="post.isReply">
-                                    <button v-scroll-to="'#' + post.parent_id">
-                                      Replying to {{ post.replyUsername }}
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <!-- post itself -->
-                              <p>{{ post.content }}</p>
-
-                              <div class="card-image">
-                                <figure
-                                  style="display: inline-block"
-                                  class="image"
-                                  :key="index"
-                                  v-for="(file, index) in post.files"
-                                >
-                                  <!-- Displays a light box image view when images are clicked -->
-                                  <img
-                                    v-if="isImage(file)"
-                                    v-lazy="file.src || file.thumb"
-                                    @click="openGallery(index, post.files)"
-                                  />
-
-                                  <div style="display: flex" v-else class="fileType">
-                                    <!-- If the file is a video -> display video image -->
-                                    <img v-if="isVideo(file)" src="../assets/video.png" />
-                                    <img v-else src="../assets/file.png" />
-                                    <a :href="file.src">{{ file.name }}</a>
-                                  </div>
-                                </figure>
-                              </div>
-
-                              <div v-if="post.replies > 0" class="post-info">
-                                <button
-                                  class="button is-success"
-                                  @click="viewReplies(post.id)"
-                                  style="margin-right: 2em"
-                                >
-                                  {{ post.replies }} Replies
-                                </button>
-                              </div>
-                              <p>{{ post.clips }} Clips</p>
-                            </div>
-
-                            <!-- column three (icons) -->
-                            <div class="column card-right">
-                              <div class="row">
-                                <div class="column icon-placement">
-                                  <!-- adds and unadds a clip -->
-                                  <button
-                                    @click="onAddClip(post.id, index)"
-                                    class="clipButton is-success"
-                                  ></button>
-                                </div>
-                                <div class="column icon-placement">
-                                  <!-- Deletes post -->
-                                  <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
-                                </div>
-                                <div class="column icon-placement">
-                                  <!-- Reply button -->
-                                  <button @click="reply(post)" class="replyButton is-primary"></button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  <div v-if="listReplies == post.id">
+                    <!--  Start of List Of  Replies -->
+                    <div v-for="(reply, index) in replies" :key="index" class="replies">
+                      <Post
+                        :post="reply"
+                        :index="index"
+                        :currentUser="currentUser"
+                        @addClip="addClip"
+                        @onDelete="onDelete"
+                        @reply="reply"
+                        @openGallery="openGallery"
+                        @viewReplys="viewReplies"
+                      />
                     </div>
                     <!--  End of List Of  Replies -->
                   </div>
@@ -304,16 +147,15 @@
                 <div class="column chat-left">
                   <!-- tags -->
                   <div style="display: flex" class="tags">
-                    <button
-                      @click.prevent="generalTag = !generalTag"
-                      class
-                      :class="{ clicked: generalTag }"
-                      id="tag"
-                    >
-                      General
-                    </button>
                     <button @click.prevent="notesTag = !notesTag" id="tag" :class="{ clicked: notesTag }">
                       Notes
+                    </button>
+                    <button
+                      @click.prevent="questionsTag = !questionsTag"
+                      id="tag"
+                      :class="{ clicked: questionsTag }"
+                    >
+                      Questions
                     </button>
                     <button @click.prevent="examTag = !examTag" id="tag" :class="{ clicked: examTag }">
                       Exam
@@ -396,7 +238,7 @@
       <!-- THIRD COLUMN -->
       <div class="column right">
         <div class="whiteBox">
-          <h2>Post Filters</h2>
+          <h2>Post tags</h2>
 
           <!-- Files filter -->
           <div class="row">
@@ -430,20 +272,6 @@
             </div>
           </div>
 
-          <!-- General Tag -->
-          <div class="row" style="clear: both;">
-            <div class="column">
-              <p>General</p>
-            </div>
-            <div class="column">
-              <button
-                @click.prevent="filterByGeneral = !filterByGeneral"
-                id="tags"
-                :class="{ clicked: filterByGeneral }"
-              ></button>
-            </div>
-          </div>
-
           <div class="row" style="clear: both;">
             <div class="column">
               <p>Notes</p>
@@ -466,6 +294,19 @@
                 @click.prevent="filterByExam = !filterByExam"
                 id="tags"
                 :class="{ clicked: filterByExam }"
+              ></button>
+            </div>
+          </div>
+
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Questions</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterByQuestions = !filterByQuestions"
+                id="tags"
+                :class="{ clicked: filterByQuestions }"
               ></button>
             </div>
           </div>
@@ -498,6 +339,8 @@ import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import ResizeAuto from '@/components/ResizeAuto';
 import Courses from '@/components/Courses';
+import Post from '@/components/Post';
+
 import db from '@/db';
 import LightBox from 'vue-image-lightbox';
 
@@ -507,6 +350,7 @@ export default {
     ResizeAuto,
     LightBox,
     Courses,
+    Post,
   },
 
   data: () => ({
@@ -525,20 +369,20 @@ export default {
     userId: '', //the Id of the current user
     currentUser: null, //the current user
     posts: [], //the loaded posts
+    taggedPosts: [], //the loaded tagged posts
     scroll: true, //whether to scroll to the bottom on updated()
     lastScroll: null, //the previous scroll position
 
-    //Filters
+    //tags
+    isFilter: false,
     filterByFiles: false,
     filterByClips: false,
-    filterByGeneral: false,
     filterByNotes: false,
     filterByExam: false,
     filterByAssignment: false,
     filterByQuestions: false,
 
     //Which Tags are clicked
-    generalTag: false,
     notesTag: false,
     examTag: false,
     assignmentTag: false,
@@ -588,6 +432,33 @@ export default {
       });
     },
 
+    taggedPosts: function() {
+      this.$nextTick(() => {
+        console.log(this.scroll);
+        if (this.scroll) {
+          this.scrollToBottom();
+        }
+      });
+    },
+
+    getTags() {
+      if (this.getTags.length == 0) {
+        this.isFilter = false;
+      } else {
+        this.lastScroll = null;
+        this.isFilter = true;
+      }
+      if (this.getTags.length < 2) {
+        this.loadTaggedPosts();
+      }
+    },
+
+    filterByClips() {
+      if (this.getTags.length == 0) {
+        console.log('yp');
+      }
+    },
+
     //Changes this.currentUser when user changes
     user() {
       this.currentUser = this.user;
@@ -620,10 +491,27 @@ export default {
 
     //the new post is added to posts
     newPost() {
-      if (this.newPost[0] && this.posts[0].id != this.newPost[0].id) {
-        this.posts.push(this.newPost[0]);
-      } else if (this.posts[0].id == this.newPost[0].id) {
-        this.posts[0] = this.newPost[0];
+      console.log(this.newPost[0], 'newPost');
+
+      if (this.newPost[0]) {
+        //If the most recent post is being updated
+        if (this.posts.length != 0 && this.posts[0].id == this.newPost[0].id) {
+          this.posts[0] = this.newPost[0];
+        } else {
+          this.posts.push(this.newPost[0]);
+        }
+
+        //Check to see if there are tags applied and if to push to taggedPosts
+        const tags = JSON.parse(JSON.stringify(this.newPost[0].tags));
+        let matchedTags = (tags, appliedTags) => appliedTags.every((tag) => tags.includes(tag));
+        if (matchedTags(tags, this.getTags)) {
+          //If the most recent post is being updated
+          if (this.taggedPosts.length != 0 && this.taggedPosts[0].id == this.newPost[0].id) {
+            this.taggedPosts[0] = this.newPost[0];
+          } else {
+            this.taggedPosts.push(this.newPost[0]);
+          }
+        }
       }
     },
 
@@ -694,7 +582,7 @@ export default {
       }
     },
 
-    // if the user views the replies of a different post list the replies
+    // if the user views the replies of a different post -> list the replies
     listReplies() {
       this.initReplies(this.listReplies);
     },
@@ -703,52 +591,50 @@ export default {
   computed: {
     ...mapState('messageBoard', ['replies', 'course', 'newPost', 'newNotification']),
     ...mapState('user', ['user']),
-
-    // Filters post depending on which filters the user applies
-    filteredPosts() {
-      // If typing in the search bar
-      if (this.searchTerm) {
-        const regexp = new RegExp(this.searchTerm, 'gi');
-        return this.posts.filter((post) => post.content.match(regexp));
-      }
-
+    getTaggedPosts() {
+      var finalTaggedPosts = this.taggedPosts;
       // If filtering by files
       if (this.filterByFiles) {
-        return this.posts.filter((post) => post.files[0]);
+        finalTaggedPosts = finalTaggedPosts.filter((post) => post.files.length > 0);
       }
-
       // If filter by number of clips
       if (this.filterByClips) {
-        return this.posts.slice().sort((a, b) => {
+        finalTaggedPosts = finalTaggedPosts.slice().sort((a, b) => {
           return a.clips - b.clips;
         });
       }
 
-      // If filter by number of clips
-      if (this.filterByGeneral) {
-        return this.posts.filter((post) => this.checkForTag(post, 'general'));
-      }
-
-      // If filter by number of clips
       if (this.filterByNotes) {
-        return this.posts.filter((post) => this.checkForTag(post, 'notes'));
+        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'notes'));
       }
-
-      // If filter by number of clips
       if (this.filterByExam) {
-        return this.posts.filter((post) => this.checkForTag(post, 'exam'));
+        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'exam'));
       }
-
-      // If filter by number of clips
       if (this.filterByAssignment) {
-        return this.posts.filter((post) => this.checkForTag(post, 'assignment'));
+        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'assignment'));
       }
-
-      // If filter by number fof clips
       if (this.filterByQuestions) {
-        return this.posts.filter((post) => this.checkForTag(post, 'questions'));
+        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'questions'));
       }
-      return this.posts;
+      return finalTaggedPosts;
+    },
+
+    getTags() {
+      var tags = [];
+      if (this.filterByNotes) {
+        tags.push('notes');
+      }
+      if (this.filterByExam) {
+        tags.push('exam');
+      }
+      if (this.filterByAssignment) {
+        tags.push('assignment');
+      }
+      if (this.filterByQuestions) {
+        tags.push('questions');
+      }
+      console.log(tags, 'compute tags');
+      return tags;
     },
   },
 
@@ -787,6 +673,32 @@ export default {
             console.log('Error getting documents: ', error);
           });
         this.posts = tempPosts;
+      }
+    },
+
+    //Loads the first 10 most recent posts
+    async loadTaggedPosts() {
+      this.scroll = true;
+      console.log('loading filtered posts');
+
+      const tempPosts = [];
+      if (this.course) {
+        db.collection('posts')
+          .where('course_id', '==', this.course)
+          .where('tags', 'array-contains', this.getTags[0])
+          .orderBy('created_at', 'desc')
+          .limit(10)
+          .get()
+          .then(function(querySnapshot) {
+            //adds all documents besides the most recent as the the newPost() listener will get it
+            querySnapshot.forEach(function(doc) {
+              tempPosts.unshift(doc.data());
+            });
+          })
+          .catch(function(error) {
+            console.log('Error getting documents: ', error);
+          });
+        this.taggedPosts = tempPosts;
       }
     },
 
@@ -925,33 +837,59 @@ export default {
     async appendPosts(scrollHeight) {
       var container = this.$el.querySelector('.postContainer');
       const tempPosts = [];
-      if (this.course) {
-        await db
-          .collection('posts')
-          .where('course_id', '==', this.course)
-          .orderBy('created_at', 'desc')
-          .startAfter(this.posts[0].created_at)
-          .limit(10)
-          .get()
-          .then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
-              tempPosts.push(doc.data());
+
+      //if there is no filter applied updates posts else update taggedPosts
+      if (!this.isFilter) {
+        if (this.course) {
+          await db
+            .collection('posts')
+            .where('course_id', '==', this.course)
+            .orderBy('created_at', 'desc')
+            .startAfter(this.posts[0].created_at)
+            .limit(10)
+            .get()
+            .then(function(querySnapshot) {
+              querySnapshot.forEach(function(doc) {
+                tempPosts.push(doc.data());
+              });
+            })
+            .catch(function(error) {
+              console.log('Error getting documents: ', error);
             });
-          })
-          .catch(function(error) {
-            console.log('Error getting documents: ', error);
-          });
 
-        //adds all the docs in tempPosts to the beggining of posts
-        for (const index in tempPosts) {
-          this.posts.unshift(tempPosts[index]);
+          //adds all the docs in tempPosts to the beggining of posts
+          for (const index in tempPosts) {
+            this.posts.unshift(tempPosts[index]);
+          }
         }
+      } else {
+        if (this.course) {
+          await db
+            .collection('posts')
+            .where('course_id', '==', this.course)
+            .orderBy('created_at', 'desc')
+            .startAfter(this.taggedPosts[0].created_at)
+            .where('tags', 'array-contains', this.getTags[0])
+            .limit(10)
+            .get()
+            .then(function(querySnapshot) {
+              querySnapshot.forEach(function(doc) {
+                tempPosts.push(doc.data());
+              });
+            })
+            .catch(function(error) {
+              console.log('Error getting documents: ', error);
+            });
 
-        //Keeps scroll position
-        this.$nextTick(() => {
-          container.scrollTop = container.scrollHeight - scrollHeight;
-        });
+          //adds all the docs in tempPosts to the beggining of posts
+          for (const index in tempPosts) {
+            this.taggedPosts.unshift(tempPosts[index]);
+          }
+        }
       }
+      this.$nextTick(() => {
+        container.scrollTop = container.scrollHeight - scrollHeight;
+      });
     },
 
     // Adds reply to a post
@@ -1073,13 +1011,12 @@ export default {
         }
 
         //Resets tags
-        this.generalTag = false;
         this.notesTag = false;
         this.examTag = false;
         this.notesTag = false;
         this.questionsTag = false;
+        this.assignmentTag = false;
 
-        this.scrollToBottom();
         //Resets the post
         this.post = {
           content: '',
@@ -1088,11 +1025,13 @@ export default {
           parent_id: '',
           tags: [],
         };
+
+        this.scroll = true;
       }
     },
 
     onDelete(post_id) {
-      const name = this.currentUser.firstName + ' ' + this.currentUser.firstName;
+      const name = this.currentUser.firstName + ' ' + this.currentUser.lastName;
       for (const index in this.posts) {
         if (this.posts[index].id == post_id) {
           this.posts[index].files = [];
@@ -1105,10 +1044,6 @@ export default {
 
     //If the user adds a tag
     setTags() {
-      if (this.generalTag) {
-        this.post.tags.push('general');
-      }
-
       if (this.notesTag) {
         this.post.tags.push('notes');
       }
@@ -1119,6 +1054,10 @@ export default {
 
       if (this.assignmentTag) {
         this.post.tags.push('assignment');
+      }
+
+      if (this.questionsTag) {
+        this.post.tags.push('questions');
       }
     },
 

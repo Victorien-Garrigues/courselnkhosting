@@ -78,6 +78,7 @@ const actions = {
       files: [],
       content: name + ' deleted this post',
       deleted: true,
+      tags: [],
     });
   },
 
