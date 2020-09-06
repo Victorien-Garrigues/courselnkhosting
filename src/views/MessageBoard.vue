@@ -94,7 +94,7 @@
 
               <!-- If there is a filter applied -->
               <div v-else>
-                <div v-for="(post, index) in getTaggedPosts" :key="index">
+                <div v-for="(post, index) in filteredPosts" :key="index">
                   <!-- this is the post card -->
                   <Post
                     :post="post"
@@ -147,25 +147,33 @@
                 <div class="column chat-left">
                   <!-- tags -->
                   <div style="display: flex" class="tags">
-                    <button @click.prevent="notesTag = !notesTag" id="tag" :class="{ clicked: notesTag }">
+                    <button
+                      @click.prevent="post.notesTag = !post.notesTag"
+                      id="tag"
+                      :class="{ clicked: post.notesTag }"
+                    >
                       Notes
                     </button>
                     <button
-                      @click.prevent="questionsTag = !questionsTag"
+                      @click.prevent="post.questionsTag = !post.questionsTag"
                       id="tag"
-                      :class="{ clicked: questionsTag }"
+                      :class="{ clicked: post.questionsTag }"
                     >
                       Questions
                     </button>
-                    <button @click.prevent="examTag = !examTag" id="tag" :class="{ clicked: examTag }">
-                      Exam
+                    <button
+                      @click.prevent="post.examsTag = !post.examsTag"
+                      id="tag"
+                      :class="{ clicked: post.examsTag }"
+                    >
+                      Exams
                     </button>
                     <button
-                      @click.prevent="assignmentTag = !assignmentTag"
+                      @click.prevent="post.assignmentsTag = !post.assignmentsTag"
                       id="tag"
-                      :class="{ clicked: assignmentTag }"
+                      :class="{ clicked: post.assignmentsTag }"
                     >
-                      Assignment
+                      Assignments
                     </button>
                   </div>
 
@@ -249,7 +257,7 @@
               <label class="switch">
                 <input
                   type="checkbox"
-                  @click.prevent="filterByFiles = !filterByFiles"
+                  @click.prevent="filterBy('files')"
                   id="tags"
                   :class="{ clicked: filterByFiles }"
                 />
@@ -265,7 +273,7 @@
             </div>
             <div class="column">
               <button
-                @click.prevent="filterByClips = !filterByClips"
+                @click.prevent="filterBy('clips')"
                 id="tags"
                 :class="{ clicked: filterByClips }"
               ></button>
@@ -278,7 +286,7 @@
             </div>
             <div class="column">
               <button
-                @click.prevent="filterByNotes = !filterByNotes"
+                @click.prevent="filterBy('notes')"
                 id="tags"
                 :class="{ clicked: filterByNotes }"
               ></button>
@@ -287,13 +295,13 @@
 
           <div class="row" style="clear: both;">
             <div class="column">
-              <p>Exam</p>
+              <p>Exams</p>
             </div>
             <div class="column">
               <button
-                @click.prevent="filterByExam = !filterByExam"
+                @click.prevent="filterBy('exams')"
                 id="tags"
-                :class="{ clicked: filterByExam }"
+                :class="{ clicked: filterByExams }"
               ></button>
             </div>
           </div>
@@ -304,7 +312,7 @@
             </div>
             <div class="column">
               <button
-                @click.prevent="filterByQuestions = !filterByQuestions"
+                @click.prevent="filterBy('questions')"
                 id="tags"
                 :class="{ clicked: filterByQuestions }"
               ></button>
@@ -313,13 +321,13 @@
 
           <div class="row" style="clear: both;">
             <div class="column">
-              <p>Assignment</p>
+              <p>Assignments</p>
             </div>
             <div class="column">
               <button
-                @click.prevent="filterByAssignment = !filterByAssignment"
+                @click.prevent="filterBy('assignments')"
                 id="tags"
-                :class="{ clicked: filterByAssignment }"
+                :class="{ clicked: filterByAssignments }"
               ></button>
             </div>
           </div>
@@ -369,24 +377,18 @@ export default {
     userId: '', //the Id of the current user
     currentUser: null, //the current user
     posts: [], //the loaded posts
-    taggedPosts: [], //the loaded tagged posts
+    filteredPosts: [], //the loaded tagged posts
     scroll: true, //whether to scroll to the bottom on updated()
     lastScroll: null, //the previous scroll position
+    isFilter: false, //If a filter is applied
 
     //tags
-    isFilter: false,
     filterByFiles: false,
     filterByClips: false,
     filterByNotes: false,
-    filterByExam: false,
-    filterByAssignment: false,
+    filterByExams: false,
+    filterByAssignments: false,
     filterByQuestions: false,
-
-    //Which Tags are clicked
-    notesTag: false,
-    examTag: false,
-    assignmentTag: false,
-    questionsTag: false,
 
     //Drop zone options
     dropzoneOptions: {
@@ -406,7 +408,11 @@ export default {
       isReply: false, //if the post is a reply
       parent_id: '', //the id of the post being replied to
       course_id: '', //the id of the selected course
-      tags: [], //tags applied to the post
+      //tags applied to the post
+      notesTag: false,
+      examsTag: false,
+      assignmentsTag: false,
+      questionsTag: false,
     },
   }),
 
@@ -432,31 +438,12 @@ export default {
       });
     },
 
-    taggedPosts: function() {
+    filteredPosts: function() {
       this.$nextTick(() => {
-        console.log(this.scroll);
         if (this.scroll) {
           this.scrollToBottom();
         }
       });
-    },
-
-    getTags() {
-      if (this.getTags.length == 0) {
-        this.isFilter = false;
-      } else {
-        this.lastScroll = null;
-        this.isFilter = true;
-      }
-      if (this.getTags.length < 2) {
-        this.loadTaggedPosts();
-      }
-    },
-
-    filterByClips() {
-      if (this.getTags.length == 0) {
-        console.log('yp');
-      }
     },
 
     //Changes this.currentUser when user changes
@@ -501,15 +488,13 @@ export default {
           this.posts.push(this.newPost[0]);
         }
 
-        //Check to see if there are tags applied and if to push to taggedPosts
-        const tags = JSON.parse(JSON.stringify(this.newPost[0].tags));
-        let matchedTags = (tags, appliedTags) => appliedTags.every((tag) => tags.includes(tag));
-        if (matchedTags(tags, this.getTags)) {
+        //Check to see if there are tags applied and if to push to filteredposts
+        if (this.filtersMatch(this.newPost[0])) {
           //If the most recent post is being updated
-          if (this.taggedPosts.length != 0 && this.taggedPosts[0].id == this.newPost[0].id) {
-            this.taggedPosts[0] = this.newPost[0];
+          if (this.filteredPosts.length != 0 && this.filteredPosts[0].id == this.newPost[0].id) {
+            this.filteredPosts[0] = this.newPost[0];
           } else {
-            this.taggedPosts.push(this.newPost[0]);
+            this.filteredPosts.push(this.newPost[0]);
           }
         }
       }
@@ -591,51 +576,6 @@ export default {
   computed: {
     ...mapState('messageBoard', ['replies', 'course', 'newPost', 'newNotification']),
     ...mapState('user', ['user']),
-    getTaggedPosts() {
-      var finalTaggedPosts = this.taggedPosts;
-      // If filtering by files
-      if (this.filterByFiles) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) => post.files.length > 0);
-      }
-      // If filter by number of clips
-      if (this.filterByClips) {
-        finalTaggedPosts = finalTaggedPosts.slice().sort((a, b) => {
-          return a.clips - b.clips;
-        });
-      }
-
-      if (this.filterByNotes) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'notes'));
-      }
-      if (this.filterByExam) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'exam'));
-      }
-      if (this.filterByAssignment) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'assignment'));
-      }
-      if (this.filterByQuestions) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) => this.checkForTag(post, 'questions'));
-      }
-      return finalTaggedPosts;
-    },
-
-    getTags() {
-      var tags = [];
-      if (this.filterByNotes) {
-        tags.push('notes');
-      }
-      if (this.filterByExam) {
-        tags.push('exam');
-      }
-      if (this.filterByAssignment) {
-        tags.push('assignment');
-      }
-      if (this.filterByQuestions) {
-        tags.push('questions');
-      }
-      console.log(tags, 'compute tags');
-      return tags;
-    },
   },
 
   methods: {
@@ -657,7 +597,7 @@ export default {
         db.collection('posts')
           .where('course_id', '==', course)
           .orderBy('created_at', 'desc')
-          .limit(10)
+          .limit(5)
           .get()
           .then(function(querySnapshot) {
             //adds all documents besides the most recent as the the newPost() listener will get it
@@ -673,32 +613,6 @@ export default {
             console.log('Error getting documents: ', error);
           });
         this.posts = tempPosts;
-      }
-    },
-
-    //Loads the first 10 most recent posts
-    async loadTaggedPosts() {
-      this.scroll = true;
-      console.log('loading filtered posts');
-
-      const tempPosts = [];
-      if (this.course) {
-        db.collection('posts')
-          .where('course_id', '==', this.course)
-          .where('tags', 'array-contains', this.getTags[0])
-          .orderBy('created_at', 'desc')
-          .limit(10)
-          .get()
-          .then(function(querySnapshot) {
-            //adds all documents besides the most recent as the the newPost() listener will get it
-            querySnapshot.forEach(function(doc) {
-              tempPosts.unshift(doc.data());
-            });
-          })
-          .catch(function(error) {
-            console.log('Error getting documents: ', error);
-          });
-        this.taggedPosts = tempPosts;
       }
     },
 
@@ -738,6 +652,22 @@ export default {
         console.log('Error, Could not get current user');
       }
     },
+
+    //Check if the newPost matches the currently applied filters
+    filtersMatch(newPost) {
+      var isMatch = true;
+      if (
+        (!newPost.notesTag && this.filterByNotes) ||
+        (!newPost.examsTag && this.filterByExams) ||
+        (!newPost.assignmentsTag && this.filterByAssignments) ||
+        (!newPost.questionsTag && this.filterByQuestions) ||
+        this.filterByClips ||
+        (newPost.files.length == 0 && this.filterByFiles)
+      ) {
+        isMatch = false;
+      }
+      return isMatch;
+    },
     // If the file is an image
     isImage(file) {
       return file.src.includes('png');
@@ -768,6 +698,88 @@ export default {
       this.lastCourse = course_id;
     },
 
+    setQueryFilters() {
+      var queryPosts = db.collection('posts').where('course_id', '==', this.course);
+
+      if (this.filterByNotes) {
+        queryPosts = queryPosts.where('notesTag', '==', true);
+      }
+
+      if (this.filterByExams) {
+        queryPosts = queryPosts.where('examsTag', '==', true);
+      }
+
+      if (this.filterByAssignments) {
+        queryPosts = queryPosts.where('assignmentsTag', '==', true);
+      }
+
+      if (this.filterByQuestions) {
+        queryPosts = queryPosts.where('questionsTag', '==', true);
+      }
+
+      if (this.filterByFiles) {
+        queryPosts = queryPosts.where('hasFiles', '==', true);
+      }
+
+      if (this.filterByClips) {
+        queryPosts = queryPosts.orderBy('clips', 'desc');
+      } else {
+        queryPosts = queryPosts.orderBy('created_at', 'desc');
+      }
+
+      return queryPosts;
+    },
+
+    filterBy(type) {
+      if (type == 'notes') {
+        this.filterByNotes = !this.filterByNotes;
+      } else if (type == 'exams') {
+        this.filterByExams = !this.filterByExams;
+      } else if (type == 'assignments') {
+        this.filterByAssignments = !this.filterByAssignments;
+      } else if (type == 'questions') {
+        this.filterByQuestions = !this.filterByQuestions;
+      } else if (type == 'clips') {
+        this.filterByClips = !this.filterByClips;
+      } else if (type == 'files') {
+        this.filterByFiles = !this.filterByFiles;
+      }
+
+      if (
+        !this.filterByNotes &&
+        !this.filterByExams &&
+        !this.filterByAssignments &&
+        !this.filterByQuestions &&
+        !this.filterByClips &&
+        !this.filterByFiles
+      ) {
+        this.isFilter = false;
+        return;
+      }
+
+      this.isFilter = true;
+      this.lastScroll = null;
+
+      var queryPosts = this.setQueryFilters();
+      console.log(queryPosts, 'queryPOsts');
+
+      var tempPosts = [];
+      queryPosts
+        .limit(5)
+        .get()
+        .then(function(querySnapshot) {
+          //adds all documents besides the most recent as the the newPost() listener will get it
+          querySnapshot.forEach(function(doc) {
+            tempPosts.unshift(doc.data());
+          });
+        })
+        .catch(function(error) {
+          console.log('Error getting documents: ', error);
+        });
+
+      this.filteredPosts = tempPosts;
+      console.log(this.filteredPosts, 'filteredPOsts');
+    },
     // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
@@ -783,7 +795,11 @@ export default {
 
       //If the user scrolls to the top of the postsContainer
       if (scrollTop == 0 && this.lastScroll) {
-        this.appendPosts(scrollHeight);
+        if (this.isFilter) {
+          this.appendFilteredPosts(scrollHeight);
+        } else {
+          this.appendPosts(scrollHeight);
+        }
       }
 
       this.lastScroll = scrollTop;
@@ -838,55 +854,67 @@ export default {
       var container = this.$el.querySelector('.postContainer');
       const tempPosts = [];
 
-      //if there is no filter applied updates posts else update taggedPosts
-      if (!this.isFilter) {
-        if (this.course) {
-          await db
-            .collection('posts')
-            .where('course_id', '==', this.course)
-            .orderBy('created_at', 'desc')
-            .startAfter(this.posts[0].created_at)
-            .limit(10)
-            .get()
-            .then(function(querySnapshot) {
-              querySnapshot.forEach(function(doc) {
-                tempPosts.push(doc.data());
-              });
-            })
-            .catch(function(error) {
-              console.log('Error getting documents: ', error);
+      //if there is no filter applied updates posts else update filteredPosts
+      if (this.course) {
+        await db
+          .collection('posts')
+          .where('course_id', '==', this.course)
+          .orderBy('created_at', 'desc')
+          .startAfter(this.posts[0].created_at)
+          .limit(5)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              tempPosts.push(doc.data());
             });
+          })
+          .catch(function(error) {
+            console.log('Error getting documents: ', error);
+          });
 
-          //adds all the docs in tempPosts to the beggining of posts
-          for (const index in tempPosts) {
-            this.posts.unshift(tempPosts[index]);
-          }
-        }
-      } else {
-        if (this.course) {
-          await db
-            .collection('posts')
-            .where('course_id', '==', this.course)
-            .orderBy('created_at', 'desc')
-            .startAfter(this.taggedPosts[0].created_at)
-            .where('tags', 'array-contains', this.getTags[0])
-            .limit(10)
-            .get()
-            .then(function(querySnapshot) {
-              querySnapshot.forEach(function(doc) {
-                tempPosts.push(doc.data());
-              });
-            })
-            .catch(function(error) {
-              console.log('Error getting documents: ', error);
-            });
-
-          //adds all the docs in tempPosts to the beggining of posts
-          for (const index in tempPosts) {
-            this.taggedPosts.unshift(tempPosts[index]);
-          }
+        //adds all the docs in tempPosts to the beggining of posts
+        for (const index in tempPosts) {
+          this.posts.unshift(tempPosts[index]);
         }
       }
+
+      //scrolls to bottom
+      this.$nextTick(() => {
+        container.scrollTop = container.scrollHeight - scrollHeight;
+      });
+    },
+
+    async appendFilteredPosts(scrollHeight) {
+      var container = this.$el.querySelector('.postContainer');
+      const tempPosts = [];
+
+      var queryPosts = this.setQueryFilters();
+
+      this.posts[0].created_at;
+      console.log(this.filteredPosts[0]);
+      if (this.course) {
+        await queryPosts
+          .startAfter(this.filteredPosts[0].created_at)
+          .limit(5)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              tempPosts.push(doc.data());
+            });
+          })
+          .catch(function(error) {
+            console.log('Error getting documents: ', error);
+          });
+
+        console.log(tempPosts, 'tempPosts');
+        //adds all the docs in tempPosts to the beggining of posts
+        for (const index in tempPosts) {
+          console.log('hey');
+          this.filteredPosts.unshift(tempPosts[index]);
+        }
+      }
+
+      //scrolls to bottom
       this.$nextTick(() => {
         container.scrollTop = container.scrollHeight - scrollHeight;
       });
@@ -986,13 +1014,13 @@ export default {
         return this.posts.filter((post) => post.content.match(regexp));
       }
     },
+
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
-        this.setTags();
         this.createPost(this.post);
 
         //if the post is a reply -> adds the reply to the post
@@ -1012,10 +1040,10 @@ export default {
 
         //Resets tags
         this.notesTag = false;
-        this.examTag = false;
+        this.examsTag = false;
         this.notesTag = false;
         this.questionsTag = false;
-        this.assignmentTag = false;
+        this.assignmentsTag = false;
 
         //Resets the post
         this.post = {
@@ -1040,25 +1068,6 @@ export default {
         }
       }
       this.deletePost({ post_id: post_id, name: name });
-    },
-
-    //If the user adds a tag
-    setTags() {
-      if (this.notesTag) {
-        this.post.tags.push('notes');
-      }
-
-      if (this.examTag) {
-        this.post.tags.push('exam');
-      }
-
-      if (this.assignmentTag) {
-        this.post.tags.push('assignment');
-      }
-
-      if (this.questionsTag) {
-        this.post.tags.push('questions');
-      }
     },
 
     //checks if a post has the specified tag
