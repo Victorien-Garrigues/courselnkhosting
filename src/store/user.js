@@ -8,7 +8,6 @@ const state = {
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    console.log('yo');
     db.collection('users')
       .doc(user.uid)
       .get()

@@ -371,15 +371,19 @@ export default {
     replyingToId: '', //The id of the user you are replying to
     replyingMessage: '', //The message of the post your are replying to
     listReplies: '', //id of post in which to list replies for
+
     lastCourse: null, //The previous course that the user was on
     userCount: null, //the number of users in the selected course
     otherCourses: [], //The courses that the user is not currently on
+
     userId: '', //the Id of the current user
     currentUser: null, //the current user
-    posts: [], //the loaded posts
-    filteredPosts: [], //the loaded tagged posts
+
     scroll: true, //whether to scroll to the bottom on updated()
     lastScroll: null, //the previous scroll position
+
+    posts: [], //the loaded posts
+    filteredPosts: [], //the loaded tagged posts
     isFilter: false, //If a filter is applied
 
     //tags
@@ -408,6 +412,7 @@ export default {
       isReply: false, //if the post is a reply
       parent_id: '', //the id of the post being replied to
       course_id: '', //the id of the selected course
+
       //tags applied to the post
       notesTag: false,
       examsTag: false,
@@ -438,6 +443,7 @@ export default {
       });
     },
 
+    //Watches filteredPosts collection and scrolls if scroll is true
     filteredPosts: function() {
       this.$nextTick(() => {
         if (this.scroll) {
@@ -467,6 +473,7 @@ export default {
         this.loadPosts(this.course);
         this.updateOtherCourses(this.course);
 
+        //Get User count
         db.collection('courses')
           .doc(this.course)
           .get()
@@ -476,13 +483,11 @@ export default {
       }
     },
 
-    //the new post is added to posts
+    //When a newPost is added to your current course
     newPost() {
-      console.log(this.newPost[0], 'newPost');
-
       if (this.newPost[0]) {
         //If the most recent post is being updated
-        if (this.posts.length != 0 && this.posts[0].id == this.newPost[0].id) {
+        if (this.posts.length != 0 && this.posts[this.posts.length - 1].id === this.newPost[0].id) {
           this.posts[0] = this.newPost[0];
         } else {
           this.posts.push(this.newPost[0]);
@@ -491,7 +496,10 @@ export default {
         //Check to see if there are tags applied and if to push to filteredposts
         if (this.filtersMatch(this.newPost[0])) {
           //If the most recent post is being updated
-          if (this.filteredPosts.length != 0 && this.filteredPosts[0].id == this.newPost[0].id) {
+          if (
+            this.filteredPosts.length != 0 &&
+            this.filteredPosts[this.filteredPosts.length - 1].id === this.newPost[0].id
+          ) {
             this.filteredPosts[0] = this.newPost[0];
           } else {
             this.filteredPosts.push(this.newPost[0]);
@@ -589,7 +597,7 @@ export default {
     ]),
     ...mapActions('user', ['logout']),
 
-    //Loads the first 10 most recent posts
+    //Loads the first 20 most recent posts
     async loadPosts(course) {
       const tempPosts = [];
       var first = 0;
@@ -731,6 +739,7 @@ export default {
     },
 
     filterBy(type) {
+      this.scroll = true;
       if (type == 'notes') {
         this.filterByNotes = !this.filterByNotes;
       } else if (type == 'exams') {
@@ -744,7 +753,6 @@ export default {
       } else if (type == 'files') {
         this.filterByFiles = !this.filterByFiles;
       }
-
       if (
         !this.filterByNotes &&
         !this.filterByExams &&
@@ -780,6 +788,7 @@ export default {
       this.filteredPosts = tempPosts;
       console.log(this.filteredPosts, 'filteredPOsts');
     },
+
     // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector('.postContainer');
@@ -807,6 +816,7 @@ export default {
 
     // Adds clip to a post
     async addClip(post_id, index) {
+      var postsCollection = this.isFilter ? this.filteredPosts : this.posts;
       var alreadyClipped = false;
       db.collection('users')
         .doc(this.userId)
@@ -814,14 +824,14 @@ export default {
         .then((doc) => {
           for (const clip in doc.data().clips) {
             //Checks if the user has already clipped the post
-            if (doc.data().clips[clip] == post_id) {
+            if (doc.data().clips[clip] === post_id) {
               alreadyClipped = true;
             }
           }
 
           // If the user hasnt clipped the post then clip it else unclip it
           if (!alreadyClipped) {
-            this.posts[index].clips += 1;
+            postsCollection[index].clips += 1;
             db.collection('posts')
               .doc(post_id)
               .update({
@@ -833,7 +843,7 @@ export default {
                 clips: firebase.firestore.FieldValue.arrayUnion(post_id),
               });
           } else {
-            this.posts[index].clips -= 1;
+            postsCollection[index].clips -= 1;
 
             db.collection('posts')
               .doc(post_id)
@@ -849,7 +859,7 @@ export default {
         });
     },
 
-    //Appends the next 10 posts to posts
+    //Appends the next 20 posts to posts
     async appendPosts(scrollHeight) {
       var container = this.$el.querySelector('.postContainer');
       const tempPosts = [];
@@ -906,10 +916,8 @@ export default {
             console.log('Error getting documents: ', error);
           });
 
-        console.log(tempPosts, 'tempPosts');
         //adds all the docs in tempPosts to the beggining of posts
         for (const index in tempPosts) {
-          console.log('hey');
           this.filteredPosts.unshift(tempPosts[index]);
         }
       }
@@ -1060,11 +1068,12 @@ export default {
 
     onDelete(post_id) {
       const name = this.currentUser.firstName + ' ' + this.currentUser.lastName;
-      for (const index in this.posts) {
-        if (this.posts[index].id == post_id) {
-          this.posts[index].files = [];
-          this.posts[index].content = name + ' deleted this post';
-          this.posts[index].deleted = true;
+      const postsCollection = this.isFilter ? this.filteredPosts : this.posts;
+      for (const index in postsCollection) {
+        if (postsCollection[index].id == post_id) {
+          postsCollection[index].files = [];
+          postsCollection[index].content = name + ' deleted this post';
+          postsCollection[index].deleted = true;
         }
       }
       this.deletePost({ post_id: post_id, name: name });
