@@ -8,6 +8,7 @@ const state = {
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
+    console.log('yo');
     db.collection('users')
       .doc(user.uid)
       .get()
@@ -32,6 +33,10 @@ const mutations = {
 
   setCourses(state, courses) {
     state.user.courses = courses;
+  },
+
+  setFaculties(state, faculties) {
+    state.user.faculties = faculties;
   },
 };
 
