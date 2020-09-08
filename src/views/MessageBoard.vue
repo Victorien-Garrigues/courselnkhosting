@@ -52,236 +52,219 @@
       <div class="column left">
         <Courses />
       </div>
+    </div>
 
-      <!-- SECOND COLUMN -->
-      <div class="column middle">
-        <!-- start of chat container design -->
-        <div @scroll="onScroll" class="container is-fluid postContainer">
-          <div v-if="!isFilter" class="posts is-multiline">
-            <div v-for="(post, index) in posts" :key="index">
-              <!-- this is the post card -->
+    <!-- SECOND COLUMN -->
+    <div class="column middle">
+      <!-- start of chat container design -->
+      <div @scroll="onScroll" class="container is-fluid postContainer">
+        <div v-if="!isFilter" class="posts is-multiline">
+          <div v-for="(post, index) in posts" :key="index">
+            <!-- this is the post card -->
 
-              <Post
-                :post="post"
-                :index="index"
-                :currentUser="currentUser"
-                @addClip="addClip"
-                @onDelete="onDelete"
-                @reply="reply"
-                @openGallery="openGallery"
-                @viewReplys="viewReplies"
-              />
+            <Post
+              :post="post"
+              :index="index"
+              :currentUser="currentUser"
+              @addClip="addClip"
+              @onDelete="onDelete"
+              @reply="reply"
+              @openGallery="openGallery"
+              @viewReplys="viewReplies"
+            />
 
-              <div v-if="listReplies == post.id">
-                <!--  Start of List Of  Replies -->
-                <div v-for="(reply, index) in replies" :key="index" class="replies">
-                  <Post
-                    :post="reply"
-                    :index="index"
-                    :currentUser="currentUser"
-                    @addClip="addClip"
-                    @onDelete="onDelete"
-                    @reply="reply"
-                    @openGallery="openGallery"
-                    @viewReplys="viewReplies"
-                  />
-                </div>
-                <!--  End of List Of  Replies -->
-              </div>
-            </div>
-          </div>
-
-          <!-- If there is a filter applied -->
-          <div v-else>
-            <div v-for="(post, index) in getTaggedPosts" :key="index">
-              <!-- this is the post card -->
-              <Post
-                :post="post"
-                :index="index"
-                :currentUser="currentUser"
-                @addClip="addClip"
-                @onDelete="onDelete"
-                @reply="reply"
-                @openGallery="openGallery"
-                @viewReplys="viewReplies"
-              />
-
-              <div v-if="listReplies == post.id">
-                <!--  Start of List Of  Replies -->
-                <div v-for="(reply, index) in replies" :key="index" class="replies">
-                  <Post
-                    :post="reply"
-                    :index="index"
-                    :currentUser="currentUser"
-                    @addClip="addClip"
-                    @onDelete="onDelete"
-                    @reply="reply"
-                    @openGallery="openGallery"
-                    @viewReplys="viewReplies"
-                  />
-                </div>
+            <div v-if="listReplies == post.id">
+              <!--  Start of List Of  Replies -->
+              <div v-for="(reply, index) in replies" :key="index" class="replies">
+                <Post
+                  :post="reply"
+                  :index="index"
+                  :currentUser="currentUser"
+                  @addClip="addClip"
+                  @onDelete="onDelete"
+                  @reply="reply"
+                  @openGallery="openGallery"
+                  @viewReplys="viewReplies"
+                />
               </div>
               <!--  End of List Of  Replies -->
             </div>
           </div>
         </div>
 
-        <!-- uploading files (outside of table) -->
-        <vue-dropzone
-          v-if="showDropArea || fileDropped"
-          ref="imgDropZone"
-          id="dropzone"
-          :options="dropzoneOptions"
-          @vdropzone-drop="fileDropped = true"
-          @vdropzone-complete="afterComplete"
-        ></vue-dropzone>
+        <!-- If there is a filter applied -->
+        <div v-else>
+          <div v-for="(post, index) in filteredPosts" :key="index">
+            <!-- this is the post card -->
+            <Post
+              :post="reply"
+              :index="index"
+              :currentUser="currentUser"
+              @addClip="addClip"
+              @onDelete="onDelete"
+              @reply="reply"
+              @openGallery="openGallery"
+              @viewReplys="viewReplies"
+            />
+          </div>
+        </div>
+      </div>
 
-        <div class="type-menu">
-          <div class="flex-container3">
-            <label for="file-upload" class="custom-file-upload">
-              <i class="fa fa-cloud-upload"></i>
-            </label>
+      <!-- uploading files (outside of table) -->
+      <vue-dropzone
+        v-if="showDropArea || fileDropped"
+        ref="imgDropZone"
+        id="dropzone"
+        :options="dropzoneOptions"
+        @vdropzone-drop="fileDropped = true"
+        @vdropzone-complete="afterComplete"
+      ></vue-dropzone>
 
-            <!-- if the post has files -->
-            <div v-if="post.files.length > 0" class="image-div">
-              <div style="display: inline-block" v-for="file in post.files" :key="file.src">
-                <img :src="file.src" class="image" />
-              </div>
+      <div class="type-menu">
+        <div class="flex-container3">
+          <label for="file-upload" class="custom-file-upload">
+            <i class="fa fa-cloud-upload"></i>
+          </label>
+
+          <!-- if the post has files -->
+          <div v-if="post.files.length > 0" class="image-div">
+            <div style="display: inline-block" v-for="file in post.files" :key="file.src">
+              <img :src="file.src" class="image" />
             </div>
+          </div>
 
-            <div class="wrapper buttons are-small">
-              <!-- If the post is a reply -->
-              <div style="botton: 0" v-if="post.isReply" class="reply">
-                <!-- Cancel reply button -->
-                <div class="flex-reply">
-                  <div class="replyingText">
-                    <p style="color: black">Replying to {{ replyingTo }}</p>
-                    <p>{{ replyingMessage }}</p>
-                  </div>
-                  <div class="flex-remove">
-                    <button @click="post.isReply = false" class="remButton">X</button>
-                  </div>
+          <div class="wrapper buttons are-small">
+            <!-- If the post is a reply -->
+            <div style="botton: 0" v-if="post.isReply" class="reply">
+              <!-- Cancel reply button -->
+              <div class="flex-reply">
+                <div class="replyingText">
+                  <p style="color: black">Replying to {{ replyingTo }}</p>
+                  <p>{{ replyingMessage }}</p>
+                </div>
+                <div class="flex-remove">
+                  <button @click="post.isReply = false" class="remButton">X</button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- table -->
-          <div class="flex-container2">
-            <!-- replies and docs -->
-            <div class="chat-left">
-              <!-- tags -->
-              <div style="display: flex" class="tags">
-                <button
-                  v-if="notesTag==false"
-                  @click.prevent="notesTag = !notesTag"
-                  id="notesFilter"
-                  :class="{ clicked: notesTag }"
-                  title="add note tag"
-                ></button>
-                <button
-                  v-if="notesTag==true"
-                  @click.prevent="notesTag = !notesTag"
-                  id="notesFilter-clicked"
-                  :class="{ clicked: notesTag }"
-                  title="remove note tag"
-                ></button>
-
-                <button
-                  v-if="questionsTag==false"
-                  @click.prevent="questionsTag = !questionsTag"
-                  id="questionsFilter"
-                  :class="{ clicked: questionsTag }"
-                  title="add question tag"
-                ></button>
-                <button
-                  v-if="questionsTag==true"
-                  @click.prevent="questionsTag = !questionsTag"
-                  id="questionsFilter-clicked"
-                  :class="{ clicked: questionsTag }"
-                  title="remove question tag"
-                ></button>
-
-                <button
-                  v-if="examTag==false"
-                  @click.prevent="examTag = !examTag"
-                  id="examFilter"
-                  :class="{ clicked: examTag }"
-                  title="add exam tag"
-                ></button>
-                <button
-                  v-if="examTag==true"
-                  @click.prevent="examTag = !examTag"
-                  id="examFilter-clicked"
-                  :class="{ clicked: examTag }"
-                  title="remove exam tag"
-                ></button>
-
-                <button
-                  v-if="assignmentTag==false"
-                  @click.prevent="assignmentTag = !assignmentTag"
-                  id="assignmentFilter"
-                  :class="{ clicked: assignmentTag }"
-                  title="add assignment tag"
-                  style="margin-top: 8px"
-                ></button>
-                <button
-                  v-if="assignmentTag==true"
-                  @click.prevent="assignmentTag = !assignmentTag"
-                  id="assignmentFilter-clicked"
-                  :class="{ clicked: assignmentTag }"
-                  title="remove assignment tag"
-                  style="margin-top: 8px"
-                ></button>
-              </div>
-            </div>
-
-            <div class="chat-mid">
-              <!-- post itself -->
-              <div class="wrapper">
-                <form>
-                  <!-- Text input area -->
-                  <div>
-                    <ResizeAuto>
-                      <template v-slot:default="{ resize }">
-                        <textarea
-                          v-model="post.content"
-                          rows="1"
-                          @input="resize"
-                          placeholder="Have something to say?"
-                        ></textarea>
-                      </template>
-                    </ResizeAuto>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div class="chat-right">
-              <!-- Dropzone with attachment icon beside text area -->
-              <vue-dropzone
-                ref="imgDropZone"
-                id="attachDropzone"
-                class="docButton"
-                :include-styling="false"
-                :options="dropzoneOptions"
-                @vdropzone-complete="afterAttach"
-              ></vue-dropzone>
-            </div>
-
-            <div class="chat-right">
-              <!-- Add Post Button -->
+        <!-- table -->
+        <div class="flex-container2">
+          <!-- replies and docs -->
+          <div class="chat-left">
+            <!-- tags -->
+            <div style="display: flex" class="tags">
               <button
-                @click="onCreatePost()"
-                class="sendButton is-success bottom"
-                style="margin-left:-15px"
+                v-if="notesTag==false"
+                @click.prevent="notesTag = !notesTag"
+                id="notesFilter"
+                :class="{ clicked: notesTag }"
+                title="add note tag"
+              ></button>
+              <button
+                v-if="notesTag==true"
+                @click.prevent="notesTag = !notesTag"
+                id="notesFilter-clicked"
+                :class="{ clicked: notesTag }"
+                title="remove note tag"
+              ></button>
+
+              <button
+                v-if="questionsTag==false"
+                @click.prevent="questionsTag = !questionsTag"
+                id="questionsFilter"
+                :class="{ clicked: questionsTag }"
+                title="add question tag"
+              ></button>
+              <button
+                v-if="questionsTag==true"
+                @click.prevent="questionsTag = !questionsTag"
+                id="questionsFilter-clicked"
+                :class="{ clicked: questionsTag }"
+                title="remove question tag"
+              ></button>
+
+              <button
+                v-if="examsTag==false"
+                @click.prevent="examsTag = !examsTag"
+                id="examsFilter"
+                :class="{ clicked: examsTag }"
+                title="add exam tag"
+              ></button>
+              <button
+                v-if="examsTag==true"
+                @click.prevent="examsTag = !examsTag"
+                id="examsFilter-clicked"
+                :class="{ clicked: examsTag }"
+                title="remove exam tag"
+              ></button>
+
+              <button
+                v-if="assignmentsTag==false"
+                @click.prevent="assignmentsTag = !assignmentsTag"
+                id="assignmentsFilter"
+                :class="{ clicked: assignmentsTag }"
+                title="add assignment tag"
+                style="margin-top: 8px"
+              ></button>
+              <button
+                v-if="assignmentsTag==true"
+                @click.prevent="assignmentTag = !assignmentsTag"
+                id="assignmentsFilter-clicked"
+                :class="{ clicked: assignmentsTag }"
+                title="remove assignment tag"
+                style="margin-top: 8px"
               ></button>
             </div>
-
-            <div class="chat-right" style="padding:20px"></div>
-
-            <div id="bottom"></div>
           </div>
+
+          <div class="chat-mid">
+            <!-- post itself -->
+            <div class="wrapper">
+              <form>
+                <!-- Text input area -->
+                <div>
+                  <ResizeAuto>
+                    <template v-slot:default="{ resize }">
+                      <textarea
+                        v-model="post.content"
+                        rows="1"
+                        @input="resize"
+                        placeholder="Have something to say?"
+                      ></textarea>
+                    </template>
+                  </ResizeAuto>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="chat-right">
+            <!-- Dropzone with attachment icon beside text area -->
+            <vue-dropzone
+              ref="imgDropZone"
+              id="attachDropzone"
+              class="docButton"
+              :include-styling="false"
+              :options="dropzoneOptions"
+              @vdropzone-complete="afterAttach"
+            ></vue-dropzone>
+          </div>
+
+          <div class="chat-right">
+            <!-- Add Post Button -->
+            <button
+              @click="onCreatePost()"
+              class="sendButton is-success bottom"
+              style="margin-left:-15px"
+            ></button>
+          </div>
+
+          <div class="chat-right" style="padding:20px"></div>
+
+          <div id="bottom"></div>
         </div>
       </div>
     </div>
@@ -408,30 +391,28 @@ export default {
     replyingToId: "", //The id of the user you are replying to
     replyingMessage: "", //The message of the post your are replying to
     listReplies: "", //id of post in which to list replies for
+
     lastCourse: null, //The previous course that the user was on
     userCount: null, //the number of users in the selected course
     otherCourses: [], //The courses that the user is not currently on
+
     userId: "", //the Id of the current user
     currentUser: null, //the current user
-    posts: [], //the loaded posts
-    taggedPosts: [], //the loaded tagged posts
+
     scroll: true, //whether to scroll to the bottom on updated()
     lastScroll: null, //the previous scroll position
 
+    posts: [], //the loaded posts
+    filteredPosts: [], //the loaded tagged posts
+    isFilter: false, //If a filter is applied
+
     //tags
-    isFilter: false,
     filterByFiles: false,
     filterByClips: false,
     filterByNotes: false,
-    filterByExam: false,
-    filterByAssignment: false,
+    filterByExams: false,
+    filterByAssignments: false,
     filterByQuestions: false,
-
-    //Which Tags are clicked
-    notesTag: false,
-    examTag: false,
-    assignmentTag: false,
-    questionsTag: false,
 
     //Drop zone options
     dropzoneOptions: {
@@ -451,7 +432,12 @@ export default {
       isReply: false, //if the post is a reply
       parent_id: "", //the id of the post being replied to
       course_id: "", //the id of the selected course
-      tags: [], //tags applied to the post
+
+      //tags applied to the post
+      notesTag: false,
+      examsTag: false,
+      assignmentsTag: false,
+      questionsTag: false,
     },
   }),
 
@@ -477,31 +463,13 @@ export default {
       });
     },
 
-    taggedPosts: function () {
+    //Watches filteredPosts collection and scrolls if scroll is true
+    filteredPosts: function () {
       this.$nextTick(() => {
-        console.log(this.scroll);
         if (this.scroll) {
           this.scrollToBottom();
         }
       });
-    },
-
-    getTags() {
-      if (this.getTags.length == 0) {
-        this.isFilter = false;
-      } else {
-        this.lastScroll = null;
-        this.isFilter = true;
-      }
-      if (this.getTags.length < 2) {
-        this.loadTaggedPosts();
-      }
-    },
-
-    filterByClips() {
-      if (this.getTags.length == 0) {
-        console.log("yp");
-      }
     },
 
     //Changes this.currentUser when user changes
@@ -525,6 +493,7 @@ export default {
         this.loadPosts(this.course);
         this.updateOtherCourses(this.course);
 
+        //Get User count
         db.collection("courses")
           .doc(this.course)
           .get()
@@ -534,31 +503,30 @@ export default {
       }
     },
 
-    //the new post is added to posts
+    //When a newPost is added to your current course
     newPost() {
-      console.log(this.newPost[0], "newPost");
-
       if (this.newPost[0]) {
         //If the most recent post is being updated
-        if (this.posts.length != 0 && this.posts[0].id == this.newPost[0].id) {
+        if (
+          this.posts.length != 0 &&
+          this.posts[this.posts.length - 1].id === this.newPost[0].id
+        ) {
           this.posts[0] = this.newPost[0];
         } else {
           this.posts.push(this.newPost[0]);
         }
 
-        //Check to see if there are tags applied and if to push to taggedPosts
-        const tags = JSON.parse(JSON.stringify(this.newPost[0].tags));
-        let matchedTags = (tags, appliedTags) =>
-          appliedTags.every((tag) => tags.includes(tag));
-        if (matchedTags(tags, this.getTags)) {
+        //Check to see if there are tags applied and if to push to filteredposts
+        if (this.filtersMatch(this.newPost[0])) {
           //If the most recent post is being updated
           if (
-            this.taggedPosts.length != 0 &&
-            this.taggedPosts[0].id == this.newPost[0].id
+            this.filteredPosts.length != 0 &&
+            this.filteredPosts[this.filteredPosts.length - 1].id ===
+              this.newPost[0].id
           ) {
-            this.taggedPosts[0] = this.newPost[0];
+            this.filteredPosts[0] = this.newPost[0];
           } else {
-            this.taggedPosts.push(this.newPost[0]);
+            this.filteredPosts.push(this.newPost[0]);
           }
         }
       }
@@ -643,61 +611,6 @@ export default {
       "newNotification",
     ]),
     ...mapState("user", ["user"]),
-    getTaggedPosts() {
-      var finalTaggedPosts = this.taggedPosts;
-      // If filtering by files
-      if (this.filterByFiles) {
-        finalTaggedPosts = finalTaggedPosts.filter(
-          (post) => post.files.length > 0
-        );
-      }
-      // If filter by number of clips
-      if (this.filterByClips) {
-        finalTaggedPosts = finalTaggedPosts.slice().sort((a, b) => {
-          return a.clips - b.clips;
-        });
-      }
-
-      if (this.filterByNotes) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) =>
-          this.checkForTag(post, "notes")
-        );
-      }
-      if (this.filterByExam) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) =>
-          this.checkForTag(post, "exam")
-        );
-      }
-      if (this.filterByAssignment) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) =>
-          this.checkForTag(post, "assignment")
-        );
-      }
-      if (this.filterByQuestions) {
-        finalTaggedPosts = finalTaggedPosts.filter((post) =>
-          this.checkForTag(post, "questions")
-        );
-      }
-      return finalTaggedPosts;
-    },
-
-    getTags() {
-      var tags = [];
-      if (this.filterByNotes) {
-        tags.push("notes");
-      }
-      if (this.filterByExam) {
-        tags.push("exam");
-      }
-      if (this.filterByAssignment) {
-        tags.push("assignment");
-      }
-      if (this.filterByQuestions) {
-        tags.push("questions");
-      }
-      console.log(tags, "compute tags");
-      return tags;
-    },
   },
 
   methods: {
@@ -711,7 +624,7 @@ export default {
     ]),
     ...mapActions("user", ["logout"]),
 
-    //Loads the first 10 most recent posts
+    //Loads the first 20 most recent posts
     async loadPosts(course) {
       const tempPosts = [];
       var first = 0;
@@ -719,7 +632,7 @@ export default {
         db.collection("posts")
           .where("course_id", "==", course)
           .orderBy("created_at", "desc")
-          .limit(10)
+          .limit(5)
           .get()
           .then(function (querySnapshot) {
             //adds all documents besides the most recent as the the newPost() listener will get it
@@ -735,32 +648,6 @@ export default {
             console.log("Error getting documents: ", error);
           });
         this.posts = tempPosts;
-      }
-    },
-
-    //Loads the first 10 most recent posts
-    async loadTaggedPosts() {
-      this.scroll = true;
-      console.log("loading filtered posts");
-
-      const tempPosts = [];
-      if (this.course) {
-        db.collection("posts")
-          .where("course_id", "==", this.course)
-          .where("tags", "array-contains", this.getTags[0])
-          .orderBy("created_at", "desc")
-          .limit(10)
-          .get()
-          .then(function (querySnapshot) {
-            //adds all documents besides the most recent as the the newPost() listener will get it
-            querySnapshot.forEach(function (doc) {
-              tempPosts.unshift(doc.data());
-            });
-          })
-          .catch(function (error) {
-            console.log("Error getting documents: ", error);
-          });
-        this.taggedPosts = tempPosts;
       }
     },
 
@@ -798,6 +685,22 @@ export default {
         console.log("Error, Could not get current user");
       }
     },
+
+    //Check if the newPost matches the currently applied filters
+    filtersMatch(newPost) {
+      var isMatch = true;
+      if (
+        (!newPost.notesTag && this.filterByNotes) ||
+        (!newPost.examsTag && this.filterByExams) ||
+        (!newPost.assignmentsTag && this.filterByAssignments) ||
+        (!newPost.questionsTag && this.filterByQuestions) ||
+        this.filterByClips ||
+        (newPost.files.length == 0 && this.filterByFiles)
+      ) {
+        isMatch = false;
+      }
+      return isMatch;
+    },
     // If the file is an image
     isImage(file) {
       return file.src.includes("png");
@@ -826,6 +729,91 @@ export default {
       this.lastCourse = course_id;
     },
 
+    setQueryFilters() {
+      var queryPosts = db
+        .collection("posts")
+        .where("course_id", "==", this.course);
+
+      if (this.filterByNotes) {
+        queryPosts = queryPosts.where("notesTag", "==", true);
+      }
+
+      if (this.filterByExams) {
+        queryPosts = queryPosts.where("examsTag", "==", true);
+      }
+
+      if (this.filterByAssignments) {
+        queryPosts = queryPosts.where("assignmentsTag", "==", true);
+      }
+
+      if (this.filterByQuestions) {
+        queryPosts = queryPosts.where("questionsTag", "==", true);
+      }
+
+      if (this.filterByFiles) {
+        queryPosts = queryPosts.where("hasFiles", "==", true);
+      }
+
+      if (this.filterByClips) {
+        queryPosts = queryPosts.orderBy("clips", "desc");
+      } else {
+        queryPosts = queryPosts.orderBy("created_at", "desc");
+      }
+
+      return queryPosts;
+    },
+
+    filterBy(type) {
+      this.scroll = true;
+      if (type == "notes") {
+        this.filterByNotes = !this.filterByNotes;
+      } else if (type == "exams") {
+        this.filterByExams = !this.filterByExams;
+      } else if (type == "assignments") {
+        this.filterByAssignments = !this.filterByAssignments;
+      } else if (type == "questions") {
+        this.filterByQuestions = !this.filterByQuestions;
+      } else if (type == "clips") {
+        this.filterByClips = !this.filterByClips;
+      } else if (type == "files") {
+        this.filterByFiles = !this.filterByFiles;
+      }
+      if (
+        !this.filterByNotes &&
+        !this.filterByExams &&
+        !this.filterByAssignments &&
+        !this.filterByQuestions &&
+        !this.filterByClips &&
+        !this.filterByFiles
+      ) {
+        this.isFilter = false;
+        return;
+      }
+
+      this.isFilter = true;
+      this.lastScroll = null;
+
+      var queryPosts = this.setQueryFilters();
+      console.log(queryPosts, "queryPOsts");
+
+      var tempPosts = [];
+      queryPosts
+        .limit(5)
+        .get()
+        .then(function (querySnapshot) {
+          //adds all documents besides the most recent as the the newPost() listener will get it
+          querySnapshot.forEach(function (doc) {
+            tempPosts.unshift(doc.data());
+          });
+        })
+        .catch(function (error) {
+          console.log("Error getting documents: ", error);
+        });
+
+      this.filteredPosts = tempPosts;
+      console.log(this.filteredPosts, "filteredPOsts");
+    },
+
     // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector(".postContainer");
@@ -841,7 +829,11 @@ export default {
 
       //If the user scrolls to the top of the postsContainer
       if (scrollTop == 0 && this.lastScroll) {
-        this.appendPosts(scrollHeight);
+        if (this.isFilter) {
+          this.appendFilteredPosts(scrollHeight);
+        } else {
+          this.appendPosts(scrollHeight);
+        }
       }
 
       this.lastScroll = scrollTop;
@@ -849,6 +841,7 @@ export default {
 
     // Adds clip to a post
     async addClip(post_id, index) {
+      var postsCollection = this.isFilter ? this.filteredPosts : this.posts;
       var alreadyClipped = false;
       db.collection("users")
         .doc(this.userId)
@@ -856,14 +849,14 @@ export default {
         .then((doc) => {
           for (const clip in doc.data().clips) {
             //Checks if the user has already clipped the post
-            if (doc.data().clips[clip] == post_id) {
+            if (doc.data().clips[clip] === post_id) {
               alreadyClipped = true;
             }
           }
 
           // If the user hasnt clipped the post then clip it else unclip it
           if (!alreadyClipped) {
-            this.posts[index].clips += 1;
+            postsCollection[index].clips += 1;
             db.collection("posts")
               .doc(post_id)
               .update({
@@ -875,7 +868,7 @@ export default {
                 clips: firebase.firestore.FieldValue.arrayUnion(post_id),
               });
           } else {
-            this.posts[index].clips -= 1;
+            postsCollection[index].clips -= 1;
 
             db.collection("posts")
               .doc(post_id)
@@ -891,60 +884,70 @@ export default {
         });
     },
 
-    //Appends the next 10 posts to posts
+    //Appends the next 20 posts to posts
     async appendPosts(scrollHeight) {
       var container = this.$el.querySelector(".postContainer");
       const tempPosts = [];
 
-      //if there is no filter applied updates posts else update taggedPosts
-      if (!this.isFilter) {
-        if (this.course) {
-          await db
-            .collection("posts")
-            .where("course_id", "==", this.course)
-            .orderBy("created_at", "desc")
-            .startAfter(this.posts[0].created_at)
-            .limit(10)
-            .get()
-            .then(function (querySnapshot) {
-              querySnapshot.forEach(function (doc) {
-                tempPosts.push(doc.data());
-              });
-            })
-            .catch(function (error) {
-              console.log("Error getting documents: ", error);
+      //if there is no filter applied updates posts else update filteredPosts
+      if (this.course) {
+        await db
+          .collection("posts")
+          .where("course_id", "==", this.course)
+          .orderBy("created_at", "desc")
+          .startAfter(this.posts[0].created_at)
+          .limit(5)
+          .get()
+          .then(function (querySnapshot) {
+            querySnapshot.forEach(function (doc) {
+              tempPosts.push(doc.data());
             });
+          })
+          .catch(function (error) {
+            console.log("Error getting documents: ", error);
+          });
 
-          //adds all the docs in tempPosts to the beggining of posts
-          for (const index in tempPosts) {
-            this.posts.unshift(tempPosts[index]);
-          }
-        }
-      } else {
-        if (this.course) {
-          await db
-            .collection("posts")
-            .where("course_id", "==", this.course)
-            .orderBy("created_at", "desc")
-            .startAfter(this.taggedPosts[0].created_at)
-            .where("tags", "array-contains", this.getTags[0])
-            .limit(10)
-            .get()
-            .then(function (querySnapshot) {
-              querySnapshot.forEach(function (doc) {
-                tempPosts.push(doc.data());
-              });
-            })
-            .catch(function (error) {
-              console.log("Error getting documents: ", error);
-            });
-
-          //adds all the docs in tempPosts to the beggining of posts
-          for (const index in tempPosts) {
-            this.taggedPosts.unshift(tempPosts[index]);
-          }
+        //adds all the docs in tempPosts to the beggining of posts
+        for (const index in tempPosts) {
+          this.posts.unshift(tempPosts[index]);
         }
       }
+
+      //scrolls to bottom
+      this.$nextTick(() => {
+        container.scrollTop = container.scrollHeight - scrollHeight;
+      });
+    },
+
+    async appendFilteredPosts(scrollHeight) {
+      var container = this.$el.querySelector(".postContainer");
+      const tempPosts = [];
+
+      var queryPosts = this.setQueryFilters();
+
+      this.posts[0].created_at;
+      console.log(this.filteredPosts[0]);
+      if (this.course) {
+        await queryPosts
+          .startAfter(this.filteredPosts[0].created_at)
+          .limit(5)
+          .get()
+          .then(function (querySnapshot) {
+            querySnapshot.forEach(function (doc) {
+              tempPosts.push(doc.data());
+            });
+          })
+          .catch(function (error) {
+            console.log("Error getting documents: ", error);
+          });
+
+        //adds all the docs in tempPosts to the beggining of posts
+        for (const index in tempPosts) {
+          this.filteredPosts.unshift(tempPosts[index]);
+        }
+      }
+
+      //scrolls to bottom
       this.$nextTick(() => {
         container.scrollTop = container.scrollHeight - scrollHeight;
       });
@@ -1044,13 +1047,13 @@ export default {
         return this.posts.filter((post) => post.content.match(regexp));
       }
     },
+
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
-        this.setTags();
         this.createPost(this.post);
 
         //if the post is a reply -> adds the reply to the post
@@ -1070,10 +1073,10 @@ export default {
 
         //Resets tags
         this.notesTag = false;
-        this.examTag = false;
+        this.examsTag = false;
         this.notesTag = false;
         this.questionsTag = false;
-        this.assignmentTag = false;
+        this.assignmentsTag = false;
 
         //Resets the post
         this.post = {
@@ -1090,33 +1093,15 @@ export default {
 
     onDelete(post_id) {
       const name = this.currentUser.firstName + " " + this.currentUser.lastName;
-      for (const index in this.posts) {
-        if (this.posts[index].id == post_id) {
-          this.posts[index].files = [];
-          this.posts[index].content = name + " deleted this post";
-          this.posts[index].deleted = true;
+      const postsCollection = this.isFilter ? this.filteredPosts : this.posts;
+      for (const index in postsCollection) {
+        if (postsCollection[index].id == post_id) {
+          postsCollection[index].files = [];
+          postsCollection[index].content = name + " deleted this post";
+          postsCollection[index].deleted = true;
         }
       }
       this.deletePost({ post_id: post_id, name: name });
-    },
-
-    //If the user adds a tag
-    setTags() {
-      if (this.notesTag) {
-        this.post.tags.push("notes");
-      }
-
-      if (this.examTag) {
-        this.post.tags.push("exam");
-      }
-
-      if (this.assignmentTag) {
-        this.post.tags.push("assignment");
-      }
-
-      if (this.questionsTag) {
-        this.post.tags.push("questions");
-      }
     },
 
     //checks if a post has the specified tag
@@ -1482,7 +1467,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#examFilter {
+#examsFilter {
   color: black;
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1496,7 +1481,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#examFilter-clicked {
+#examsFilter-clicked {
   color: black;
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1510,7 +1495,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#assignmentFilter {
+#assignmentsFilter {
   color: black;
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1524,7 +1509,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#assignmentFilter-clicked {
+#assignmentsFilter-clicked {
   color: black;
   border: 1px solid gray;
   padding: 17px 17px;

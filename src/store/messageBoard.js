@@ -28,6 +28,8 @@ const actions = {
     post.created_at = Date.now();
     post.replies = 0;
     post.clips = 0;
+    post.hasFiles = post.files.length > 0;
+
     db.collection('users')
       .doc(user.uid)
       .get()
