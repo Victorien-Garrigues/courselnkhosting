@@ -72,19 +72,21 @@
               @click="viewReplies(post.id)"
               style="margin-right: 2em"
             >{{ post.replies }} Replies</button>
-
-            <p>{{ post.clips }} Clips</p>
           </div>
         </div>
 
         <!-- column three (icons) -->
         <div class="card-right-other">
           <div v-if="currentUser.id != post.user_id" class="flexIcons">
-            <div class="icon-placement">
+            <div>
+              <!-- shows number of clips -->
+              <button class="clipNum is-success">{{ post.clips }}</button>
+            </div>
+            <div>
               <!-- adds and unadds a clip -->
               <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
             </div>
-            <div class="icon-placement">
+            <div>
               <!-- Reply button -->
               <button @click="reply(post)" class="replyButton is-primary"></button>
             </div>
@@ -105,18 +107,22 @@
             alt
           />
 
-          <div v-if="currentUser.id == post.user_id" class="flexIcons">
-            <div class="icon-placement">
-              <!-- adds and unadds a clip -->
-              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
-            </div>
-            <div class="icon-placement">
+          <div v-if="currentUser.id == post.user_id" class="flexIcons-own">
+            <div>
               <!-- Deletes post -->
               <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
             </div>
-            <div class="icon-placement">
+            <div>
               <!-- Reply button -->
               <button @click="reply(post)" class="replyButton is-primary"></button>
+            </div>
+            <div>
+              <!-- adds and unadds a clip -->
+              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
+            </div>
+            <div>
+              <!-- shows number of clips -->
+              <button class="clipNum is-success">{{ post.clips }}</button>
             </div>
           </div>
         </div>
@@ -174,8 +180,6 @@
               @click="viewReplies(post.id)"
               style="margin-right: 2em"
             >{{ post.replies }} Replies</button>
-
-            <p>{{ post.clips }} Clips</p>
           </div>
         </div>
 
@@ -190,16 +194,35 @@
           />
 
           <div v-if="currentUser.id != post.user_id" class="row">
-            <div class="icon-placement">
+            <div>
               <!-- adds and unadds a clip -->
               <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
             </div>
-            <div class="column icon-placement">
+            <div>
               <!-- Reply button -->
               <button @click="reply(post)" class="replyButton is-primary"></button>
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="listReplies == post.id">
+        <!--  Start of List Of  Replies -->
+        <div v-for="(reply, index) in replies" :key="index" class="replies">
+          <div :id="post.id">
+            <div v-if="!post.deleted" class="card-content">
+              <!-- enter the code here, but it's not working anyways 
+              so I don't want to make file unnecessarily long-->
+            </div>
+          </div>
+        </div>
+        <!-- End of List of Replies -->
+      </div>
+    </div>
+
+    <div v-if="post.deleted" class="flex-container-deleted">
+      <div class="mainCard-delete">
+        <p class="post-itself">{{ post.username }} has deleted this post</p>
       </div>
     </div>
   </div>
@@ -256,6 +279,7 @@ export default {
   border: none;
   border-radius: 50%;
   margin: 3px;
+  display: none;
 }
 
 .clipButton:hover {
@@ -273,6 +297,7 @@ export default {
   border: none;
   border-radius: 50%;
   margin: 3px;
+  display: none;
 }
 
 .deleteButton:hover {
@@ -290,10 +315,25 @@ export default {
   border: none;
   border-radius: 50%;
   margin: 3px;
+  display: none;
 }
 
 .replyButton:hover {
   background-image: url("../assets/replyIcon-hover.png");
+}
+
+.clipNum {
+  background-color: white;
+  padding: 10.5px 14.5px;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
+  margin: 3px;
+  display: flex;
+}
+
+.clipNum:hover {
+  background-color: #0fafa8;
 }
 
 /* SEND BUTTON */
@@ -346,7 +386,17 @@ export default {
   margin-bottom: 10px;
 }
 
-.flexIcons {
+.flex-container-deleted {
+  display: flex;
+  align-items: stretch;
+  background-color: #f3f3f3;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+/*.flexIcons {
   display: none;
 }
 
@@ -355,6 +405,31 @@ export default {
   align-items: stretch;
   background-color: #f3f3f3;
   align-items: center;
+}*/
+
+.flexIcons {
+  display: flex;
+  align-items: stretch;
+  background-color: #f3f3f3;
+}
+
+.flexIcons-own {
+  display: flex;
+  align-items: stretch;
+  background-color: #f3f3f3;
+  justify-content: flex-end;
+}
+
+.flex-container:hover .clipButton {
+  display: flex;
+}
+
+.flex-container:hover .replyButton {
+  display: flex;
+}
+
+.flex-container:hover .deleteButton {
+  display: flex;
 }
 
 .card-middle-other {
@@ -390,6 +465,9 @@ export default {
 }
 
 .info-column {
+  margin-top: 20px;
+  margin-bottom: -8px;
+  margin-left: 5px;
   width: 50%;
 }
 
@@ -412,6 +490,17 @@ export default {
   background-color: #f3f3f3;
   justify-content: flex-end;
   flex-direction: column;
+}
+
+.mainCard-delete {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 5px;
+  padding-left: 10px;
 }
 
 .postItself {
