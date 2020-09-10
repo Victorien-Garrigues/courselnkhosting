@@ -1,46 +1,48 @@
-<template>
-  <section>
+<template >
+  <section style="margin: 0px !important">
+    <!-- start of navbar design -->
     <div
-      class="top"
+      class="navbar"
       @dragenter="showDropArea = true"
       @mouseout="showDropArea = false"
       @drop="showDropArea = false"
     >
-      <!-- start of navbar design -->
-      <div class="navbar">
-        <!-- brand design -->
-        <div class="container">
-          <a href="#">
-            <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
-          </a>
-        </div>
+      <!-- brand design -->
+      <div class="flexNav">
+        <a href="#">
+          <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
+        </a>
+      </div>
 
-        <!-- search design -->
-        <form style="display: flex;" class="search-form-outside">
-          <b-field>
-            <b-input v-model="searchTerm" placeholder="Search Posts"></b-input>
-          </b-field>
-        </form>
+      <!-- search design -->
+      <form class="flexNav">
+        <b-field>
+          <b-input
+            v-model="searchTerm"
+            placeholder="Search Posts"
+            style="margin-left: -100%; width: 300%;"
+          ></b-input>
+        </b-field>
+      </form>
 
-        <!--p>{{ this.userCount }} Members</p-->
+      <!--p>{{ this.userCount }} Members</p-->
 
-        <!-- profile design -->
-        <div class="flexNav">
-          <router-link
-            class="navButton"
-            :to="{
+      <!-- profile design -->
+      <div class="flexNav">
+        <router-link
+          class="navButton"
+          :to="{
                 name: 'Profile',
               }"
-          >Profile</router-link>
+        >Profile</router-link>
 
-          <router-link
-            :to="{
+        <router-link
+          :to="{
                 name: 'Login',
               }"
-            @click="logout"
-            class="navButton"
-          >Logout</router-link>
-        </div>
+          @click="logout"
+          class="navButton"
+        >Logout</router-link>
       </div>
     </div>
 
@@ -55,7 +57,7 @@
     </div>
 
     <!-- SECOND COLUMN -->
-    <div class="column middle">
+    <div class="column middle" style="height: 81vh">
       <!-- start of chat container design -->
       <div @scroll="onScroll" class="container is-fluid postContainer">
         <div v-if="!isFilter" class="posts is-multiline">
@@ -109,164 +111,6 @@
           </div>
         </div>
       </div>
-
-      <!-- uploading files (outside of table) -->
-      <vue-dropzone
-        v-if="showDropArea || fileDropped"
-        ref="imgDropZone"
-        id="dropzone"
-        :options="dropzoneOptions"
-        @vdropzone-drop="fileDropped = true"
-        @vdropzone-complete="afterComplete"
-      ></vue-dropzone>
-
-      <div class="type-menu">
-        <div class="flex-container3">
-          <label for="file-upload" class="custom-file-upload">
-            <i class="fa fa-cloud-upload"></i>
-          </label>
-
-          <!-- if the post has files -->
-          <div v-if="post.files.length > 0" class="image-div">
-            <div style="display: inline-block" v-for="file in post.files" :key="file.src">
-              <img :src="file.src" class="image" />
-            </div>
-          </div>
-
-          <div class="wrapper buttons are-small">
-            <!-- If the post is a reply -->
-            <div style="botton: 0" v-if="post.isReply" class="reply">
-              <!-- Cancel reply button -->
-              <div class="flex-reply">
-                <div class="replyingText">
-                  <p style="color: black">Replying to {{ replyingTo }}</p>
-                  <p>{{ replyingMessage }}</p>
-                </div>
-                <div class="flex-remove">
-                  <button @click="post.isReply = false" class="remButton">X</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- table -->
-        <div class="flex-container2">
-          <!-- replies and docs -->
-          <div class="chat-left">
-            <!-- tags -->
-            <div style="display: flex" class="tags">
-              <button
-                v-if="notesTag==false"
-                @click.prevent="notesTag = !notesTag"
-                id="notesFilter"
-                :class="{ clicked: notesTag }"
-                title="add note tag"
-              ></button>
-              <button
-                v-if="notesTag==true"
-                @click.prevent="notesTag = !notesTag"
-                id="notesFilter-clicked"
-                :class="{ clicked: notesTag }"
-                title="remove note tag"
-              ></button>
-
-              <button
-                v-if="questionsTag==false"
-                @click.prevent="questionsTag = !questionsTag"
-                id="questionsFilter"
-                :class="{ clicked: questionsTag }"
-                title="add question tag"
-              ></button>
-              <button
-                v-if="questionsTag==true"
-                @click.prevent="questionsTag = !questionsTag"
-                id="questionsFilter-clicked"
-                :class="{ clicked: questionsTag }"
-                title="remove question tag"
-              ></button>
-
-              <button
-                v-if="examsTag==false"
-                @click.prevent="examsTag = !examsTag"
-                id="examsFilter"
-                :class="{ clicked: examsTag }"
-                title="add exam tag"
-              ></button>
-              <button
-                v-if="examsTag==true"
-                @click.prevent="examsTag = !examsTag"
-                id="examsFilter-clicked"
-                :class="{ clicked: examsTag }"
-                title="remove exam tag"
-              ></button>
-
-              <button
-                v-if="assignmentsTag==false"
-                @click.prevent="assignmentsTag = !assignmentsTag"
-                id="assignmentsFilter"
-                :class="{ clicked: assignmentsTag }"
-                title="add assignment tag"
-                style="margin-top: 8px"
-              ></button>
-              <button
-                v-if="assignmentsTag==true"
-                @click.prevent="assignmentTag = !assignmentsTag"
-                id="assignmentsFilter-clicked"
-                :class="{ clicked: assignmentsTag }"
-                title="remove assignment tag"
-                style="margin-top: 8px"
-              ></button>
-            </div>
-          </div>
-
-          <div class="chat-mid">
-            <!-- post itself -->
-            <div class="wrapper">
-              <form>
-                <!-- Text input area -->
-                <div>
-                  <ResizeAuto>
-                    <template v-slot:default="{ resize }">
-                      <textarea
-                        v-model="post.content"
-                        rows="1"
-                        @input="resize"
-                        placeholder="Have something to say?"
-                      ></textarea>
-                    </template>
-                  </ResizeAuto>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <div class="chat-right">
-            <!-- Dropzone with attachment icon beside text area -->
-            <vue-dropzone
-              ref="imgDropZone"
-              id="attachDropzone"
-              class="docButton"
-              :include-styling="false"
-              :options="dropzoneOptions"
-              @vdropzone-complete="afterAttach"
-            ></vue-dropzone>
-          </div>
-
-          <div class="chat-right">
-            <!-- Add Post Button -->
-            <button
-              @click="onCreatePost()"
-              class="sendButton is-success bottom"
-              style="margin-left:-15px"
-            ></button>
-          </div>
-
-          <div class="chat-right" style="padding:20px"></div>
-
-          <div id="bottom"></div>
-        </div>
-      </div>
     </div>
 
     <!-- THIRD COLUMN -->
@@ -275,20 +119,16 @@
         <h2>Post tags</h2>
 
         <!-- Files filter -->
-        <div class="row">
+        <div class="row" style="clear: both;">
           <div class="column">
-            <p>Attachment</p>
+            <p>Attachments</p>
           </div>
           <div class="column">
-            <label class="switch">
-              <input
-                type="checkbox"
-                @click.prevent="filterByFiles = !filterByFiles"
-                id="tags"
-                :class="{ clicked: filterByFiles }"
-              />
-              <span class="slider round"></span>
-            </label>
+            <button
+              @click.prevent="filterByAttachments = !filterByAttachments"
+              id="tags"
+              :class="{ clicked: filterByAttachments }"
+            ></button>
           </div>
         </div>
 
@@ -304,6 +144,7 @@
             ></button>
           </div>
         </div>
+
         <div class="row" style="clear: both;">
           <div class="column">
             <p>Exam</p>
@@ -346,15 +187,165 @@
       </div>
     </div>
 
-    <!--  <div class="column">    <-- IDK WHAT THIS DOES
-      <button
-        @click.prevent="filterByGeneral = !filterByGeneral"
-        id="tags"
-        :class="{ clicked: filterByGeneral }"
-      ></button>
-    </div>-->
-
     <!-- END OF TABLE -->
+
+    <!-- text area -->
+    <div>
+      <div class="flex-container3">
+        <!-- if the post has files ->
+        <div v-if="post.files.length > 0" class="image-div">
+          <div style="display: inline-block" v-for="file in post.files" :key="file.src">
+            <img :src="file.src" class="image" />
+          </div>
+        </div>-->
+
+        <div class="flex-file">
+          <!-- uploading files -->
+          <vue-dropzone
+            v-if="showDropArea || fileDropped"
+            ref="imgDropZone"
+            id="dropzone"
+            style="width: 50%"
+            :options="dropzoneOptions"
+            @vdropzone-drop="fileDropped = true"
+            @vdropzone-complete="afterComplete"
+          ></vue-dropzone>
+
+          <label for="file-upload" class="custom-file-upload">
+            <i class="fa fa-cloud-upload"></i>
+          </label>
+        </div>
+
+        <!-- If the post is a reply -->
+        <div v-if="post.isReply" class="flex-reply">
+          <div class="replyingText">
+            <p style="color: black">Replying to {{ replyingTo }}</p>
+            <p>{{ replyingMessage }}</p>
+          </div>
+          <div class="flex-remove">
+            <button @click="post.isReply = false" class="remButton">X</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- table -->
+      <div class="flex-container2">
+        <!-- replies and docs -->
+        <div class="chat-left">
+          <!-- tags -->
+
+          <button
+            v-if="notesTag==false"
+            @click.prevent="notesTag = !notesTag"
+            id="notesFilter"
+            :class="{ clicked: notesTag }"
+            title="add note-tag"
+          ></button>
+          <button
+            v-if="notesTag==true"
+            @click.prevent="notesTag = !notesTag"
+            id="notesFilter-clicked"
+            :class="{ clicked: notesTag }"
+            title="remove note-tag"
+          ></button>
+
+          <button
+            v-if="questionsTag==false"
+            @click.prevent="questionsTag = !questionsTag"
+            id="questionsFilter"
+            :class="{ clicked: questionsTag }"
+            title="add question-tag"
+          ></button>
+          <button
+            v-if="questionsTag==true"
+            @click.prevent="questionsTag = !questionsTag"
+            id="questionsFilter-clicked"
+            :class="{ clicked: questionsTag }"
+            title="remove question-tag"
+          ></button>
+
+          <button
+            v-if="examsTag==false"
+            @click.prevent="examsTag = !examsTag"
+            id="examsFilter"
+            :class="{ clicked: examsTag }"
+            title="add exam-tag"
+          ></button>
+          <button
+            v-if="examsTag==true"
+            @click.prevent="examsTag = !examsTag"
+            id="examsFilter-clicked"
+            :class="{ clicked: examsTag }"
+            title="remove exam-tag"
+          ></button>
+
+          <button
+            v-if="assignmentsTag==false"
+            @click.prevent="assignmentsTag = !assignmentsTag"
+            id="assignmentsFilter"
+            :class="{ clicked: assignmentsTag }"
+            title="add assignment-tag"
+            style="margin-top: 8px"
+          ></button>
+          <button
+            v-if="assignmentsTag==true"
+            @click.prevent="assignmentTag = !assignmentsTag"
+            id="assignmentsFilter-clicked"
+            :class="{ clicked: assignmentsTag }"
+            title="remove assignment-tag"
+            style="margin-top: 8px"
+          ></button>
+        </div>
+
+        <div class="chat-mid">
+          <!-- post itself -->
+          <div class="wrapper">
+            <form>
+              <!-- Text input area -->
+              <div>
+                <ResizeAuto>
+                  <template v-slot:default="{ resize }">
+                    <textarea
+                      id="message"
+                      v-model="post.content"
+                      rows="1"
+                      @input="resize"
+                      placeholder="Have something to say?"
+                    ></textarea>
+                  </template>
+                </ResizeAuto>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="chat-right">
+          <!-- Dropzone with attachment icon beside text area -->
+          <vue-dropzone
+            ref="imgDropZone"
+            id="attachDropzone"
+            class="docButton"
+            :include-styling="false"
+            :options="dropzoneOptions"
+            @vdropzone-complete="afterAttach"
+          ></vue-dropzone>
+        </div>
+
+        <div class="chat-right">
+          <!-- Add Post Button -->
+          <button
+            @click="onCreatePost()"
+            class="sendButton is-success bottom"
+            style="margin-left:-15px"
+          ></button>
+        </div>
+
+        <div class="chat-right" style="padding:20px"></div>
+
+        <div id="bottom"></div>
+      </div>
+    </div>
+
     <LightBox ref="lightbox" :media="media" :show-light-box="false" />
   </section>
 </template>
@@ -1074,7 +1065,6 @@ export default {
         //Resets tags
         this.notesTag = false;
         this.examsTag = false;
-        this.notesTag = false;
         this.questionsTag = false;
         this.assignmentsTag = false;
 
@@ -1118,25 +1108,24 @@ export default {
 </script>
 
 <style>
+.main {
+  margin: 0px;
+  padding: 0px;
+}
+
 body {
   background: #f3f3f3;
-  min-width: 480px;
-  padding-top: 0px;
   overflow: hidden;
   bottom: 0;
+  height: 100%;
 }
 
 .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
   position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 100;
-  border-color: white;
-}
-
-.search-form-outside {
-  margin-top: 0em;
-  margin-right: 30%;
   width: 100%;
 }
 
@@ -1145,13 +1134,10 @@ body {
   align-items: stretch;
   background-color: white;
   align-items: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
 }
 
 .navButton {
-  padding: 10px;
-  margin: 10px;
+  margin-right: 5px;
   background-color: white;
   color: black;
 }
@@ -1203,19 +1189,18 @@ input[type="file"] {
   margin: 15px;
 }
 
-textarea {
-  overflow-y: auto;
-  resize: vertical;
-  border-color: white;
+#message {
   background-color: white;
-  border-width: 12px;
-  border-radius: 2rem;
-  min-height: 40px;
-  padding: 50px;
   width: 100%;
-  resize: none;
-  appearance: none;
+  border: none;
+  border-radius: 20px;
   outline: none;
+  font-size: 1em;
+  color: black;
+  resize: none;
+  overflow: scroll;
+  padding: 10px;
+  max-height: 70px;
 }
 
 #attach {
@@ -1278,15 +1263,15 @@ textarea {
 }
 
 .middle {
-  width: 60%;
+  width: 70%;
 }
 
 .left {
-  width: 20%;
+  width: 15%;
 }
 
 .right {
-  width: 20%;
+  width: 15%;
 }
 
 .cardTable {
@@ -1296,14 +1281,14 @@ textarea {
 
 .flex-container2 {
   display: flex;
-  align-items: stretch;
+  align-self: stretch;
   flex-wrap: wrap;
   background-color: #f3f3f3;
-  align-items: center;
-  position: fixed;
-  bottom: 0;
-  width: 55%;
+  justify-content: center;
+  width: 100%;
   max-height: 70px;
+  /*position: fixed;*/
+  bottom: 0;
 }
 
 .flex-container3 {
@@ -1312,35 +1297,39 @@ textarea {
   flex-wrap: wrap;
   background-color: #f3f3f3;
   align-items: center;
-  position: fixed;
-  bottom: 80px;
-  width: 55%;
+  justify-content: center;
+  bottom: 0px;
+  /*position: fixed;*/
+  z-index: 100;
+  width: 100%;
 }
 
 .chat-left {
   flex-direction: row;
-  flex-basis: 25%;
+  flex-basis: 12%;
   align-self: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .chat-mid {
   flex-direction: row;
-  flex-basis: 55%;
+  flex-basis: 40%;
   align-self: center;
 }
 
 .chat-right {
   flex-direction: row;
-  margin-top: 7px;
   flex-basis: 5%;
   align-self: center;
 }
 
 .whiteBox {
-  background-color: white;
+  /*  background-color: white;*/
   padding: 10px;
   border-radius: 0.3rem;
   min-height: 330px;
+  margin-left: -25%;
 }
 
 .switch {
@@ -1412,7 +1401,6 @@ input:checked + .slider:before {
 }
 
 #notesFilter {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1426,7 +1414,6 @@ input:checked + .slider:before {
 }
 
 #notesFilter-clicked {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1440,7 +1427,6 @@ input:checked + .slider:before {
 }
 
 #questionsFilter {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1454,7 +1440,6 @@ input:checked + .slider:before {
 }
 
 #questionsFilter-clicked {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1468,7 +1453,6 @@ input:checked + .slider:before {
 }
 
 #examsFilter {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1482,7 +1466,6 @@ input:checked + .slider:before {
 }
 
 #examsFilter-clicked {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1496,7 +1479,6 @@ input:checked + .slider:before {
 }
 
 #assignmentsFilter {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1510,7 +1492,6 @@ input:checked + .slider:before {
 }
 
 #assignmentsFilter-clicked {
-  color: black;
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1526,12 +1507,23 @@ input:checked + .slider:before {
 .flex-reply {
   display: flex;
   align-items: stretch;
-  background-color: #f3f3f3;
+  background-color: #f1f1f1;
   justify-content: space-between;
-  align-items: center;
   position: fixed;
-  bottom: 60px;
-  width: 55%;
+  bottom: 65px;
+  padding-left: 12%;
+  padding-right: 5%;
+  width: 70%;
+}
+
+.flex-file {
+  display: flex;
+  align-items: stretch;
+  background-color: #f1f1f1;
+  justify-content: center;
+  position: fixed;
+  bottom: 65px;
+  width: 100%;
 }
 
 .replyingText {
