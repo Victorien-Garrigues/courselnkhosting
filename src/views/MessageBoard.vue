@@ -96,12 +96,12 @@
           </div>
         </div>
 
-        <!-- If there is a filter applied ->
+        <!-- If there is a filter applied -->
         <div v-else>
           <div v-for="(post, index) in filteredPosts" :key="index">
-            this is the post card ->
+            <!-- this is the post card -->
             <Post
-              :post="reply"
+              :post="post"
               :index="index"
               :currentUser="currentUser"
               @addClip="addClip"
@@ -111,7 +111,7 @@
               @viewReplies="viewReplies"
             />
           </div>
-        </div-->
+        </div>
       </div>
     </div>
 
@@ -120,6 +120,20 @@
       <div class="whiteBox">
         <h2>Post Filters</h2>
 
+        <!-- Clips filter -->
+        <div class="row" style="clear: both;">
+          <div class="column">
+            <p>Clips</p>
+          </div>
+          <div class="column">
+            <button
+              @click.prevent="filterBy('clips')"
+              id="tags"
+              :class="{ filterClicked: filterByClips }"
+            ></button>
+          </div>
+        </div>
+
         <!-- Files filter -->
         <div class="row" style="clear: both;">
           <div class="column">
@@ -127,9 +141,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByFiles = !filterByFiles"
+              @click.prevent="filterBy('files')"
               id="tags"
-              :class="{ clicked: filterByFiles }"
+              :class="{ filterClicked: filterByFiles }"
             ></button>
           </div>
         </div>
@@ -140,9 +154,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByNotes = !filterByNotes"
+              @click.prevent="filterBy('notes')"
               id="tags"
-              :class="{ clicked: filterByNotes }"
+              :class="{ filterClicked: filterByNotes }"
             ></button>
           </div>
         </div>
@@ -153,9 +167,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByExams = !filterByExams"
+              @click.prevent="filterBy('exams')"
               id="tags"
-              :class="{ clicked: filterByExams }"
+              :class="{ filterClicked: filterByExams }"
             ></button>
           </div>
         </div>
@@ -166,9 +180,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByQuestions = !filterByQuestions"
+              @click.prevent="filterBy('questions')"
               id="tags"
-              :class="{ clicked: filterByQuestions }"
+              :class="{ filterClicked: filterByQuestions }"
             ></button>
           </div>
         </div>
@@ -176,13 +190,13 @@
 
         <div class="row" style="clear: both;">
           <div class="column">
-            <p>Assignment</p>
+            <p>Assignments</p>
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByAssignments = !filterByAssignments"
+              @click.prevent="filterBy('assignments')"
               id="tags"
-              :class="{ clicked: filterByAssignments }"
+              :class="{ filterClicked: filterByAssignments }"
             ></button>
           </div>
         </div>
@@ -237,64 +251,30 @@
           <!-- tags -->
 
           <button
-            v-if="notesTag==false"
-            @click.prevent="notesTag = !notesTag"
-            id="notesFilter"
-            :class="{ clicked: notesTag }"
-            title="add note-tag"
-          ></button>
-          <button
-            v-if="notesTag==true"
-            @click.prevent="notesTag = !notesTag"
-            id="notesFilter-clicked"
-            :class="{ clicked: notesTag }"
+            @click.prevent="post.notesTag = !post.notesTag"
+            :class="{ notesFilterClicked: post.notesTag, notesFilter: true}"
             title="remove note-tag"
           ></button>
 
           <button
-            v-if="questionsTag==false"
-            @click.prevent="questionsTag = !questionsTag"
+            @click.prevent="post.questionsTag = !post.questionsTag"
             id="questionsFilter"
-            :class="{ clicked: questionsTag }"
+            :class="{ questionsFilterClicked: post.questionsTag, questionsFilter: true }"
             title="add question-tag"
           ></button>
-          <button
-            v-if="questionsTag==true"
-            @click.prevent="questionsTag = !questionsTag"
-            id="questionsFilter-clicked"
-            :class="{ clicked: questionsTag }"
-            title="remove question-tag"
-          ></button>
 
           <button
-            v-if="examsTag==false"
-            @click.prevent="examsTag = !examsTag"
+            @click.prevent="post.examsTag = !post.examsTag"
             id="examsFilter"
-            :class="{ clicked: examsTag }"
+            :class="{ examsFilterClicked: post.examsTag, examsFilter: true }"
             title="add exam-tag"
           ></button>
-          <button
-            v-if="examsTag==true"
-            @click.prevent="examsTag = !examsTag"
-            id="examsFilter-clicked"
-            :class="{ clicked: examsTag }"
-            title="remove exam-tag"
-          ></button>
 
           <button
-            v-if="assignmentsTag==false"
-            @click.prevent="assignmentsTag = !assignmentsTag"
+            @click.prevent="post.assignmentsTag = !post.assignmentsTag"
+            :class="{ assignmentsFilterClicked: post.assignmentsTag, assignmentsFilter: true }"
             id="assignmentsFilter"
-            :class="{ clicked: assignmentsTag }"
             title="add assignment-tag"
-            style="margin-top: 8px"
-          ></button>
-          <button
-            v-if="assignmentsTag==true"
-            @click.prevent="assignmentTag = !assignmentsTag"
-            id="assignmentsFilter-clicked"
-            :class="{ clicked: assignmentsTag }"
-            title="remove assignment-tag"
             style="margin-top: 8px"
           ></button>
         </div>
@@ -788,7 +768,6 @@ export default {
       this.lastScroll = null;
 
       var queryPosts = this.setQueryFilters();
-      console.log(queryPosts, "queryPOsts");
 
       var tempPosts = [];
       queryPosts
@@ -805,7 +784,6 @@ export default {
         });
 
       this.filteredPosts = tempPosts;
-      console.log(this.filteredPosts, "filteredPOsts");
     },
 
     // Scrolls to the bottom of posts
@@ -1065,12 +1043,6 @@ export default {
             });
         }
 
-        //Resets tags
-        this.notesTag = false;
-        this.examsTag = false;
-        this.questionsTag = false;
-        this.assignmentsTag = false;
-
         //Resets the post
         this.post = {
           content: "",
@@ -1078,6 +1050,10 @@ export default {
           isReply: false,
           parent_id: "",
           tags: [],
+          notesTags: false,
+          examsTag: false,
+          questionsTag: false,
+          assignmentsTag: false,
         };
 
         this.scroll = true;
@@ -1120,7 +1096,7 @@ body {
   background: #f3f3f3;
   overflow: hidden;
   bottom: 0;
-  height: 100%;
+  height: 100vh;
 }
 
 .navbar {
@@ -1165,6 +1141,10 @@ body {
   overflow: auto;
   margin-left: auto;
   margin-right: auto;
+}
+
+.filterClicked {
+  background-color: blue;
 }
 
 .postContainer::-webkit-scrollbar {
@@ -1290,7 +1270,6 @@ input[type="file"] {
   justify-content: center;
   width: 100%;
   max-height: 70px;
-  /*position: fixed;*/
   bottom: 0;
 }
 
@@ -1403,7 +1382,7 @@ input:checked + .slider:before {
   margin: 0 2px;
 }
 
-#notesFilter {
+.notesFilter {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1416,7 +1395,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#notesFilter-clicked {
+.notesFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1429,7 +1408,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#questionsFilter {
+.questionsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1442,7 +1421,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#questionsFilter-clicked {
+.questionsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1455,7 +1434,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#examsFilter {
+.examsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1468,7 +1447,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#examsFilter-clicked {
+.examsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1481,7 +1460,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#assignmentsFilter {
+.assignmentsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;
@@ -1494,7 +1473,7 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#assignmentsFilter-clicked {
+.assignmentsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
   margin: 3px;

@@ -1,6 +1,6 @@
 <template>
   <div :id="post.id">
-    <div v-if="!post.deleted && !inListReplies">
+    <div v-if="!post.deleted">
       <!-- OTHER USER'S POST CARD DESIGN -->
       <div class="flex-container" v-if="currentUser.id != post.user_id">
         <!-- columns -->
@@ -213,7 +213,7 @@
       </div>
     </div>
 
-    <div v-if="listReplies == post.id && showReplies">
+    <div v-if="listReplies == post.id && showRepliesList">
       <div v-for="(reply, index) in replies" :key="index">
         <div class="flex-container-list" v-if="currentUser.id == post.user_id">
           <div class="mainCard-listOwn">
@@ -238,14 +238,13 @@ export default {
   props: ["post", "index", "currentUser", "replies", "listReplies"],
 
   data: () => ({
-    showReplies: false,
+    showRepliesList: false,
   }),
 
   methods: {
     viewReplies(post_id) {
-      this.showReplies = !this.showReplies;
+      this.showRepliesList = !this.showRepliesList;
       this.$emit("viewReplies", post_id);
-      this.showReplies();
     },
     addClip(post_id, index) {
       console.log(post_id, index, "addClip");
@@ -269,10 +268,6 @@ export default {
     // If the file is a video
     isVideo(file) {
       return file.src.includes("MP4") || file.src.includes("mp4");
-    },
-
-    showReplies() {
-      console.log(this.inListReplies, "in list");
     },
   },
 };
