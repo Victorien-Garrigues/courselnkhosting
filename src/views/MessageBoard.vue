@@ -68,15 +68,17 @@
               :post="post"
               :index="index"
               :currentUser="currentUser"
+              :replies="replies"
+              :listReplies="listReplies"
               @addClip="addClip"
               @onDelete="onDelete"
               @reply="reply"
               @openGallery="openGallery"
-              @viewReplys="viewReplies"
+              @viewReplies="viewReplies"
             />
 
-            <div v-if="listReplies == post.id">
-              <!--  Start of List Of  Replies -->
+            <!--div v-if="listReplies == post.id">
+              <--  Start of List Of  Replies ->
               <div v-for="(reply, index) in replies" :key="index" class="replies">
                 <Post
                   :post="reply"
@@ -86,18 +88,18 @@
                   @onDelete="onDelete"
                   @reply="reply"
                   @openGallery="openGallery"
-                  @viewReplys="viewReplies"
+                  @viewReplies="viewReplies"
                 />
               </div>
-              <!--  End of List Of  Replies -->
-            </div>
+              <--  End of List Of  Replies ->
+            </div-->
           </div>
         </div>
 
-        <!-- If there is a filter applied -->
+        <!-- If there is a filter applied ->
         <div v-else>
           <div v-for="(post, index) in filteredPosts" :key="index">
-            <!-- this is the post card -->
+            this is the post card ->
             <Post
               :post="reply"
               :index="index"
@@ -106,17 +108,17 @@
               @onDelete="onDelete"
               @reply="reply"
               @openGallery="openGallery"
-              @viewReplys="viewReplies"
+              @viewReplies="viewReplies"
             />
           </div>
-        </div>
+        </div-->
       </div>
     </div>
 
     <!-- THIRD COLUMN -->
     <div class="column right">
       <div class="whiteBox">
-        <h2>Post tags</h2>
+        <h2>Post Filters</h2>
 
         <!-- Files filter -->
         <div class="row" style="clear: both;">
@@ -125,9 +127,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByAttachments = !filterByAttachments"
+              @click.prevent="filterByFiles = !filterByFiles"
               id="tags"
-              :class="{ clicked: filterByAttachments }"
+              :class="{ clicked: filterByFiles }"
             ></button>
           </div>
         </div>
@@ -151,9 +153,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByExam = !filterByExam"
+              @click.prevent="filterByExams = !filterByExams"
               id="tags"
-              :class="{ clicked: filterByExam }"
+              :class="{ clicked: filterByExams }"
             ></button>
           </div>
         </div>
@@ -178,9 +180,9 @@
           </div>
           <div class="column">
             <button
-              @click.prevent="filterByAssignment = !filterByAssignment"
+              @click.prevent="filterByAssignments = !filterByAssignments"
               id="tags"
-              :class="{ clicked: filterByAssignment }"
+              :class="{ clicked: filterByAssignments }"
             ></button>
           </div>
         </div>
@@ -382,6 +384,7 @@ export default {
     replyingToId: "", //The id of the user you are replying to
     replyingMessage: "", //The message of the post your are replying to
     listReplies: "", //id of post in which to list replies for
+    inListReplies: "",
 
     lastCourse: null, //The previous course that the user was on
     userCount: null, //the number of users in the selected course
