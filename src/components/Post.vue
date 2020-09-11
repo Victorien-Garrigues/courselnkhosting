@@ -1,6 +1,6 @@
 <template>
   <div :id="post.id">
-    <div v-if="!post.deleted">
+    <div v-if="!post.deleted && !inListReplies">
       <!-- OTHER USER'S POST CARD DESIGN -->
       <div class="flex-container" v-if="currentUser.id != post.user_id">
         <!-- columns -->
@@ -205,19 +205,6 @@
           </div>
         </div>
       </div>
-
-      <div v-if="listReplies == post.id">
-        <!--  Start of List Of  Replies -->
-        <div v-for="(reply, index) in replies" :key="index" class="replies">
-          <div :id="post.id">
-            <div v-if="!post.deleted" class="card-content">
-              <!-- enter the code here, but it's not working anyways 
-              so I don't want to make file unnecessarily long-->
-            </div>
-          </div>
-        </div>
-        <!-- End of List of Replies -->
-      </div>
     </div>
 
     <div v-if="post.deleted" class="flex-container-deleted">
@@ -225,16 +212,40 @@
         <p class="post-itself">{{ post.username }} has deleted this post</p>
       </div>
     </div>
+
+    <div v-if="listReplies == post.id && showReplies">
+      <div v-for="(reply, index) in replies" :key="index">
+        <div class="flex-container-list" v-if="currentUser.id == post.user_id">
+          <div class="mainCard-listOwn">
+            <p>{{ reply.username }}</p>
+            <p>{{ reply.content }}</p>
+          </div>
+        </div>
+
+        <div class="flex-container-list" v-if="currentUser.id != post.user_id">
+          <div class="mainCard-listOther">
+            <p>{{ reply.username }}</p>
+            <p>{{ reply.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ["post", "index", "currentUser"],
+  props: ["post", "index", "currentUser", "replies", "listReplies"],
+
+  data: () => ({
+    showReplies: false,
+  }),
 
   methods: {
     viewReplies(post_id) {
+      this.showReplies = !this.showReplies;
       this.$emit("viewReplies", post_id);
+      this.showReplies();
     },
     addClip(post_id, index) {
       console.log(post_id, index, "addClip");
@@ -258,6 +269,10 @@ export default {
     // If the file is a video
     isVideo(file) {
       return file.src.includes("MP4") || file.src.includes("mp4");
+    },
+
+    showReplies() {
+      console.log(this.inListReplies, "in list");
     },
   },
 };
@@ -386,6 +401,15 @@ export default {
   margin-bottom: 10px;
 }
 
+.flex-container-list {
+  display: flex;
+  align-items: stretch;
+  background-color: #f3f3f3;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .flex-container-deleted {
   display: flex;
   align-items: stretch;
@@ -501,6 +525,38 @@ export default {
   border-radius: 10px;
   padding: 5px;
   padding-left: 10px;
+}
+
+.mainCard-listOwn {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-direction: column;
+  /*break*/
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+  border: white;
+  border-radius: 5px;
+  opacity: 0.5;
+  margin-left: 22.4%;
+  margin-right: 10%;
+}
+
+.mainCard-listOther {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-direction: column;
+  /*break*/
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+  border: white;
+  border-radius: 5px;
+  opacity: 0.5;
+  margin-right: 22.4%;
+  margin-left: 10%;
 }
 
 .postItself {
