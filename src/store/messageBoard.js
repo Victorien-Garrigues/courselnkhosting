@@ -1,13 +1,17 @@
-import { firestoreAction } from 'vuexfire';
-import firebase from '@/firebase';
-import db from '@/db';
+import { firestoreAction } from "vuexfire";
+import firebase from "@/firebase";
+import db from "@/db";
 
-const posts = db.collection('posts');
+const posts = db.collection("posts");
 
 const mutations = {
   // Sets the course selected by the user
   setCourse(state, course) {
     state.course = course;
+  },
+
+  removeReplies(state) {
+    state.replies = [];
   },
 };
 
@@ -30,14 +34,14 @@ const actions = {
     post.clips = 0;
     post.hasFiles = post.files.length > 0;
 
-    db.collection('users')
+    db.collection("users")
       .doc(user.uid)
       .get()
       .then((doc) => {
-        post.username = doc.data().firstName + ' ' + doc.data().lastName;
+        post.username = doc.data().firstName + " " + doc.data().lastName;
         if (post.isReply) {
-          db.collection('posts')
-            .where('id', '==', post.parent_id)
+          db.collection("posts")
+            .where("id", "==", post.parent_id)
             .get()
             .then(function(querySnapshot) {
               querySnapshot.forEach(function(doc) {
@@ -57,7 +61,7 @@ const actions = {
               });
             })
             .catch(function(error) {
-              console.log('Error getting documents: ', error);
+              console.log("Error getting documents: ", error);
             });
         } else {
           try {
@@ -68,7 +72,7 @@ const actions = {
         }
       })
       .catch(function(error) {
-        console.log('Error getting documents: ', error);
+        console.log("Error getting documents: ", error);
       });
   },
 
@@ -78,7 +82,7 @@ const actions = {
     console.log(name);
     await posts.doc(post_id).update({
       files: [],
-      content: name + ' deleted this post',
+      content: name + " deleted this post",
       deleted: true,
       tags: [],
     });
@@ -86,11 +90,11 @@ const actions = {
 
   // Adds clip to a post
   async addClip(_, { post_id, user_id }) {
-    console.log('addClip');
+    console.log("addClip");
     console.log(post_id);
     console.log(user_id);
     var alreadyClipped = false;
-    db.collection('users')
+    db.collection("users")
       .doc(user_id)
       .get()
       .then((doc) => {
@@ -103,23 +107,23 @@ const actions = {
 
         // If the user hasnt clipped the post then clip it else unclip it
         if (!alreadyClipped) {
-          db.collection('posts')
+          db.collection("posts")
             .doc(post_id)
             .update({
               clips: firebase.firestore.FieldValue.increment(1),
             });
-          db.collection('users')
+          db.collection("users")
             .doc(user_id)
             .update({
               clips: firebase.firestore.FieldValue.arrayUnion(post_id),
             });
         } else {
-          db.collection('posts')
+          db.collection("posts")
             .doc(post_id)
             .update({
               clips: firebase.firestore.FieldValue.increment(-1),
             });
-          db.collection('users')
+          db.collection("users")
             .doc(user_id)
             .update({
               clips: firebase.firestore.FieldValue.arrayRemove(post_id),
@@ -130,41 +134,41 @@ const actions = {
   //Binds posts to the firebase collection of posts that have a given course_id
   initNewPost: firestoreAction(({ bindFirestoreRef }, course_id) => {
     bindFirestoreRef(
-      'newPost',
+      "newPost",
       db
-        .collection('posts')
-        .where('course_id', '==', course_id)
-        .orderBy('created_at', 'desc')
+        .collection("posts")
+        .where("course_id", "==", course_id)
+        .orderBy("created_at", "desc")
         .limit(1)
     ),
-      console.log(course_id, 'newPOstCourse)id');
+      console.log(course_id, "newPOstCourse)id");
   }),
 
   //Binds replies to the firebase collection of posts that are repling to a given post
   initReplies: firestoreAction(({ bindFirestoreRef }, originalPost_id) => {
     bindFirestoreRef(
-      'replies',
+      "replies",
       db
-        .collection('posts')
-        .where('originalPost_id', '==', originalPost_id)
-        .orderBy('created_at', 'asc')
+        .collection("posts")
+        .where("originalPost_id", "==", originalPost_id)
+        .orderBy("created_at", "asc")
     );
   }),
 
   //Gets the newest post from that course
   newestNotification: firestoreAction(({ bindFirestoreRef }, course_ids) => {
     bindFirestoreRef(
-      'newNotification',
+      "newNotification",
       db
-        .collection('posts')
-        .where('course_id', 'in', course_ids)
-        .orderBy('created_at', 'desc')
+        .collection("posts")
+        .where("course_id", "in", course_ids)
+        .orderBy("created_at", "desc")
         .limit(1)
     );
   }),
 
   unbindPosts: firestoreAction(({ unbindFirestoreRef }) => {
-    unbindFirestoreRef('newNotification');
+    unbindFirestoreRef("newNotification");
   }),
 };
 
