@@ -49,35 +49,36 @@
     <!-- end of navbar design -->
 
     <!-- 3 columns for main page -->
-    <div class="row">
-      <!-- FIRST COLUMN -->
-      <div class="column left">
-        <Courses />
+    <div>
+      <div class="row">
+        <!-- FIRST COLUMN -->
+        <div class="column left">
+          <Courses />
+        </div>
       </div>
-    </div>
 
-    <!-- SECOND COLUMN -->
-    <div class="column middle" style="height: 81vh">
-      <!-- start of chat container design -->
-      <div @scroll="onScroll" class="container is-fluid postContainer">
-        <div v-if="!isFilter" class="posts is-multiline">
-          <div v-for="(post, index) in posts" :key="index">
-            <!-- this is the post card -->
+      <!-- SECOND COLUMN -->
+      <div class="column middle" style="height: 81vh">
+        <!-- start of chat container design -->
+        <div @scroll="onScroll" class="container is-fluid postContainer">
+          <div v-if="!isFilter" class="posts is-multiline">
+            <div v-for="(post, index) in posts" :key="index">
+              <!-- this is the post card -->
 
-            <Post
-              :post="post"
-              :index="index"
-              :currentUser="currentUser"
-              :replies="replies"
-              :listReplies="listReplies"
-              @addClip="addClip"
-              @onDelete="onDelete"
-              @reply="reply"
-              @openGallery="openGallery"
-              @viewReplies="viewReplies"
-            />
+              <Post
+                :post="post"
+                :index="index"
+                :currentUser="currentUser"
+                :replies="replies"
+                :listReplies="listReplies"
+                @addClip="addClip"
+                @onDelete="onDelete"
+                @reply="reply"
+                @openGallery="openGallery"
+                @viewReplies="viewReplies"
+              />
 
-            <!--div v-if="listReplies == post.id">
+              <!--div v-if="listReplies == post.id">
               <--  Start of List Of  Replies ->
               <div v-for="(reply, index) in replies" :key="index" class="replies">
                 <Post
@@ -92,243 +93,244 @@
                 />
               </div>
               <--  End of List Of  Replies ->
-            </div-->
+              </div-->
+            </div>
           </div>
-        </div>
 
-        <!-- If there is a filter applied -->
-        <div v-else>
-          <div v-for="(post, index) in filteredPosts" :key="index">
-            <!-- this is the post card -->
-            <Post
-              :post="post"
-              :index="index"
-              :currentUser="currentUser"
-              @addClip="addClip"
-              @onDelete="onDelete"
-              @reply="reply"
-              @openGallery="openGallery"
-              @viewReplies="viewReplies"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- THIRD COLUMN -->
-    <div class="column right">
-      <div class="whiteBox">
-        <h2>Post Filters</h2>
-
-        <!-- Clips filter -->
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Clips</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('clips')"
-              id="tags"
-              :class="{ filterClicked: filterByClips }"
-            ></button>
-          </div>
-        </div>
-
-        <!-- Files filter -->
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Attachments</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('files')"
-              id="tags"
-              :class="{ filterClicked: filterByFiles }"
-            ></button>
-          </div>
-        </div>
-
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Notes</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('notes')"
-              id="tags"
-              :class="{ filterClicked: filterByNotes }"
-            ></button>
-          </div>
-        </div>
-
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Exam</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('exams')"
-              id="tags"
-              :class="{ filterClicked: filterByExams }"
-            ></button>
-          </div>
-        </div>
-
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Questions</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('questions')"
-              id="tags"
-              :class="{ filterClicked: filterByQuestions }"
-            ></button>
-          </div>
-        </div>
-        <!--/div-->
-
-        <div class="row" style="clear: both;">
-          <div class="column">
-            <p>Assignments</p>
-          </div>
-          <div class="column">
-            <button
-              @click.prevent="filterBy('assignments')"
-              id="tags"
-              :class="{ filterClicked: filterByAssignments }"
-            ></button>
+          <!-- If there is a filter applied -->
+          <div v-else>
+            <div v-for="(post, index) in filteredPosts" :key="index">
+              <!-- this is the post card -->
+              <Post
+                :post="post"
+                :index="index"
+                :currentUser="currentUser"
+                @addClip="addClip"
+                @onDelete="onDelete"
+                @reply="reply"
+                @openGallery="openGallery"
+                @viewReplies="viewReplies"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- END OF TABLE -->
+      <!-- THIRD COLUMN -->
+      <div class="column right">
+        <div class="whiteBox">
+          <h2>Post Filters</h2>
 
-    <!-- text area -->
-    <div>
-      <div class="flex-container3">
-        <!-- if the post has files ->
+          <!-- Clips filter -->
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Clips</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('clips')"
+                id="tags"
+                :class="{ filterClicked: filterByClips }"
+              ></button>
+            </div>
+          </div>
+
+          <!-- Files filter -->
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Attachments</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('files')"
+                id="tags"
+                :class="{ filterClicked: filterByFiles }"
+              ></button>
+            </div>
+          </div>
+
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Notes</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('notes')"
+                id="tags"
+                :class="{ filterClicked: filterByNotes }"
+              ></button>
+            </div>
+          </div>
+
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Exam</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('exams')"
+                id="tags"
+                :class="{ filterClicked: filterByExams }"
+              ></button>
+            </div>
+          </div>
+
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Questions</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('questions')"
+                id="tags"
+                :class="{ filterClicked: filterByQuestions }"
+              ></button>
+            </div>
+          </div>
+          <!--/div-->
+
+          <div class="row" style="clear: both;">
+            <div class="column">
+              <p>Assignments</p>
+            </div>
+            <div class="column">
+              <button
+                @click.prevent="filterBy('assignments')"
+                id="tags"
+                :class="{ filterClicked: filterByAssignments }"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- END OF TABLE -->
+
+      <!-- text area -->
+      <div>
+        <div class="flex-container3">
+          <!-- if the post has files ->
         <div v-if="post.files.length > 0" class="image-div">
           <div style="display: inline-block" v-for="file in post.files" :key="file.src">
             <img :src="file.src" class="image" />
           </div>
-        </div>-->
+          </div>-->
 
-        <div class="flex-file">
-          <!-- uploading files -->
-          <vue-dropzone
-            v-if="showDropArea || fileDropped"
-            ref="imgDropZone"
-            id="dropzone"
-            style="width: 50%"
-            :options="dropzoneOptions"
-            @vdropzone-drop="fileDropped = true"
-            @vdropzone-complete="afterComplete"
-          ></vue-dropzone>
+          <div class="flex-file">
+            <!-- uploading files -->
+            <vue-dropzone
+              v-if="showDropArea || fileDropped"
+              ref="imgDropZone"
+              id="dropzone"
+              style="width: 50%"
+              :options="dropzoneOptions"
+              @vdropzone-drop="fileDropped = true"
+              @vdropzone-complete="afterComplete"
+            ></vue-dropzone>
 
-          <label for="file-upload" class="custom-file-upload">
-            <i class="fa fa-cloud-upload"></i>
-          </label>
+            <label for="file-upload" class="custom-file-upload">
+              <i class="fa fa-cloud-upload"></i>
+            </label>
+          </div>
+
+          <!-- If the post is a reply -->
+          <div v-if="post.isReply" class="flex-reply">
+            <div class="replyingText">
+              <p style="color: black">Replying to {{ replyingTo }}</p>
+              <p>{{ replyingMessage }}</p>
+            </div>
+            <div class="flex-remove">
+              <button @click="post.isReply = false" class="remButton">X</button>
+            </div>
+          </div>
         </div>
 
-        <!-- If the post is a reply -->
-        <div v-if="post.isReply" class="flex-reply">
-          <div class="replyingText">
-            <p style="color: black">Replying to {{ replyingTo }}</p>
-            <p>{{ replyingMessage }}</p>
+        <!-- table -->
+        <div class="flex-container2">
+          <!-- replies and docs -->
+          <div class="chat-left">
+            <!-- tags -->
+
+            <button
+              @click.prevent="post.notesTag = !post.notesTag"
+              :class="{ notesFilterClicked: post.notesTag, notesFilter: true}"
+              title="remove note-tag"
+            ></button>
+
+            <button
+              @click.prevent="post.questionsTag = !post.questionsTag"
+              id="questionsFilter"
+              :class="{ questionsFilterClicked: post.questionsTag, questionsFilter: true }"
+              title="add question-tag"
+            ></button>
+
+            <button
+              @click.prevent="post.examsTag = !post.examsTag"
+              id="examsFilter"
+              :class="{ examsFilterClicked: post.examsTag, examsFilter: true }"
+              title="add exam-tag"
+            ></button>
+
+            <button
+              @click.prevent="post.assignmentsTag = !post.assignmentsTag"
+              :class="{ assignmentsFilterClicked: post.assignmentsTag, assignmentsFilter: true }"
+              id="assignmentsFilter"
+              title="add assignment-tag"
+              style="margin-top: 8px"
+            ></button>
           </div>
-          <div class="flex-remove">
-            <button @click="post.isReply = false" class="remButton">X</button>
+
+          <div class="chat-mid">
+            <!-- post itself -->
+            <div class="wrapper">
+              <form>
+                <!-- Text input area -->
+                <div>
+                  <ResizeAuto>
+                    <template v-slot:default="{ resize }">
+                      <textarea
+                        id="message"
+                        v-model="post.content"
+                        rows="1"
+                        @input="resize"
+                        placeholder="Have something to say?"
+                      ></textarea>
+                    </template>
+                  </ResizeAuto>
+                </div>
+              </form>
+            </div>
           </div>
+
+          <div class="chat-right">
+            <!-- Dropzone with attachment icon beside text area -->
+            <vue-dropzone
+              ref="imgDropZone"
+              id="attachDropzone"
+              class="docButton"
+              :include-styling="false"
+              :options="dropzoneOptions"
+              @vdropzone-complete="afterAttach"
+            ></vue-dropzone>
+          </div>
+
+          <div class="chat-right">
+            <!-- Add Post Button -->
+            <button
+              @click="onCreatePost()"
+              class="sendButton is-success bottom"
+              style="margin-left:-15px"
+            ></button>
+          </div>
+
+          <div class="chat-right" style="padding:20px"></div>
+
+          <div id="bottom"></div>
         </div>
       </div>
 
-      <!-- table -->
-      <div class="flex-container2">
-        <!-- replies and docs -->
-        <div class="chat-left">
-          <!-- tags -->
-
-          <button
-            @click.prevent="post.notesTag = !post.notesTag"
-            :class="{ notesFilterClicked: post.notesTag, notesFilter: true}"
-            title="remove note-tag"
-          ></button>
-
-          <button
-            @click.prevent="post.questionsTag = !post.questionsTag"
-            id="questionsFilter"
-            :class="{ questionsFilterClicked: post.questionsTag, questionsFilter: true }"
-            title="add question-tag"
-          ></button>
-
-          <button
-            @click.prevent="post.examsTag = !post.examsTag"
-            id="examsFilter"
-            :class="{ examsFilterClicked: post.examsTag, examsFilter: true }"
-            title="add exam-tag"
-          ></button>
-
-          <button
-            @click.prevent="post.assignmentsTag = !post.assignmentsTag"
-            :class="{ assignmentsFilterClicked: post.assignmentsTag, assignmentsFilter: true }"
-            id="assignmentsFilter"
-            title="add assignment-tag"
-            style="margin-top: 8px"
-          ></button>
-        </div>
-
-        <div class="chat-mid">
-          <!-- post itself -->
-          <div class="wrapper">
-            <form>
-              <!-- Text input area -->
-              <div>
-                <ResizeAuto>
-                  <template v-slot:default="{ resize }">
-                    <textarea
-                      id="message"
-                      v-model="post.content"
-                      rows="1"
-                      @input="resize"
-                      placeholder="Have something to say?"
-                    ></textarea>
-                  </template>
-                </ResizeAuto>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <div class="chat-right">
-          <!-- Dropzone with attachment icon beside text area -->
-          <vue-dropzone
-            ref="imgDropZone"
-            id="attachDropzone"
-            class="docButton"
-            :include-styling="false"
-            :options="dropzoneOptions"
-            @vdropzone-complete="afterAttach"
-          ></vue-dropzone>
-        </div>
-
-        <div class="chat-right">
-          <!-- Add Post Button -->
-          <button
-            @click="onCreatePost()"
-            class="sendButton is-success bottom"
-            style="margin-left:-15px"
-          ></button>
-        </div>
-
-        <div class="chat-right" style="padding:20px"></div>
-
-        <div id="bottom"></div>
-      </div>
+      <LightBox ref="lightbox" :media="media" :show-light-box="false" />
     </div>
-
-    <LightBox ref="lightbox" :media="media" :show-light-box="false" />
   </section>
 </template>
 
@@ -967,6 +969,8 @@ export default {
           assignmentsTag: false,
         };
         this.scroll = true;
+        this.showDropArea = false;
+        this.fileDropped = false;
       }
     },
     onDelete(post_id) {
@@ -1010,7 +1014,7 @@ body {
   align-items: center;
   justify-content: space-between;
   background-color: white;
-  position: fixed;
+  /*position: fixed;*/
   width: 100%;
 }
 .flexNav {
