@@ -341,10 +341,8 @@ import "vue2-dropzone/dist/vue2Dropzone.min.css";
 import ResizeAuto from "@/components/ResizeAuto";
 import Courses from "@/components/Courses";
 import Post from "@/components/Post";
-
 import db from "@/db";
 import LightBox from "vue-image-lightbox";
-
 export default {
   components: {
     vueDropzone: vue2Dropzone,
@@ -353,33 +351,26 @@ export default {
     Courses,
     Post,
   },
-
   data: () => ({
     media: [], //Clickable images in a post
     searchTerm: "", //Users input in search bar
     showDropArea: false, //Whether the drop area should be shown
     fileDropped: false, //If the user dropped a file in the drop zone
-
     replyingTo: "", //The name of the user you are replying to
     replyingToId: "", //The id of the user you are replying to
     replyingMessage: "", //The message of the post your are replying to
     listReplies: "", //id of post in which to list replies for
     inListReplies: "",
-
     lastCourse: null, //The previous course that the user was on
     userCount: null, //the number of users in the selected course
     otherCourses: [], //The courses that the user is not currently on
-
     userId: "", //the Id of the current user
     currentUser: null, //the current user
-
     scroll: true, //whether to scroll to the bottom on updated()
     lastScroll: null, //the previous scroll position
-
     posts: [], //the loaded posts
     filteredPosts: [], //the loaded tagged posts
     isFilter: false, //If a filter is applied
-
     //tags
     filterByFiles: false,
     filterByClips: false,
@@ -387,7 +378,6 @@ export default {
     filterByExams: false,
     filterByAssignments: false,
     filterByQuestions: false,
-
     //Drop zone options
     dropzoneOptions: {
       url: "https://httpbin.org/post",
@@ -398,7 +388,6 @@ export default {
       duplicateCheck: true,
       addRemoveLinks: true,
     },
-
     // Post info for adding a post
     post: {
       content: "",
@@ -406,7 +395,6 @@ export default {
       isReply: false, //if the post is a reply
       parent_id: "", //the id of the post being replied to
       course_id: "", //the id of the selected course
-
       //tags applied to the post
       notesTag: false,
       examsTag: false,
@@ -414,7 +402,6 @@ export default {
       questionsTag: false,
     },
   }),
-
   mounted() {
     if (this.user) {
       this.userId = this.user.id;
@@ -426,7 +413,6 @@ export default {
       console.log("User is undefined");
     }
   },
-
   watch: {
     //Watches posts collection and scrolls if scroll is true
     posts: function () {
@@ -436,7 +422,6 @@ export default {
         }
       });
     },
-
     //Watches filteredPosts collection and scrolls if scroll is true
     filteredPosts: function () {
       this.$nextTick(() => {
@@ -445,28 +430,23 @@ export default {
         }
       });
     },
-
     //Changes this.currentUser when user changes
     user() {
       this.currentUser = this.user;
     },
-
     //if the course changes reinit posts, change last visited of courses, update notifiction listeners
     course() {
       this.scroll = true;
       this.lastScroll = null;
       this.posts = [];
-
       if (this.course) {
         if (!this.lastCourse) {
           this.lastCourse = this.course;
         }
-
         this.initNewPost(this.course);
         this.setLastVisited(this.course);
         this.loadPosts(this.course);
         this.updateOtherCourses(this.course);
-
         //Get User count
         db.collection("courses")
           .doc(this.course)
@@ -476,7 +456,6 @@ export default {
           });
       }
     },
-
     //When a newPost is added to your current course
     newPost() {
       if (this.newPost[0]) {
@@ -489,7 +468,6 @@ export default {
         } else {
           this.posts.push(this.newPost[0]);
         }
-
         //Check to see if there are tags applied and if to push to filteredposts
         if (this.filtersMatch(this.newPost[0])) {
           //If the most recent post is being updated
@@ -505,17 +483,14 @@ export default {
         }
       }
     },
-
     //Updates the users courses if the notification is unread
     newNotification() {
       if (!this.currentUser) {
         console.log("Error current user is undefined");
         return;
       }
-
       const userCourses = this.currentUser.courses;
       var isUnreadPost = false;
-
       //Checks if the post has been read by the user
       for (const index in userCourses) {
         if (
@@ -525,12 +500,10 @@ export default {
           isUnreadPost = true;
         }
       }
-
       if (!isUnreadPost) {
         console.log("The post has already been read");
         return;
       }
-
       if (this.currentUser) {
         for (const index in userCourses) {
           //If the notification is from a course with no unread posts
@@ -540,16 +513,13 @@ export default {
             !userCourses[index].unreadPosts
           ) {
             userCourses[index].unreadPosts = true;
-
             //Update users course
             db.collection("users").doc(this.userId).update({
               courses: userCourses,
             }),
               this.$store.commit("user/setCourses", this.currentUser.courses);
-
             var course_ids = [];
             this.otherCourses = [];
-
             //Updates otherCourses if there are courses with no unread posts
             for (const index in userCourses) {
               if (!userCourses[index].unreadPosts) {
@@ -557,7 +527,6 @@ export default {
                 this.otherCourses.push(userCourses[index]);
               }
             }
-
             //If all the users courses have unread posts unbind the listener, else keep listening with the updated courses
             if (course_ids.length == 0) {
               this.unbindPosts();
@@ -570,13 +539,11 @@ export default {
         console.log("Error, could not get current user");
       }
     },
-
     // if the user views the replies of a different post -> list the replies
     listReplies() {
       this.initReplies(this.listReplies);
     },
   },
-
   computed: {
     ...mapState("messageBoard", [
       "replies",
@@ -586,7 +553,6 @@ export default {
     ]),
     ...mapState("user", ["user"]),
   },
-
   methods: {
     ...mapActions("messageBoard", [
       "createPost",
@@ -597,7 +563,6 @@ export default {
       "unbindPosts",
     ]),
     ...mapActions("user", ["logout"]),
-
     //Loads the first 20 most recent posts
     async loadPosts(course) {
       const tempPosts = [];
@@ -624,7 +589,6 @@ export default {
         this.posts = tempPosts;
       }
     },
-
     //Updates otherCourses to listen for notifications
     updateOtherCourses(course_id) {
       if (this.currentUser) {
@@ -637,19 +601,15 @@ export default {
             this.otherCourses.push(this.currentUser.courses[index]);
           }
         }
-
         //updates the user collection
         db.collection("users").doc(this.userId).update({
           courses: this.currentUser.courses,
         });
-
         this.$store.commit("user/setCourses", this.currentUser.courses);
-
         var course_ids = [];
         for (const index in this.otherCourses) {
           course_ids.push(this.otherCourses[index].course_id);
         }
-
         if (course_ids.length == 0) {
           this.unbindPosts();
         } else {
@@ -659,7 +619,6 @@ export default {
         console.log("Error, Could not get current user");
       }
     },
-
     //Check if the newPost matches the currently applied filters
     filtersMatch(newPost) {
       var isMatch = true;
@@ -679,12 +638,10 @@ export default {
     isImage(file) {
       return file.src.includes("png");
     },
-
     // If the file is a video
     isVideo(file) {
       return file.src.includes("MP4") || file.src.includes("mp4");
     },
-
     //Sets a timestamp for the last time a user visisted a course
     async setLastVisited(course_id) {
       if (this.lastCourse && this.lastCourse != course_id) {
@@ -694,7 +651,6 @@ export default {
             this.$store.commit("user/setUser", this.currentUser);
           }
         }
-
         //updates user collection in firebase
         db.collection("users").doc(this.userId).update({
           courses: this.currentUser.courses,
@@ -702,41 +658,32 @@ export default {
       }
       this.lastCourse = course_id;
     },
-
     setQueryFilters() {
       var queryPosts = db
         .collection("posts")
         .where("course_id", "==", this.course);
-
       if (this.filterByNotes) {
         queryPosts = queryPosts.where("notesTag", "==", true);
       }
-
       if (this.filterByExams) {
         queryPosts = queryPosts.where("examsTag", "==", true);
       }
-
       if (this.filterByAssignments) {
         queryPosts = queryPosts.where("assignmentsTag", "==", true);
       }
-
       if (this.filterByQuestions) {
         queryPosts = queryPosts.where("questionsTag", "==", true);
       }
-
       if (this.filterByFiles) {
         queryPosts = queryPosts.where("hasFiles", "==", true);
       }
-
       if (this.filterByClips) {
         queryPosts = queryPosts.orderBy("clips", "desc");
       } else {
         queryPosts = queryPosts.orderBy("created_at", "desc");
       }
-
       return queryPosts;
     },
-
     filterBy(type) {
       this.scroll = true;
       if (type == "notes") {
@@ -763,12 +710,9 @@ export default {
         this.isFilter = false;
         return;
       }
-
       this.isFilter = true;
       this.lastScroll = null;
-
       var queryPosts = this.setQueryFilters();
-
       var tempPosts = [];
       queryPosts
         .limit(5)
@@ -782,23 +726,19 @@ export default {
         .catch(function (error) {
           console.log("Error getting documents: ", error);
         });
-
       this.filteredPosts = tempPosts;
     },
-
     // Scrolls to the bottom of posts
     scrollToBottom() {
       var container = this.$el.querySelector(".postContainer");
       container.scrollTop = container.scrollHeight;
     },
-
     //Watches where the user is in the posts container
     onScroll({ target: { scrollTop, scrollHeight } }) {
       //If the user scrolls up -> stop scrolling to the bottom of postsContainer on post updates
       if (this.lastScroll && this.lastScroll > scrollTop) {
         this.scroll = false;
       }
-
       //If the user scrolls to the top of the postsContainer
       if (scrollTop == 0 && this.lastScroll) {
         if (this.isFilter) {
@@ -807,10 +747,8 @@ export default {
           this.appendPosts(scrollHeight);
         }
       }
-
       this.lastScroll = scrollTop;
     },
-
     // Adds clip to a post
     async addClip(post_id, index) {
       var postsCollection = this.isFilter ? this.filteredPosts : this.posts;
@@ -825,7 +763,6 @@ export default {
               alreadyClipped = true;
             }
           }
-
           // If the user hasnt clipped the post then clip it else unclip it
           if (!alreadyClipped) {
             postsCollection[index].clips += 1;
@@ -841,7 +778,6 @@ export default {
               });
           } else {
             postsCollection[index].clips -= 1;
-
             db.collection("posts")
               .doc(post_id)
               .update({
@@ -855,12 +791,10 @@ export default {
           }
         });
     },
-
     //Appends the next 20 posts to posts
     async appendPosts(scrollHeight) {
       var container = this.$el.querySelector(".postContainer");
       const tempPosts = [];
-
       //if there is no filter applied updates posts else update filteredPosts
       if (this.course) {
         await db
@@ -878,25 +812,20 @@ export default {
           .catch(function (error) {
             console.log("Error getting documents: ", error);
           });
-
         //adds all the docs in tempPosts to the beggining of posts
         for (const index in tempPosts) {
           this.posts.unshift(tempPosts[index]);
         }
       }
-
       //scrolls to bottom
       this.$nextTick(() => {
         container.scrollTop = container.scrollHeight - scrollHeight;
       });
     },
-
     async appendFilteredPosts(scrollHeight) {
       var container = this.$el.querySelector(".postContainer");
       const tempPosts = [];
-
       var queryPosts = this.setQueryFilters();
-
       this.posts[0].created_at;
       console.log(this.filteredPosts[0]);
       if (this.course) {
@@ -912,19 +841,16 @@ export default {
           .catch(function (error) {
             console.log("Error getting documents: ", error);
           });
-
         //adds all the docs in tempPosts to the beggining of posts
         for (const index in tempPosts) {
           this.filteredPosts.unshift(tempPosts[index]);
         }
       }
-
       //scrolls to bottom
       this.$nextTick(() => {
         container.scrollTop = container.scrollHeight - scrollHeight;
       });
     },
-
     // Adds reply to a post
     async addReply(id) {
       db.collection("posts")
@@ -933,21 +859,18 @@ export default {
           replies: firebase.firestore.FieldValue.increment(1),
         });
     },
-
     //Adds the files to post.files and to firebase storage if the file was drag and dropped
     async afterComplete(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
         var fileRef = "";
-
         // If is an image
         if (file["type"] === "image/jpeg" || file["type"] === "image/png") {
           fileRef = storageRef.child(`images/${file.name}.png`);
         } else {
           fileRef = storageRef.child(`files/${file.name}`);
         }
-
         await fileRef.put(file);
         const downloadURL = await fileRef.getDownloadURL();
         this.post.files.push({
@@ -958,31 +881,26 @@ export default {
         console.log(error);
       }
     },
-
     //Adds the files to firebase storage if they were added by clicking on the attach icon in order to display them in top dropzone
     async afterAttach(file) {
       this.fileDropped = true;
       try {
         const storageRef = firebase.storage().ref();
         var fileRef = "";
-
         //If the file is an image
         if (file["type"] === "image/jpeg" || file["type"] === "image/png") {
           fileRef = storageRef.child(`images/${file.name}.png`);
         } else {
           fileRef = storageRef.child(`files/${file.name}`);
         }
-
         await fileRef.put(file);
         const downloadURL = await fileRef.getDownloadURL();
-
         //Adds the file to the dropzone to be viewed
         this.$refs.imgDropZone.manuallyAddFile(file, downloadURL);
       } catch (error) {
         console.log(error);
       }
     },
-
     //Shows the lightbox of the files images
     openGallery(index, files) {
       this.media = [];
@@ -995,11 +913,9 @@ export default {
       }
       this.$refs.lightbox.showImage(index);
     },
-
     viewReplies(id) {
       this.listReplies = id;
     },
-
     // if the user clicks reply to a post
     reply(post) {
       this.post.isReply = true;
@@ -1007,19 +923,16 @@ export default {
       this.replyingMessage = post.content;
       this.post.parent_id = post.id;
     },
-
     // If replying to a reply
     childReply(post) {
       this.reply(post);
     },
-
     search() {
       if (this.searchTerm) {
         const regexp = new RegExp(this.searchTerm, "gi");
         return this.posts.filter((post) => post.content.match(regexp));
       }
     },
-
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
@@ -1027,7 +940,6 @@ export default {
         this.fileDropped = false;
         this.post.course_id = this.course;
         this.createPost(this.post);
-
         //if the post is a reply -> adds the reply to the post
         if (this.post.isReply) {
           db.collection("posts")
@@ -1042,7 +954,6 @@ export default {
               }
             });
         }
-
         //Resets the post
         this.post = {
           content: "",
@@ -1055,11 +966,9 @@ export default {
           questionsTag: false,
           assignmentsTag: false,
         };
-
         this.scroll = true;
       }
     },
-
     onDelete(post_id) {
       const name = this.currentUser.firstName + " " + this.currentUser.lastName;
       const postsCollection = this.isFilter ? this.filteredPosts : this.posts;
@@ -1072,7 +981,6 @@ export default {
       }
       this.deletePost({ post_id: post_id, name: name });
     },
-
     //checks if a post has the specified tag
     checkForTag(post, tag) {
       for (const index in post.tags) {
@@ -1091,14 +999,12 @@ export default {
   margin: 0px;
   padding: 0px;
 }
-
 body {
   background: #f3f3f3;
   overflow: hidden;
   bottom: 0;
   height: 100vh;
 }
-
 .navbar {
   display: flex;
   align-items: center;
@@ -1107,62 +1013,50 @@ body {
   position: fixed;
   width: 100%;
 }
-
 .flexNav {
   display: flex;
   align-items: stretch;
   background-color: white;
   align-items: center;
 }
-
 .navButton {
   margin-right: 5px;
   background-color: white;
   color: black;
 }
-
 .posts {
   margin-top: 2em;
 }
-
 .card {
   height: 100%;
   margin-top: 20px;
   border-radius: 5px;
   background-color: #f3f3f3;
 }
-
 .card img {
   border-radius: 5px;
 }
-
 .postContainer {
   height: 75vh;
   overflow: auto;
   margin-left: auto;
   margin-right: auto;
 }
-
 .filterClicked {
   background-color: blue;
 }
-
 .postContainer::-webkit-scrollbar {
   width: 3px;
 }
-
 .postContainer::-webkit-scrollbar-track {
   background: #ddd;
 }
-
 .postContainer::-webkit-scrollbar-thumb {
   background: #aaa;
 }
-
 input[type="file"] {
   display: none;
 }
-
 .image-div {
   display: flex;
   margin: 25px;
@@ -1171,7 +1065,6 @@ input[type="file"] {
   max-width: 250px;
   margin: 15px;
 }
-
 #message {
   background-color: white;
   width: 100%;
@@ -1185,7 +1078,6 @@ input[type="file"] {
   padding: 10px;
   max-height: 70px;
 }
-
 #attach {
   width: 50px;
   height: 50px;
@@ -1193,35 +1085,29 @@ input[type="file"] {
   cursor: pointer;
   background: url("../assets/docIcon.png") center/cover;
 }
-
 #attach:hover {
   background: url("../assets/docIcon-hover.png") center/cover;
 }
-
 #attach .dz-success-mark,
 .dz-error-mark,
 .dz-remove {
   display: none;
 }
-
 #attach .dz-filename,
 .dz-size {
   display: none;
 }
-
 .text-area {
   display: flex;
   margin-right: 3em;
   margin-left: 1.5em;
 }
-
 .fileType img {
   max-width: 25px;
   max-height: 25px;
   margin-top: 10px;
   margin-right: 10px;
 }
-
 /* DOC BUTTON */
 .docButton {
   margin: 3px;
@@ -1235,33 +1121,26 @@ input[type="file"] {
   border: none;
   border-radius: 50%;
 }
-
 .docButton:hover {
   background-image: url("../assets/docIcon-hover.png");
 }
-
 .column {
   float: left;
   padding: 10px;
 }
-
 .middle {
   width: 70%;
 }
-
 .left {
   width: 15%;
 }
-
 .right {
   width: 15%;
 }
-
 .cardTable {
   display: flex;
   width: 100%;
 }
-
 .flex-container2 {
   display: flex;
   align-self: stretch;
@@ -1272,7 +1151,6 @@ input[type="file"] {
   max-height: 70px;
   bottom: 0;
 }
-
 .flex-container3 {
   display: flex;
   align-items: stretch;
@@ -1285,7 +1163,6 @@ input[type="file"] {
   z-index: 100;
   width: 100%;
 }
-
 .chat-left {
   flex-direction: row;
   flex-basis: 12%;
@@ -1293,19 +1170,16 @@ input[type="file"] {
   align-items: center;
   justify-content: center;
 }
-
 .chat-mid {
   flex-direction: row;
   flex-basis: 40%;
   align-self: center;
 }
-
 .chat-right {
   flex-direction: row;
   flex-basis: 5%;
   align-self: center;
 }
-
 .whiteBox {
   /*  background-color: white;*/
   padding: 10px;
@@ -1313,20 +1187,17 @@ input[type="file"] {
   min-height: 330px;
   margin-left: -25%;
 }
-
 .switch {
   position: relative;
   display: inline-block;
   width: 35px;
   height: 21px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -1338,7 +1209,6 @@ input[type="file"] {
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -1350,30 +1220,24 @@ input[type="file"] {
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
-
 input:checked + .slider {
   background-color: #2196f3;
 }
-
 input:focus + .slider {
   box-shadow: 0 0 1px #2196f3;
 }
-
 input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
 }
-
 /* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }
-
 .slider.round:before {
   border-radius: 50%;
 }
-
 /*Filters */
 #tag {
   color: black;
@@ -1381,7 +1245,6 @@ input:checked + .slider:before {
   padding: 5px;
   margin: 0 2px;
 }
-
 .notesFilter {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1394,7 +1257,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .notesFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1407,7 +1269,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .questionsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1420,7 +1281,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .questionsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1433,7 +1293,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .examsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1446,7 +1305,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .examsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1459,7 +1317,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .assignmentsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1472,7 +1329,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .assignmentsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1485,7 +1341,6 @@ input:checked + .slider:before {
   border: none;
   border-radius: 50%;
 }
-
 .flex-reply {
   display: flex;
   align-items: stretch;
@@ -1497,7 +1352,6 @@ input:checked + .slider:before {
   padding-right: 5%;
   width: 70%;
 }
-
 .flex-file {
   display: flex;
   align-items: stretch;
@@ -1507,15 +1361,12 @@ input:checked + .slider:before {
   bottom: 65px;
   width: 100%;
 }
-
 .replyingText {
   width: 80%;
 }
-
 .flex-remove {
   width: 20%;
 }
-
 .remButton {
   background-color: #f3f3f3;
   color: #808080;
