@@ -5,27 +5,16 @@
       <form @submit.prevent="signup">
         <img src="../../assets/logo.png" alt />
         <h1>Sign Up</h1>
-        <p style="margin-bottom: 22px;">
-          Interact with students in your classes for free
-        </p>
+        <p style="margin-bottom: 22px;">Interact with students in your classes for free</p>
         <select v-model="university" class="select-css">
-          <option disabled selected="selected" value="0"
-            >Select University...</option
-          >
+          <option disabled selected="selected" value="0">Select University...</option>
           <option
             v-for="(school, index) in schools"
             :key="index"
             :value="school.id"
-            >{{ school.data().name }}</option
-          >
+          >{{ school.data().name }}</option>
         </select>
-        <input
-          v-model="email"
-          type="text"
-          placeholder="University Email"
-          name="email"
-          required
-        />
+        <input v-model="email" type="text" placeholder="University Email" name="email" required />
 
         <div class="name" style="display: flex;">
           <input
@@ -36,22 +25,10 @@
             name="name"
             required
           />
-          <input
-            v-model="lastName"
-            type="text"
-            placeholder="Last name"
-            name="name"
-            required
-          />
+          <input v-model="lastName" type="text" placeholder="Last name" name="name" required />
         </div>
 
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Create Password"
-          name="psw"
-          required
-        />
+        <input v-model="password" type="password" placeholder="Create Password" name="psw" required />
 
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
@@ -66,12 +43,7 @@
 
         <p>
           Already have an account?
-          <router-link
-            class="noUnderline"
-            style="color: dodgerblue;"
-            :to="{ name: 'Login' }"
-            >Login</router-link
-          >
+          <router-link class="noUnderline" style="color: dodgerblue;" :to="{ name: 'Login' }">Login</router-link>
         </p>
       </form>
     </div>
@@ -79,11 +51,11 @@
 </template>
 
 <script>
-import firebase from 'firebase';
-import db from '@/db';
-import router from '@/router/index';
+import firebase from "firebase";
+import db from "@/db";
+import router from "@/router/index";
 export default {
-  name: 'Signup',
+  name: "Signup",
   data: () => ({
     schools: [],
     email: null,
@@ -101,10 +73,10 @@ export default {
     async getSchools() {
       var tempSchools = [];
       await db
-        .collection('schools')
+        .collection("schools")
         .get()
-        .then(function(querySnapshot) {
-          querySnapshot.forEach(function(doc) {
+        .then(function (querySnapshot) {
+          querySnapshot.forEach(function (doc) {
             tempSchools.push(doc);
           });
         });
@@ -122,10 +94,10 @@ export default {
       ) {
         //If a valid university email was entered
         if (
-          (this.university == 'pOFdIKe2KVcQ8IbEl6sw' &&
-            this.email.endsWith('@uwo.ca')) ||
-          (this.university == '5Uo24jSg4nGg3sVOzeec' &&
-            this.email.endsWith('@mail.mcgill.ca'))
+          (this.university == "pOFdIKe2KVcQ8IbEl6sw" &&
+            this.email.endsWith("@uwo.ca")) ||
+          (this.university == "5Uo24jSg4nGg3sVOzeec" &&
+            this.email.endsWith("@mail.mcgill.ca"))
         ) {
           this.feedback = null;
           firebase
@@ -136,35 +108,32 @@ export default {
                 .auth()
                 .currentUser.sendEmailVerification()
                 .then(
-                  function() {
-                    router.push('/verification-email-sent');
+                  function () {
+                    router.push("/verification-email-sent");
                   },
-                  function(error) {
+                  function (error) {
                     console.log(error.message);
                   }
                 );
-              db.collection('users')
-                .doc(cred.user.uid)
-                .set({
-                  firstName: this.firstName,
-                  lastName: this.lastName,
-                  school_id: this.university,
-                  courses: [],
-                  faculties: [],
-                  course_ids: [],
-                  profileImage:
-                    'https://firebasestorage.googleapis.com/v0/b/courselnk.appspot.com/o/images%2F775162441-MR-2031-8E033EFCEBB928DC12A2A0AA3CEC4C33-21885-1527376486_680x0.jpg.png?alt=media&token=b1b32dfd-2a90-4f34-a9cc-ef5056a2afea',
-                });
+              db.collection("users").doc(cred.user.uid).set({
+                firstName: this.firstName,
+                lastName: this.lastName,
+                school_id: this.university,
+                courses: [],
+                faculties: [],
+                course_ids: [],
+                profileImage:
+                  "https://firebasestorage.googleapis.com/v0/b/courselnk.appspot.com/o/images%2F775162441-MR-2031-8E033EFCEBB928DC12A2A0AA3CEC4C33-21885-1527376486_680x0.jpg.png?alt=media&token=b1b32dfd-2a90-4f34-a9cc-ef5056a2afea",
+              });
             })
             .catch((err) => {
-              console.log(err);
               this.feedback = err.message;
             });
         } else {
-          this.feedback = 'Please enter correct university email';
+          this.feedback = "Please enter correct university email";
         }
       } else {
-        this.feedback = 'You must enter all fields';
+        this.feedback = "You must enter all fields";
       }
     },
   },
@@ -183,7 +152,7 @@ export default {
   top: 0;
   left: 0;
   display: flex;
-  background: url('../../assets/authBackground.png') no-repeat left/contain
+  background: url("../../assets/authBackground.png") no-repeat left/contain
     fixed;
 }
 .noUnderline {
@@ -199,8 +168,8 @@ export default {
   text-align: left;
 }
 /* Full-width input fields */
-input[type='text'],
-input[type='password'] {
+input[type="text"],
+input[type="password"] {
   width: 100%;
   padding: 15px;
   margin: -7px 0 22px 0;
@@ -217,8 +186,8 @@ p {
   margin: 5px;
   color: #535c68;
 }
-input[type='text']:focus,
-input[type='password']:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -250,7 +219,7 @@ button:hover {
 }
 /* Clear floats */
 .clearfix::after {
-  content: '';
+  content: "";
   clear: both;
   display: table;
 }
@@ -265,7 +234,7 @@ button:hover {
   border-radius: 5px;
   line-height: 1.3;
   appearance: none;
-  background-image: url('../../assets/dropdown.png'),
+  background-image: url("../../assets/dropdown.png"),
     linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
   background-repeat: no-repeat, repeat;
   background-position: right 0.7em top 50%, 0 0;
