@@ -9,56 +9,50 @@
       <div class="navbar">
         <!-- brand design -->
         <div class="flexNav">
-          <a href="#">
-            <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
+          <a href="#" class="flexLogo">
+            <img
+              src="@/assets/mainLogo.png"
+              width="237"
+              height="49"
+              alt="main page logo"
+            />
           </a>
         </div>
-
-        <!-- search design -->
-        <form class="flexNav">
-          <b-field>
-            <b-input
-              v-model="searchTerm"
-              placeholder="Search Posts"
-              style="margin-left: -100%; width: 300%;"
-            ></b-input>
-          </b-field>
-        </form>
 
         <!--p>{{ this.userCount }} Members</p-->
 
         <!-- profile design -->
         <div class="flexNav">
           <router-link
-            class="navButton"
+            class="navInfo"
             :to="{
-                name: 'Profile',
-              }"
-          >Profile</router-link>
+              name: 'Login',
+            }"
+            @click="logout"
+          ></router-link>
 
           <router-link
+            class="navProfile"
             :to="{
-                name: 'Login',
-              }"
-            @click="logout"
-            class="navButton"
-          >Logout</router-link>
+              name: 'Profile',
+            }"
+          ></router-link>
+
+          <!--  onclick="openForm()"-->
         </div>
       </div>
 
       <!-- end of navbar design -->
 
       <!-- 3 columns for main page -->
-      <div>
-        <div class="row">
-          <!-- FIRST COLUMN -->
-          <div class="column left">
-            <Courses />
-          </div>
+      <div class="mainFlex">
+        <!-- FIRST COLUMN -->
+        <div class="flexLeft">
+          <Courses />
         </div>
 
         <!-- SECOND COLUMN -->
-        <div class="column middle" style="height: 81vh">
+        <div class="flexMid" style="height: 81vh">
           <!-- start of chat container design -->
           <div @scroll="onScroll" class="container is-fluid postContainer">
             <div v-if="!isFilter" class="posts is-multiline">
@@ -77,23 +71,6 @@
                   @openGallery="openGallery"
                   @viewReplies="viewReplies"
                 />
-
-                <!--div v-if="listReplies == post.id">
-              <--  Start of List Of  Replies ->
-              <div v-for="(reply, index) in replies" :key="index" class="replies">
-                <Post
-                  :post="reply"
-                  :index="index"
-                  :currentUser="currentUser"
-                  @addClip="addClip"
-                  @onDelete="onDelete"
-                  @reply="reply"
-                  @openGallery="openGallery"
-                  @viewReplies="viewReplies"
-                />
-              </div>
-              <--  End of List Of  Replies ->
-                </div-->
               </div>
             </div>
 
@@ -117,12 +94,12 @@
         </div>
 
         <!-- THIRD COLUMN -->
-        <div class="column right">
+        <div class="flexRight">
           <div class="whiteBox">
             <h2>Post Filters</h2>
 
             <!-- Clips filter -->
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Clips</p>
               </div>
@@ -136,7 +113,7 @@
             </div>
 
             <!-- Files filter -->
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Attachments</p>
               </div>
@@ -149,7 +126,7 @@
               </div>
             </div>
 
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Notes</p>
               </div>
@@ -162,7 +139,7 @@
               </div>
             </div>
 
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Exam</p>
               </div>
@@ -175,7 +152,7 @@
               </div>
             </div>
 
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Questions</p>
               </div>
@@ -189,7 +166,7 @@
             </div>
             <!--/div-->
 
-            <div class="row" style="clear: both;">
+            <div class="row" style="clear: both">
               <div class="column">
                 <p>Assignments</p>
               </div>
@@ -204,18 +181,10 @@
           </div>
         </div>
 
-        <!-- END OF TABLE -->
-
-        <!-- text area -->
-        <div>
-          <div class="flex-container3">
-            <!-- if the post has files ->
-        <div v-if="post.files.length > 0" class="image-div">
-          <div style="display: inline-block" v-for="file in post.files" :key="file.src">
-            <img :src="file.src" class="image" />
-          </div>
-            </div>-->
-
+        <!-- BOTTOM -->
+        <div class="flexBottom">
+          <div>
+            <!-- class="flex-container3" -->
             <div class="flex-file">
               <!-- uploading files -->
               <vue-dropzone
@@ -235,13 +204,18 @@
             </div>
 
             <!-- If the post is a reply -->
-            <div v-if="post.isReply" class="flex-reply">
+            <div
+              v-if="post.isReply && !showDropArea && !fileDropped"
+              class="flex-reply"
+            >
               <div class="replyingText">
                 <p style="color: black">Replying to {{ replyingTo }}</p>
                 <p>{{ replyingMessage }}</p>
               </div>
               <div class="flex-remove">
-                <button @click="post.isReply = false" class="remButton">X</button>
+                <button @click="post.isReply = false" class="remButton">
+                  X
+                </button>
               </div>
             </div>
           </div>
@@ -254,27 +228,40 @@
 
               <button
                 @click.prevent="post.notesTag = !post.notesTag"
-                :class="{ notesFilterClicked: post.notesTag, notesFilter: true}"
-                title="remove note-tag"
+                id="notesFilter"
+                :class="{
+                  notesFilterClicked: post.notesTag,
+                  notesFilter: true,
+                }"
+                title="add note-tag"
               ></button>
 
               <button
                 @click.prevent="post.questionsTag = !post.questionsTag"
                 id="questionsFilter"
-                :class="{ questionsFilterClicked: post.questionsTag, questionsFilter: true }"
+                :class="{
+                  questionsFilterClicked: post.questionsTag,
+                  questionsFilter: true,
+                }"
                 title="add question-tag"
               ></button>
 
               <button
                 @click.prevent="post.examsTag = !post.examsTag"
                 id="examsFilter"
-                :class="{ examsFilterClicked: post.examsTag, examsFilter: true }"
+                :class="{
+                  examsFilterClicked: post.examsTag,
+                  examsFilter: true,
+                }"
                 title="add exam-tag"
               ></button>
 
               <button
                 @click.prevent="post.assignmentsTag = !post.assignmentsTag"
-                :class="{ assignmentsFilterClicked: post.assignmentsTag, assignmentsFilter: true }"
+                :class="{
+                  assignmentsFilterClicked: post.assignmentsTag,
+                  assignmentsFilter: true,
+                }"
                 id="assignmentsFilter"
                 title="add assignment-tag"
                 style="margin-top: 8px"
@@ -320,15 +307,15 @@
               <button
                 @click="onCreatePost()"
                 class="sendButton is-success bottom"
-                style="margin-left:-15px"
+                style="margin-left: -15px"
               ></button>
             </div>
-
-            <div class="chat-right" style="padding:20px"></div>
 
             <div id="bottom"></div>
           </div>
         </div>
+
+        <!-- END OF TABLE -->
 
         <LightBox ref="lightbox" :media="media" :show-light-box="false" />
       </div>
@@ -1133,10 +1120,85 @@ body {
   align-items: center;
 }
 
+.flexLogo {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
 .navButton {
   margin-right: 5px;
   background-color: white;
   color: black;
+}
+
+.navProfile {
+  margin: 3px;
+  padding: 30px 30px;
+  max-width: 60px;
+  cursor: pointer;
+  background-image: url("../assets/navProfile.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.navProfile:hover {
+  background-image: url("../assets/navProfile-clicked.png");
+}
+
+.navProfile:active {
+  transform: scale(0.95);
+}
+
+.navInfo {
+  margin: 3px;
+  padding: 30px 30px;
+  max-width: 60px;
+  cursor: pointer;
+  background-image: url("../assets/navInfo.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+}
+
+.navInfo:hover {
+  background-image: url("../assets/navInfo-clicked.png");
+}
+
+.navInfo:active {
+  transform: scale(0.95);
+}
+
+.mainFlex {
+  display: flex;
+  align-items: top;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background-color: #f3f3f3;
+}
+
+.flexLeft {
+  display: flex;
+  width: 10%;
+}
+
+.flexMid {
+  display: flex;
+  width: 70%;
+}
+
+.flexRight {
+  display: flex;
+  width: 15%;
+}
+
+.flexBottom {
+  margin-top: -20px;
+  display: flex;
+  width: 100%;
 }
 
 .posts {
@@ -1200,8 +1262,9 @@ input[type="file"] {
   color: black;
   resize: none;
   overflow: scroll;
-  padding: 10px;
   max-height: 70px;
+  padding-top: 12px;
+  padding-left: 10px;
 }
 
 #attach {
@@ -1258,6 +1321,14 @@ input[type="file"] {
   background-image: url("../assets/docIcon-hover.png");
 }
 
+.docButton:active {
+  transform: scale(0.95);
+}
+
+.sendButton:active {
+  transform: scale(0.95);
+}
+
 .column {
   float: left;
   padding: 10px;
@@ -1286,9 +1357,9 @@ input[type="file"] {
   flex-wrap: wrap;
   background-color: #f3f3f3;
   justify-content: center;
-  width: 100%;
   max-height: 70px;
   bottom: 0;
+  width: 100%;
 }
 
 .flex-container3 {
@@ -1301,7 +1372,6 @@ input[type="file"] {
   bottom: 0px;
   /*position: fixed;*/
   z-index: 100;
-  width: 100%;
 }
 
 .chat-left {
@@ -1413,6 +1483,10 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+.notesFilter:active {
+  transform: scale(0.95);
+}
+
 .notesFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1452,6 +1526,10 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+.questionsFilter:active {
+  transform: scale(0.95);
+}
+
 .examsFilter {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1463,6 +1541,10 @@ input:checked + .slider:before {
   background-position: 50% 50%;
   border: none;
   border-radius: 50%;
+}
+
+.examsFilter:active {
+  transform: scale(0.95);
 }
 
 .examsFilterClicked {
@@ -1491,6 +1573,10 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+.assignmentsFilter:active {
+  transform: scale(0.95);
+}
+
 .assignmentsFilterClicked {
   border: 1px solid gray;
   padding: 17px 17px;
@@ -1510,10 +1596,10 @@ input:checked + .slider:before {
   background-color: #f1f1f1;
   justify-content: space-between;
   position: fixed;
-  bottom: 65px;
-  padding-left: 12%;
-  padding-right: 5%;
-  width: 70%;
+  bottom: 70px;
+  padding-left: 20%;
+  padding-right: 20%;
+  width: 100%;
 }
 
 .flex-file {
