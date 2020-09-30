@@ -138,7 +138,10 @@ export default {
                 .currentUser.sendEmailVerification()
                 .then(
                   function () {
-                    router.push("/verification-email-sent");
+                    router.push({
+                      name: "EmailSent",
+                      params: { isVerification: true },
+                    });
                   },
                   function (error) {
                     console.log(error.message);

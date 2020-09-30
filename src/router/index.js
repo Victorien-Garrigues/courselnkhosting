@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 import Signup from '@/components/auth/Signup.vue';
 import Login from '@/components/auth/Login.vue';
 import Password from '@/components/auth/ResetPassword.vue';
-import VerificationEmailSent from '@/components/auth/VerificationEmailSent.vue';
+import EmailSent from '@/components/auth/EmailSent.vue';
 import MessageBoard from '@/views/MessageBoard.vue';
 import Profile from '@/views/Profile.vue';
 
@@ -26,9 +26,10 @@ const routes = [
     component: Password,
   },
   {
-    path: '/verification-email-sent',
-    name: 'VerificationEmailSent',
-    component: VerificationEmailSent,
+    path: '/email-sent',
+    name: 'EmailSent',
+    component: EmailSent,
+    props: true,
   },
   {
     path: '/:name',
