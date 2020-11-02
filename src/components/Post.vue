@@ -18,26 +18,135 @@
         <!-- column two (main) -->
         <div class="card-middle-other">
           <div class="mainCard-other">
-            <div class="info-column">
+            <!--div class="info-column">
               <p v-if="post.username" class="non-post">{{ post.username }}</p>
-            </div>
+            </div-->
             <!--div class="column info-column">
               <time class="non-post">{{ post.created_at | moment('ddd, MMM D YYYY hh:mma') }}</time>
             </div-->
-            <div class="media">
+            <div>
               <div class="media-left"></div>
               <div class="media-content">
                 <div class="reply" v-if="post.isReply">
                   <button
                     class="replyingButton"
                     v-scroll-to="'#' + post.parent_id"
-                  >Replying to {{ post.replyUsername }}</button>
+                  >
+                    Replying to {{ post.replyUsername }}
+                  </button>
                 </div>
               </div>
             </div>
 
             <!-- post itself -->
-            <div class="postItself">
+            <div
+              class="postItself-other-plain"
+              v-if="!post.isReply && post.replies == 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-other-isReply"
+              v-if="post.isReply && post.replies == 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-other-hasReplies"
+              v-if="!post.isReply && post.replies > 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-other-both"
+              v-if="post.isReply && post.replies > 0"
+            >
+              <b>{{ post.username }}</b>
+
               <!-- if there's an image -->
               <div class="card-image">
                 <figure
@@ -71,7 +180,9 @@
               class="listButton"
               @click="viewReplies(post.id)"
               style="margin-right: 2em"
-            >{{ post.replies }} Replies</button>
+            >
+              {{ post.replies }} Replies
+            </button>
           </div>
         </div>
 
@@ -79,25 +190,249 @@
         <div class="card-right-other">
           <div v-if="currentUser.id != post.user_id" class="flexIcons">
             <div>
-              <!-- shows number of clips -->
-              <button class="clipNum is-success">{{ post.clips }}</button>
-            </div>
-            <div>
               <!-- adds and unadds a clip -->
-              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
+              <button
+                v-if="post.clips == 0"
+                @click="addClip(post.id, index)"
+                class="clipButton is-success"
+              ></button>
+              <button
+                v-if="post.clips == 1"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton1-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 2"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton2-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 3"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton3-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 4"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton4-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 5"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton5-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 6"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton6-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 7"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton7-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 8"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton8-other is-success"
+              ></button>
+              <button
+                v-if="post.clips == 9"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButton9-other is-success"
+              ></button>
+              <button
+                v-if="post.clips > 9"
+                @click="addClip(post.id, index)"
+                class="clipButton-other clipButtonPlus-other is-success"
+              ></button>
             </div>
             <div>
               <!-- Reply button -->
-              <button @click="reply(post)" class="replyButton is-primary"></button>
+              <button
+                @click="reply(post)"
+                class="replyButton is-primary"
+              ></button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- OWN USER'S POST CARD DESIGN -->
-      <div class="flex-container" v-if="currentUser.id == post.user_id">
+      <div class="flex-container-own" v-if="currentUser.id == post.user_id">
         <!-- columns -->
-        <!-- column one (profile) -->
+        <!-- column one (icons) src="post.profile.profileImage" (or this.) src="../assets/profileIcon.png"-->
+        <div class="card-right-own">
+          <img
+            v-if="currentUser.id == post.user_id"
+            src="../assets/profileIcon.png"
+            alt="profile Image"
+            loading="lazy"
+            width="54"
+          />
+        </div>
+
+        <!-- column two (main) -->
+        <div class="card-middle-own">
+          <div class="mainCard-own">
+            <div class="reply" v-if="post.isReply">
+              <button
+                class="replyingButton-own"
+                v-scroll-to="'#' + post.parent_id"
+              >
+                Replying to {{ post.replyUsername }}
+              </button>
+            </div>
+
+            <!-- post itself -->
+            <div
+              class="postItself-own-plain"
+              v-if="!post.isReply && post.replies == 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-own-isReply"
+              v-if="post.isReply && post.replies == 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-own-hasReplies"
+              v-if="!post.isReply && post.replies > 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <div
+              class="postItself-own-both"
+              v-if="post.isReply && post.replies > 0"
+            >
+              <b>{{ post.username }}</b>
+
+              <!-- if there's an image -->
+              <div class="card-image">
+                <figure
+                  style="display: inline-block"
+                  class="image"
+                  :key="index"
+                  v-for="(file, index) in post.files"
+                >
+                  <!-- Displays a light box image view when images are clicked -->
+                  <img
+                    v-if="isImage(file)"
+                    v-lazy="file.src || file.thumb"
+                    @click="openGallery(index, post.files)"
+                  />
+
+                  <div style="display: flex" v-else class="fileType">
+                    <!-- If the file is a video -> display video image -->
+                    <img v-if="isVideo(file)" src="../assets/video.png" />
+                    <img v-else src="../assets/file.png" />
+                    <a :href="file.src">{{ file.name }}</a>
+                  </div>
+                </figure>
+              </div>
+
+              <!-- text -->
+              <p>{{ post.content }}</p>
+            </div>
+
+            <button
+              v-if="post.replies > 0"
+              class="listButton-own"
+              @click="viewReplies(post.id)"
+              style="margin-right: 2em"
+            >
+              {{ post.replies }} Replies
+            </button>
+          </div>
+        </div>
+
+        <!-- column three (profile) -->
         <div class="card-left-own">
           <img
             v-if="currentUser.id != post.user_id"
@@ -110,97 +445,75 @@
           <div v-if="currentUser.id == post.user_id" class="flexIcons-own">
             <div>
               <!-- Deletes post -->
-              <button @click="onDelete(post.id)" class="deleteButton is-danger"></button>
-            </div>
-            <div>
-              <!-- Reply button -->
-              <button @click="reply(post)" class="replyButton is-primary"></button>
-            </div>
-            <div>
-              <!-- adds and unadds a clip -->
-              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
-            </div>
-            <div>
-              <!-- shows number of clips -->
-              <button class="clipNum is-success">{{ post.clips }}</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- column two (main) -->
-        <div class="card-middle-own">
-          <div class="mainCard-own">
-            <div class="info-column">
-              <p v-if="post.username" class="non-post">{{ post.username }}</p>
-            </div>
-            <!--div class="column info-column">
-              <time class="non-post">{{ post.created_at | moment('ddd, MMM D YYYY hh:mma') }}</time>
-            </div-->
-
-            <div class="reply" v-if="post.isReply">
               <button
-                class="replyingButton"
-                v-scroll-to="'#' + post.parent_id"
-              >Replying to {{ post.replyUsername }}</button>
-            </div>
-
-            <!-- post itself -->
-            <div class="postItself">
-              <!-- if there's an image -->
-              <div class="card-image">
-                <figure
-                  style="display: inline-block"
-                  class="image"
-                  :key="index"
-                  v-for="(file, index) in post.files"
-                >
-                  <!-- Displays a light box image view when images are clicked -->
-                  <img
-                    v-if="isImage(file)"
-                    v-lazy="file.src || file.thumb"
-                    @click="openGallery(index, post.files)"
-                  />
-
-                  <div style="display: flex" v-else class="fileType">
-                    <!-- If the file is a video -> display video image -->
-                    <img v-if="isVideo(file)" src="../assets/video.png" />
-                    <img v-else src="../assets/file.png" />
-                    <a :href="file.src">{{ file.name }}</a>
-                  </div>
-                </figure>
-              </div>
-
-              <!-- text -->
-              <p>{{ post.content }}</p>
-            </div>
-
-            <button
-              v-if="post.replies > 0"
-              class="listButton"
-              @click="viewReplies(post.id)"
-              style="margin-right: 2em"
-            >{{ post.replies }} Replies</button>
-          </div>
-        </div>
-
-        <!-- column three (icons) -->
-        <div class="card-right-own">
-          <img
-            v-if="currentUser.id == post.user_id"
-            src="../assets/profileIcon.png"
-            loading="lazy"
-            width="54"
-            alt
-          />
-
-          <div v-if="currentUser.id != post.user_id" class="row">
-            <div>
-              <!-- adds and unadds a clip -->
-              <button @click="addClip(post.id, index)" class="clipButton is-success"></button>
+                @click="onDelete(post.id)"
+                class="deleteButton is-danger"
+              ></button>
             </div>
             <div>
               <!-- Reply button -->
-              <button @click="reply(post)" class="replyButton is-primary"></button>
+              <button
+                @click="reply(post)"
+                class="replyButton is-primary"
+              ></button>
+            </div>
+            <div>
+              <!-- adds and unadds a clip -->
+              <button
+                v-if="post.clips == 0"
+                @click="addClip(post.id, index)"
+                class="clipButton is-success"
+              ></button>
+              <button
+                v-if="post.clips == 1"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton1-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 2"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton2-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 3"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton3-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 4"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton4-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 5"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton5-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 6"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton6-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 7"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton7-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 8"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton8-own is-success"
+              ></button>
+              <button
+                v-if="post.clips == 9"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButton9-own is-success"
+              ></button>
+              <button
+                v-if="post.clips > 9"
+                @click="addClip(post.id, index)"
+                class="clipButton-own clipButtonPlus-own is-success"
+              ></button>
             </div>
           </div>
         </div>
@@ -222,7 +535,10 @@
           </div>
         </div>
 
-        <div class="flex-container-list" v-if="currentUser.id != post.user_id">
+        <div
+          class="flex-container-list-other"
+          v-if="currentUser.id != post.user_id"
+        >
           <div class="mainCard-listOther">
             <p>{{ reply.username }}</p>
             <p>{{ reply.content }}</p>
@@ -280,10 +596,10 @@ export default {
 
 /* CLIP BUTTON */
 .clipButton {
-  background-color: white;
+  background-color: #f3f3f3;
   padding: 17px 17px;
   cursor: pointer;
-  background-image: url("../assets/clipIcon.png");
+  background-image: url("../assets/noClipIcon.png");
   background-repeat: no-repeat;
   background-position: 50% 50%;
   border: none;
@@ -293,12 +609,273 @@ export default {
 }
 
 .clipButton:hover {
-  background-image: url("../assets/clipIcon-hover.png");
+  background-image: url("../assets/noClipIcon.png");
+  background-color: #dddddd;
+}
+
+.clipButton-one {
+  background-color: #f3f3f3;
+  padding: 17px 17px;
+  cursor: pointer;
+  background-image: url("../assets/clipIcon-one.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  margin: 3px;
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton-own {
+  background-color: #f3f3f3;
+  padding: 17px 17px;
+  cursor: pointer;
+  background-image: url("../assets/clipIcon-own.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+  margin: 3px;
+  display: flex;
+}
+
+.clipButton1-own {
+  background-image: url("../assets/clipIcon1-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton1-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton2-own {
+  background-image: url("../assets/clipIcon2-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton2-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton3-own {
+  background-image: url("../assets/clipIcon3-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton3-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton4-own {
+  background-image: url("../assets/clipIcon4-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton4-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton5-own {
+  background-image: url("../assets/clipIcon5-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton5-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton6-own {
+  background-image: url("../assets/clipIcon6-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton6-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton7-own {
+  background-image: url("../assets/clipIcon7-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton7-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton8-own {
+  background-image: url("../assets/clipIcon8-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton8-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButton9-own {
+  background-image: url("../assets/clipIcon9-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton9-own:hover {
+  background-image: url("../assets/clipIcon-own.png");
+  border-radius: 50%;
+}
+
+.clipButtonPlus-own {
+  background-image: url("../assets/clipIcon9+-own.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButtonPlus-own:hover {
+  background-image: url("../assets/clipIcon9+-own.png");
+  border-radius: 50%;
+}
+
+/* other user's clips */
+.clipButton-other {
+  background-color: #f3f3f3;
+  padding: 17px 17px;
+  cursor: pointer;
+  background-image: url("../assets/clipIcon-other.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  border: none;
+  border-radius: 50%;
+  margin: 3px;
+  display: flex;
+}
+
+.clipButton1-other {
+  background-image: url("../assets/clipIcon1-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton1-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton2-other {
+  background-image: url("../assets/clipIcon2-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton2-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton3-other {
+  background-image: url("../assets/clipIcon3-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton3-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton4-other {
+  background-image: url("../assets/clipIcon4-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton4-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton5-other {
+  background-image: url("../assets/clipIcon5-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton5-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton6-other {
+  background-image: url("../assets/clipIcon6-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton6-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton7-other {
+  background-image: url("../assets/clipIcon7-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton7-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton8-other {
+  background-image: url("../assets/clipIcon8-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton8-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButton9-other {
+  background-image: url("../assets/clipIcon9-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButton9-other:hover {
+  background-image: url("../assets/clipIcon-other.png");
+  border-radius: 50%;
+}
+
+.clipButtonPlus-other {
+  background-image: url("../assets/clipIcon9+-other.png");
+  display: flex;
+  border-radius: 0% 50% 50% 50%;
+}
+
+.clipButtonPlus-other:hover {
+  background-image: url("../assets/clipIcon9+-other.png");
+  border-radius: 50%;
 }
 
 /* DELETE BUTTON */
 .deleteButton {
-  background-color: white;
+  background-color: #f3f3f3;
   padding: 17px 17px;
   cursor: pointer;
   background-image: url("../assets/deleteIcon.png");
@@ -311,12 +888,13 @@ export default {
 }
 
 .deleteButton:hover {
-  background-image: url("../assets/deleteIcon-hover.png");
+  background-image: url("../assets/deleteIcon.png");
+  background-color: #dddddd;
 }
 
 /* REPLY BUTTON */
 .replyButton {
-  background-color: white;
+  background-color: #f3f3f3;
   padding: 17px 17px;
   cursor: pointer;
   background-image: url("../assets/replyIcon.png");
@@ -329,7 +907,8 @@ export default {
 }
 
 .replyButton:hover {
-  background-image: url("../assets/replyIcon-hover.png");
+  background-image: url("../assets/replyIcon.png");
+  background-color: #dddddd;
 }
 
 .clipNum {
@@ -365,40 +944,72 @@ export default {
 
 /* REPLYING BUTTON */
 .replyingButton {
-  margin-bottom: 5px;
+  margin-bottom: -5px;
   width: 100%;
   background-color: white;
   cursor: pointer;
   padding: 10px;
   border: white;
-  border-radius: 5px 5px 0px 0px;
+  border-radius: 15px 15px 0px 0px;
+  opacity: 0.5;
+}
+
+.replyingButton-own {
+  margin-bottom: -5px;
+  padding-bottom: 30px;
+  width: 100%;
+  background-color: #0fb9b1;
+  cursor: pointer;
+  padding: 10px;
+  border: #0fb9b1;
+  border-radius: 15px 15px 0px 0px;
   opacity: 0.5;
 }
 
 /* LIST OF REPLIES BUTTON */
+.listButton-own {
+  margin-top: -5px;
+  width: 100%;
+  background-color: #0fb9b1;
+  cursor: pointer;
+  padding: 10px;
+  border: #0fb9b1;
+  border-radius: 0px 0px 15px 15px;
+  opacity: 0.5;
+}
+
 .listButton {
-  margin-top: 5px;
+  margin-top: -5px;
   width: 100%;
   background-color: white;
   cursor: pointer;
   padding: 10px;
   border: white;
-  border-radius: 0px 0px 5px 5px;
+  border-radius: 0px 0px 15px 15px;
   opacity: 0.5;
 }
 
 .flex-container {
   display: flex;
-  align-items: stretch;
-  background-color: #f3f3f3;
   align-items: center;
+  background-color: #f3f3f3;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
 .flex-container-list {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  background-color: #f3f3f3;
+  align-items: center;
+  flex-direction: row-reverse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.flex-container-list-other {
+  display: flex;
+  align-items: center;
   background-color: #f3f3f3;
   align-items: center;
   margin-top: 10px;
@@ -414,17 +1025,6 @@ export default {
   margin-top: 10px;
   margin-bottom: 30px;
 }
-
-/*.flexIcons {
-  display: none;
-}
-
-.flex-container:hover .flexIcons {
-  display: flex;
-  align-items: stretch;
-  background-color: #f3f3f3;
-  align-items: center;
-}*/
 
 .flexIcons {
   display: flex;
@@ -451,10 +1051,31 @@ export default {
   display: flex;
 }
 
+.flex-container-own {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  background-color: #f3f3f3;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.flex-container-own:hover .clipButton {
+  display: flex;
+}
+
+.flex-container-own:hover .replyButton {
+  display: flex;
+}
+
+.flex-container-own:hover .deleteButton {
+  display: flex;
+}
+
 .card-middle-other {
   margin-top: 5px;
   margin-bottom: 5px;
-  flex-basis: 70%;
+  max-width: 60%;
 }
 
 .card-left-other {
@@ -470,7 +1091,8 @@ export default {
 .card-middle-own {
   margin-top: 5px;
   margin-bottom: 5px;
-  flex-basis: 70%;
+  /*  flex-basis: 5%;*/
+  max-width: 60%;
 }
 
 .card-right-own {
@@ -488,10 +1110,11 @@ export default {
   margin-bottom: -8px;
   margin-left: 5px;
   width: 50%;
+  overflow: visible;
 }
 
 .non-post {
-  color: #a9a9a9;
+  color: black;
   margin-top: -10%;
 }
 
@@ -523,28 +1146,17 @@ export default {
 }
 
 .mainCard-listOwn {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  flex-direction: column;
-  /*break*/
-  width: 100%;
-  background-color: white;
+  background-color: #0fb9b1;
   padding: 10px;
-  border: white;
-  border-radius: 5px;
+  border: #0fb9b1;
+  color: white;
+  border-radius: 15px;
   opacity: 0.5;
-  margin-left: 22.4%;
-  margin-right: 10%;
+  max-width: 60%;
+  margin-right: 75px;
 }
 
 .mainCard-listOther {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  flex-direction: column;
-  /*break*/
-  width: 100%;
   background-color: white;
   padding: 10px;
   border: white;
@@ -554,10 +1166,76 @@ export default {
   margin-left: 10%;
 }
 
-.postItself {
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 5px;
-  padding-left: 10px;
+.postItself-own-plain {
+  background-color: #0fb9b1;
+  color: white;
+  border-radius: 15px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-own-isReply {
+  background-color: #0fb9b1;
+  color: white;
+  border-radius: 5px 5px 15px 15px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-own-hasReplies {
+  background-color: #0fb9b1;
+  color: white;
+  border-radius: 15px 15px 5px 5px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-own-both {
+  background-color: #0fb9b1;
+  color: white;
+  border-radius: 5px 5px 5px 5px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* other post design */
+.postItself-other-plain {
+  background-color: white;
+  color: #707070;
+  border-radius: 15px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-other-isReply {
+  background-color: white;
+  color: #707070;
+  border-radius: 5px 5px 15px 15px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-other-hasReplies {
+  background-color: white;
+  color: #707070;
+  border-radius: 15px 15px 5px 5px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.postItself-other-both {
+  background-color: white;
+  color: #707070;
+  border-radius: 5px 5px 5px 5px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 </style>
