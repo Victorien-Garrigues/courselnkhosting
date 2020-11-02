@@ -36,9 +36,37 @@
             :to="{
               name: 'Profile',
             }"
+            @click="profile"
           ></router-link>
 
-          <!--  onclick="openForm()"-->
+          <!--div class="shrink">
+            <a class="navProfile" href="#popup1"></a>
+          </div-->
+
+          <!-- profile popup 
+          <div id="popup1" class="overlay">
+            <div class="popup">
+              <div class="delProfile">
+                <a class="navProfile" href="#"></a>
+              </div>
+
+              <a class="close" href="#">&times;</a?
+
+              <div class="content">
+                <img
+                  src="../assets/profileIcon.png"
+                  loading="lazy"
+                  width="54"
+                  alt="profile pic"
+                />
+                <h5>NAME LASTNAME</h5>
+              </div>
+            </div>
+          </div-->
+
+          <!-- :to="{
+              name: 'Profile',
+            }" -->
         </div>
       </div>
 
@@ -1023,6 +1051,17 @@ export default {
       }
     },
 
+    //SUBMIT ON ENTER
+    //function submitOnEnter(event){
+    //if(event.which === 13){
+    //    event.target.form.dispatchEvent(new Event("submit", {cancelable: true}));
+    //    event.preventDefault(); // Prevents the addition of a new line in the text field (not needed in a lot of cases)
+    //}
+    //}
+
+    //LISTENER
+    //document.getElementById("usermsg").addEventListener("keypress", submitOnEnter);
+
     //Creates the post
     async onCreatePost() {
       //If the user has added content or files
@@ -1126,6 +1165,10 @@ body {
   margin: 5px;
 }
 
+.flexLogo:active {
+  transform: scale(0.97);
+}
+
 .navButton {
   margin-right: 5px;
   background-color: white;
@@ -1152,6 +1195,10 @@ body {
   transform: scale(0.95);
 }
 
+.shrink:active {
+  transform: scale(0.95);
+}
+
 .navInfo {
   margin: 3px;
   padding: 30px 30px;
@@ -1172,6 +1219,73 @@ body {
   transform: scale(0.95);
 }
 
+/*PROFILE POPUP*/
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: opacity 500ms;
+  visibility: hidden;
+  opacity: 0;
+  padding-left: 80%;
+}
+
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 100%;
+  position: relative;
+  transition: all 5s ease-in-out;
+}
+
+.popup h2 {
+  margin-top: 0;
+  color: #333;
+  font-family: Tahoma, Arial, sans-serif;
+}
+.popup .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  transition: all 200ms;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+
+.popup .close:hover {
+  color: #06d85f;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+
+@media screen and (max-width: 700px) {
+  .popup {
+    width: 70%;
+  }
+}
+/*END OF PROFILE POPUP*/
+
 .mainFlex {
   display: flex;
   align-items: top;
@@ -1182,12 +1296,12 @@ body {
 
 .flexLeft {
   display: flex;
-  width: 10%;
+  width: 20%;
 }
 
 .flexMid {
   display: flex;
-  width: 70%;
+  width: 60%;
 }
 
 .flexRight {
