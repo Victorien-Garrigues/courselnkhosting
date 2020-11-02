@@ -4,8 +4,8 @@
     <div class="container">
       <form @submit.prevent="resetPassword">
         <img src="../../assets/logo.png" alt="" />
-        <h1 style="margin: 10px 0;">Forgot Password?</h1>
-        <p style="margin-bottom: 22px;">
+        <h1 style="margin: 10px 0">Forgot Password?</h1>
+        <p style="margin-bottom: 22px">
           Enter your accounts email address below to receive password reset
           instructions
         </p>
@@ -45,7 +45,10 @@ export default {
       auth
         .sendPasswordResetEmail(emailAddress)
         .then(() => {
-          this.$router.push({ name: "PasswordEmailSent" });
+          this.$router.push({
+            name: "EmailSent",
+            params: { isVerification: false },
+          });
         })
         .catch(() => {
           this.feedback = "The email entered is not valid";

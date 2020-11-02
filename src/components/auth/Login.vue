@@ -129,13 +129,13 @@ input[type="password"] {
   padding: 15px;
   margin: -7px 0 22px 0;
   display: inline-block;
-  border: 2px solid #bdc3c7;
+  border: 2px solid rgb(189, 195, 199);
   background: #f9f9f9;
   border-radius: 6px;
   font-size: 14px;
 }
 p {
-  color: #535c68;
+  color: rgb(83, 92, 104);
 }
 h1 {
   margin-bottom: 20px;
@@ -152,7 +152,7 @@ hr {
 }
 /* Set a style for all buttons */
 button {
-  background-color: #0fb9b1ff;
+  background-color: rgb(15, 185, 177);
   color: white;
   padding: 10px 20px;
   margin: 8px 0;

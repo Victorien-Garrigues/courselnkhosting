@@ -5,36 +5,60 @@
       <form @submit.prevent="signup">
         <img src="../../assets/logo.png" alt />
         <h1>Sign Up</h1>
-        <p style="margin-bottom: 22px;">Interact with students in your classes for free</p>
+        <p style="margin-bottom: 22px">
+          Interact with students in your classes for free
+        </p>
         <select v-model="university" class="select-css">
-          <option disabled selected="selected" value="0">Select University...</option>
+          <option disabled selected="selected" value="0">
+            Select University...
+          </option>
           <option
             v-for="(school, index) in schools"
             :key="index"
             :value="school.id"
-          >{{ school.data().name }}</option>
+          >
+            {{ school.data().name }}
+          </option>
         </select>
-        <input v-model="email" type="text" placeholder="University Email" name="email" required />
+        <input
+          v-model="email"
+          type="text"
+          placeholder="University Email"
+          name="email"
+          required
+        />
 
-        <div class="name" style="display: flex;">
+        <div class="name" style="display: flex">
           <input
-            style="margin-right: 5px;"
+            style="margin-right: 5px"
             v-model="firstName"
             type="text"
             placeholder="First name"
             name="name"
             required
           />
-          <input v-model="lastName" type="text" placeholder="Last name" name="name" required />
+          <input
+            v-model="lastName"
+            type="text"
+            placeholder="Last name"
+            name="name"
+            required
+          />
         </div>
 
-        <input v-model="password" type="password" placeholder="Create Password" name="psw" required />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Create Password"
+          name="psw"
+          required
+        />
 
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
         <p>
           By signing up you agree to our
-          <a href="#" style="color: dodgerblue;">Terms & Privacy</a>.
+          <a href="#" style="color: dodgerblue">Terms & Privacy</a>.
         </p>
 
         <div class="clearfix">
@@ -43,7 +67,12 @@
 
         <p>
           Already have an account?
-          <router-link class="noUnderline" style="color: dodgerblue;" :to="{ name: 'Login' }">Login</router-link>
+          <router-link
+            class="noUnderline"
+            style="color: dodgerblue"
+            :to="{ name: 'Login' }"
+            >Login</router-link
+          >
         </p>
       </form>
     </div>
@@ -109,7 +138,10 @@ export default {
                 .currentUser.sendEmailVerification()
                 .then(
                   function () {
-                    router.push("/verification-email-sent");
+                    router.push({
+                      name: "EmailSent",
+                      params: { isVerification: true },
+                    });
                   },
                   function (error) {
                     console.log(error.message);
@@ -123,7 +155,7 @@ export default {
                 faculties: [],
                 course_ids: [],
                 profileImage:
-                  "https://firebasestorage.googleapis.com/v0/b/courselnk.appspot.com/o/images%2F775162441-MR-2031-8E033EFCEBB928DC12A2A0AA3CEC4C33-21885-1527376486_680x0.jpg.png?alt=media&token=b1b32dfd-2a90-4f34-a9cc-ef5056a2afea",
+                  "https://firebasestorage.googleapis.com/v0/b/courselnk.appspot.com/o/profileIcon.png?alt=media&token=3aca529c-14f9-45fe-91b8-d01a4d2ad1ed",
               });
             })
             .catch((err) => {
