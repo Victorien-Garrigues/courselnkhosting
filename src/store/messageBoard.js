@@ -27,53 +27,56 @@ const actions = {
   async createPost(_, post) {
     const result = posts.doc();
     const user = firebase.auth().currentUser;
+    console.log(result.id, 'result');
+    console.log(post, 'POst');
+
     post.id = result.id;
     post.user_id = user.uid;
     post.created_at = Date.now();
     post.replies = 0;
     post.clips = 0;
     post.hasFiles = post.files.length > 0;
+    // db.collection('users')
+    //   .doc(user.uid)
+    //   .get()
+    //   .then((doc) => {
+    //     post.username = doc.data().firstName + ' ' + doc.data().lastName;
 
-    db.collection('users')
-      .doc(user.uid)
-      .get()
-      .then((doc) => {
-        post.username = doc.data().firstName + ' ' + doc.data().lastName;
-        if (post.isReply) {
-          db.collection('posts')
-            .where('id', '==', post.parent_id)
-            .get()
-            .then(function(querySnapshot) {
-              querySnapshot.forEach(function(doc) {
-                post.replyUsername = doc.data().username;
+    // db.collection('posts')
+    //   .where('id', '==', post.parent_id)
+    //   .get()
+    //   .then(function(querySnapshot) {
+    //     querySnapshot.forEach(function(doc) {
+    //       post.replyUsername = doc.data().username;
+    //       post.replyContent = doc.data().content
+    //       post.replyContent = doc.data().content
 
-                // If the post is replying to a reply
-                if (doc.data().isReply) {
-                  post.originalPost_id = doc.data().parent_id;
-                } else {
-                  post.originalPost_id = post.parent_id;
-                }
-                try {
-                  posts.doc(post.id).set(post);
-                } catch (error) {
-                  console.error(error);
-                }
-              });
-            })
-            .catch(function(error) {
-              console.log('Error getting documents: ', error);
-            });
-        } else {
-          try {
-            posts.doc(post.id).set(post);
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      })
-      .catch(function(error) {
-        console.log('Error getting documents: ', error);
-      });
+    //       // If the post is replying to a reply
+    //       if (doc.data().isReply) {
+    //         post.originalPost_id = doc.data().parent_id;
+    //       } else {
+    //         post.originalPost_id = post.parent_id;
+    //       }
+    //       try {
+    //         posts.doc(post.id).set(post);
+    //       } catch (error) {
+    //         console.error(error);
+    //       }
+    //     });
+    //   })
+    //   .catch(function(error) {
+    //     console.log('Error getting documents: ', error);
+    //   });
+    //}
+    try {
+      posts.doc(post.id).set(post);
+    } catch (error) {
+      console.error(error);
+    }
+    // })
+    // .catch(function(error) {
+    //   console.log('Error getting documents: ', error);
+    // });
   },
 
   //Deletes a post
