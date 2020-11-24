@@ -417,6 +417,7 @@ export default {
       addRemoveLinks: true,
     },
 
+    replyPost: null,
     // Post info for adding a post
     post: {
       content: "",
@@ -1033,6 +1034,7 @@ export default {
     // if the user clicks reply to a post
     reply(post) {
       this.post.isReply = true;
+      this.replyPost = post;
       this.replyingTo = post.username;
       this.replyingMessage = post.content;
       this.post.parent_id = post.id;
@@ -1067,6 +1069,18 @@ export default {
       if (this.post.content || this.post.files[0]) {
         this.fileDropped = false;
         this.post.course_id = this.course;
+        this.post.username = this.user.firstName + " " + this.user.lastName;
+
+        if (this.post.isReply && this.replyPost) {
+          this.post.replyUsername = this.replyPost.username;
+          this.post.replyContent = this.replyPost.content;
+          this.post.replyFiles = this.replyPost.files;
+          if (this.replyPost.isReply) {
+            this.post.originalPost_id = this.replyPost.parent_id;
+          } else {
+            this.post.originalPost_id = this.post.parent_id;
+          }
+        }
         this.createPost(this.post);
 
         //if the post is a reply -> adds the reply to the post
@@ -1744,3 +1758,4 @@ input:checked + .slider:before {
   color: black;
 }
 </style>
+
