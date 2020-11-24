@@ -86,7 +86,6 @@
             <div v-if="!isFilter" class="posts is-multiline">
               <div v-for="(post, index) in posts" :key="index">
                 <!-- this is the post card -->
-
                 <Post
                   :post="post"
                   :index="index"
