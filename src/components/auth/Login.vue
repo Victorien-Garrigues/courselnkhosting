@@ -5,12 +5,26 @@
       <form @submit.prevent="login">
         <img src="../../assets/logo.png" alt="simple logo" />
         <h1>Welcome to CourseLnk</h1>
-        <input v-model="email" type="text" placeholder="University Email" name="email" required />
-        <input v-model="password" type="password" placeholder="Password" name="psw" required />
+        <input
+          v-model="email"
+          type="text"
+          placeholder="University Email"
+          name="email"
+          required
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          name="psw"
+          required
+        />
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
-        <p style="text-align:left;">
-          <router-link class="forgotPassword" :to="{ name: 'Password' }">Forgot password?</router-link>
+        <p style="text-align: left">
+          <router-link class="forgotPassword" :to="{ name: 'Password' }"
+            >Forgot password?</router-link
+          >
         </p>
 
         <div class="clearfix">
@@ -19,7 +33,12 @@
 
         <p>
           Not on CoursLnk yet?
-          <router-link class="noUnderline" style="color:dodgerblue" :to="{ name: 'Signup' }">Signup</router-link>
+          <router-link
+            class="noUnderline"
+            style="color: dodgerblue"
+            :to="{ name: 'Signup' }"
+            >Signup</router-link
+          >
         </p>
       </form>
     </div>
