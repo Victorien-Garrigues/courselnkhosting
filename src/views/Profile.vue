@@ -3,17 +3,65 @@
     <!-- start of navbar design -->
     <div class="navbar">
       <!-- brand design -->
-      <div class="container">
-        <a href="#">
-          <img src="@/assets/mainLogo.png" width="200" height="50" alt="main page logo" />
+      <div class="flexNav">
+        <a href="#" class="flexLogo">
+          <img
+            src="@/assets/mainLogo.png"
+            width="237"
+            height="49"
+            alt="main page logo"
+          />
         </a>
       </div>
 
+      <!--p>{{ this.userCount }} Members</p-->
+
       <!-- profile design -->
-      <div>
-        <router-link class="button" :to="{
-                name: 'Profile',
-              }">Profile</router-link>
+      <div class="flexNav">
+        <router-link
+          class="navInfo"
+          :to="{
+            name: 'Login',
+          }"
+          @click="logout"
+        ></router-link>
+
+        <router-link
+          class="navProfile"
+          :to="{
+            name: 'Profile',
+          }"
+          @click="profile"
+        ></router-link>
+
+        <!--div class="shrink">
+            <a class="navProfile" href="#popup1"></a>
+          </div-->
+
+        <!-- profile popup 
+          <div id="popup1" class="overlay">
+            <div class="popup">
+              <div class="delProfile">
+                <a class="navProfile" href="#"></a>
+              </div>
+
+              <a class="close" href="#">&times;</a?
+
+              <div class="content">
+                <img
+                  src="../assets/profileIcon.png"
+                  loading="lazy"
+                  width="54"
+                  alt="profile pic"
+                />
+                <h5>NAME LASTNAME</h5>
+              </div>
+            </div>
+          </div-->
+
+        <!-- :to="{
+              name: 'Profile',
+            }" -->
       </div>
     </div>
     <!-- end of navbar design -->
@@ -25,7 +73,7 @@
         <!-- side menu -->
       </div>
       <div class="column" style="width: 80%">
-        <div style="display: flex;">
+        <div style="display: flex">
           <div class="profileImage">
             <img :src="this.profile.profileImage" alt="profile Image" />
             <vue-dropzone
@@ -38,15 +86,18 @@
           </div>
 
           <div class="info">
-            <div style="display: flex;">
-              <p
-                v-if="this.profile && !isEditingName"
-                class="nameDesign"
-              >Name: {{ this.profile.firstName }} {{ this.profile.lastName }}</p>
-              <button v-if="!isEditingName" @click="isEditingName = true" class="editButton3"></button>
+            <div style="display: flex">
+              <p v-if="this.profile && !isEditingName" class="nameDesign">
+                Name: {{ this.profile.firstName }} {{ this.profile.lastName }}
+              </p>
+              <button
+                v-if="!isEditingName"
+                @click="isEditingName = true"
+                class="editButton3"
+              ></button>
             </div>
 
-            <div v-if="isEditingName" class="editing" style="display: flex;">
+            <div v-if="isEditingName" class="editing" style="display: flex">
               <input type="text" id="fname" name="fname" v-model="firstName" />
               <input type="text" id="lname" name="lname" v-model="lastName" />
 
@@ -58,8 +109,8 @@
             <p v-if="this.school">School: {{ this.school }}</p>
             <button @click.prevent="resetPassword()">Change Password</button>
             <p v-if="changedPassword">
-              An email has been sent to your university email with instructions on
-              how to change your password
+              An email has been sent to your university email with instructions
+              on how to change your password
             </p>
           </div>
         </div>
