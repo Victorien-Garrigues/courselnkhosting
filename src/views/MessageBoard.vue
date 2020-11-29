@@ -128,81 +128,123 @@
             <!-- Clips filter -->
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Clips</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByClips"
                   @click.prevent="filterBy('clips')"
                   id="tags"
                   :class="{ filterClicked: filterByClips }"
                 ></button>
+                <button
+                  v-if="filterByClips"
+                  @click.prevent="filterBy('clips')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByClips }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Clips</p>
               </div>
             </div>
 
             <!-- Files filter -->
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Attachments</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByFiles"
                   @click.prevent="filterBy('files')"
                   id="tags"
                   :class="{ filterClicked: filterByFiles }"
                 ></button>
+                <button
+                  v-if="filterByFiles"
+                  @click.prevent="filterBy('files')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByFiles }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Attachments</p>
               </div>
             </div>
 
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Notes</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByNotes"
                   @click.prevent="filterBy('notes')"
                   id="tags"
                   :class="{ filterClicked: filterByNotes }"
                 ></button>
+                <button
+                  v-if="filterByNotes"
+                  @click.prevent="filterBy('notes')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByNotes }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Notes</p>
               </div>
             </div>
 
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Exam</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByExams"
                   @click.prevent="filterBy('exams')"
                   id="tags"
                   :class="{ filterClicked: filterByExams }"
                 ></button>
+                <button
+                  v-if="filterByExams"
+                  @click.prevent="filterBy('exams')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByExams }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Exam</p>
               </div>
             </div>
 
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Questions</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByQuestions"
                   @click.prevent="filterBy('questions')"
                   id="tags"
                   :class="{ filterClicked: filterByQuestions }"
                 ></button>
+                <button
+                  v-if="filterByQuestions"
+                  @click.prevent="filterBy('questions')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByQuestions }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Questions</p>
               </div>
             </div>
             <!--/div-->
 
             <div class="row" style="clear: both">
               <div class="column">
-                <p>Assignments</p>
-              </div>
-              <div class="column">
                 <button
+                  v-if="!filterByAssignments"
                   @click.prevent="filterBy('assignments')"
                   id="tags"
                   :class="{ filterClicked: filterByAssignments }"
                 ></button>
+                <button
+                  v-if="filterByAssignments"
+                  @click.prevent="filterBy('assignments')"
+                  id="clickedTags"
+                  :class="{ filterClicked: filterByAssignments }"
+                ></button>
+              </div>
+              <div class="column">
+                <p>Assignments</p>
               </div>
             </div>
           </div>
@@ -1222,6 +1264,7 @@ body {
   background-position: 50% 50%;
   border: none;
   border-radius: 50%;
+  transform: rotate(-90deg);
 }
 
 .navInfo:hover {
@@ -1350,22 +1393,6 @@ body {
   margin-right: auto;
 }
 
-.filterClicked {
-  background-color: blue;
-}
-
-.postContainer::-webkit-scrollbar {
-  width: 3px;
-}
-
-.postContainer::-webkit-scrollbar-track {
-  background: #ddd;
-}
-
-.postContainer::-webkit-scrollbar-thumb {
-  background: #aaa;
-}
-
 input[type="file"] {
   display: none;
 }
@@ -1374,6 +1401,7 @@ input[type="file"] {
   display: flex;
   margin: 25px;
 }
+
 .image {
   max-width: 250px;
   margin: 15px;
@@ -1487,6 +1515,7 @@ input[type="file"] {
   max-height: 70px;
   bottom: 0;
   width: 100%;
+  margin-left: 30px;
 }
 
 .flex-container3 {
@@ -1529,72 +1558,39 @@ input[type="file"] {
   margin-left: -25%;
 }
 
-.switch {
+/*Filters */
+#tags {
+  cursor: pointer;
   position: relative;
   display: inline-block;
-  width: 35px;
-  height: 21px;
+  width: 25px;
+  background-image: url("../assets/checkbox.png");
+  background-position: 50% 50%;
+  background-color: #f1f1f1;
+  height: 25px;
+  /*border-radius: 34px;*/
+  border: 0;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+#tags:hover {
+  background-color: #e0dfdf;
 }
 
-.slider {
-  position: absolute;
+#clickedTags {
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  position: relative;
+  display: inline-block;
+  width: 25px;
+  background-image: url("../assets/checkedbox.png");
+  background-position: 50% 50%;
+  background-color: #f1f1f1;
+  height: 25px;
+  /*border-radius: 34px;*/
+  border: 0;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 15px;
-  width: 15px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #2196f3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-/*Filters */
-#tag {
-  color: black;
-  border: 1px solid gray;
-  padding: 5px;
-  margin: 0 2px;
+#clickedTags:hover {
+  background-color: #e0dfdf;
 }
 
 .notesFilter {
