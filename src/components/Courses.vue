@@ -1,207 +1,255 @@
 <template>
   <section class="background-body">
-    <div v-if="!isFaculty" class="courses">
-      <!-- Lists all of the users courses -->
-      <ul v-if="!isEditing && !isAdding" class="menu-list">
-        <div class="row courseList">
-          <div class="column listName">
-            <p class="menu-label">Your Courses</p>
+    <div style="height: 500px; overflow: auto">
+      <div v-if="!isFaculty" class="courses">
+        <!-- Lists all of the users courses -->
+        <ul v-if="!isEditing && !isAdding" class="menu-list">
+          <div class="row courseList">
+            <div class="column listName">
+              <p class="menu-label">Your Courses</p>
+            </div>
+            <!-- Edit Courses Button -->
+            <div class="column listEdit">
+              <button
+                v-if="!isAdding && !isEditing"
+                @click="(isEditing = true), (isCourse = true)"
+                class="editButton is-danger"
+              ></button>
+            </div>
           </div>
-          <!-- Edit Courses Button -->
-          <div class="column listEdit">
+
+          <div class="void2"></div>
+
+          <li v-for="course in user.courses" :key="course.id">
+            <div class="listCourse">
+              <div style="flex-basis: 20%">
+                <img
+                  v-if="!course.unreadPosts"
+                  src="@/assets/chatIcon.png"
+                  alt="chat icon"
+                  id="courseImg"
+                  style="
+                    width: 45px;
+                    height: 40px;
+                    padding: 5px;
+                    vertical-align: middle;
+                  "
+                />
+                <img
+                  v-if="course.unreadPosts"
+                  src="@/assets/chatIconNotification.png"
+                  alt="chat icon"
+                  id="courseImg"
+                  style="
+                    width: 45px;
+                    height: 40px;
+                    padding: 5px;
+                    vertical-align: middle;
+                  "
+                />
+              </div>
+              <div style="flex-basis: 80%">
+                <router-link
+                  class="indCourse"
+                  @click.native="
+                    $store.commit('messageBoard/setCourse', course.course_id)
+                  "
+                  :to="{
+                    name: 'MessageBoard',
+                    params: { name: course.courseCode.replace(/\s/g, '') },
+                  }"
+                  >{{ course.courseCode }}</router-link
+                >
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <div style="width: 100%; height: 5px"></div>
+
+        <!-- Add Course Button -->
+        <button
+          v-if="!isAdding && !isEditing"
+          @click="showCourses()"
+          class="addButton is-primary"
+        >
+          ADD COURSE +
+        </button>
+
+        <!-- Lists All Courses For The User To Add -->
+        <div v-if="isAdding">
+          <p class="menu-label" style="margin: 10px">Add a course</p>
+          <input
+            class="input"
+            type="text"
+            style="width: 150px; margin: 10px"
+            placeholder="Search Courses"
+            v-model="searchTerm"
+          />
+          <div>
+            <!-- Displays the courses for the user to add -->
+            <ul class="menu-list">
+              <li v-for="course in filteredCourses" :key="course.id">
+                <button class="plusButton" @click="addCourse(course)">
+                  {{ course.courseCode }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Create course -->
+          <div v-if="!isCreating" style="padding: 15px">
+            <p>Don't see the course you're looking for?</p>
+            <button @click="isCreating = true" class="createButton is-success">
+              Create Course
+            </button>
+          </div>
+
+          <!-- If the user is creating a course -->
+          <div v-if="isCreating" style="padding: 15px">
+            <p>Create a new course by entering its course code</p>
+            <input
+              style="margin-bottom: 1em; width: 100px; margin: 10px"
+              v-model="courseCode"
+              class="input is-focused"
+              type="text"
+              placeholder="AAAA 000"
+            />
+            <!-- Cancel button -->
             <button
-              v-if="!isAdding && !isEditing"
-              @click="(isEditing = true), (isCourse = true)"
-              class="editButton is-danger"
+              @click="isCreating = false"
+              class="delButton2 is-danger"
             ></button>
+
+            <p class="feedback">{{ this.feedback }}</p>
+
+            <!-- Create course button -->
+            <button @click="createCourse()" class="createButton is-success">
+              Create Course
+            </button>
           </div>
         </div>
 
-        <div class="void2"></div>
+        <!-- Lists All The Users Courses To Be Removed When Clicked -->
+        <ul v-if="isEditing" class="menu-list">
+          <p class="menu-label removeName">
+            Remove a course from your class list
+          </p>
+          <li v-for="course in user.courses" :key="course.id">
+            <button class="delButton" @click="removeCourse(course.course_id)">
+              {{ course.courseCode }}
+            </button>
+          </li>
+        </ul>
+      </div>
 
-        <li v-for="course in user.courses" :key="course.id">
-          <div style="display: flex">
-            <router-link
-              @click.native="
-                $store.commit('messageBoard/setCourse', course.course_id)
-              "
-              :to="{
-                name: 'MessageBoard',
-                params: { name: course.courseCode.replace(/\s/g, '') },
-              }"
-              >{{ course.courseCode }}</router-link
-            >
-            <p v-if="course.unreadPosts">...</p>
+      <!-- Lists the user faculties -->
+      <div v-if="!isCourse" class="faculties">
+        <ul
+          style="margin-top: 2em"
+          v-if="!isEditing && !isAdding"
+          class="menu-list"
+        >
+          <div class="row courseList">
+            <div class="column listName">
+              <p class="menu-label">Your Faculties</p>
+            </div>
+
+            <!-- Edit Faculties Button -->
+            <div class="column listEdit2">
+              <button
+                v-if="!isAdding && !isEditing"
+                @click="(isEditing = true), (isFaculty = true)"
+                class="editButton is-danger"
+              ></button>
+            </div>
+            <div class="void"></div>
           </div>
-        </li>
-      </ul>
 
-      <div style="width: 100%; height: 5px"></div>
+          <li v-for="faculty in user.faculties" :key="faculty.id">
+            <div class="listCourse">
+              <div style="flex-basis: 20%">
+                <img
+                  src="@/assets/chatIcon.png"
+                  alt="chat icon"
+                  id="courseImg"
+                  style="
+                    width: 45px;
+                    height: 40px;
+                    padding: 5px;
+                    vertical-align: middle;
+                  "
+                />
+              </div>
+              <div style="flex-basis: 80%">
+                <router-link
+                  class="indCourse"
+                  @click.native="
+                    $store.commit('messageBoard/setCourse', faculty.faculty_id)
+                  "
+                  :to="{
+                    name: 'MessageBoard',
+                    params: { name: faculty.name.replace(/\s/g, '') },
+                  }"
+                  >{{ faculty.name }}</router-link
+                >
+              </div>
+            </div>
+          </li>
+        </ul>
 
-      <!-- Add Course Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="showCourses()"
-        class="addButton is-primary"
-      >
-        ADD COURSE +
-      </button>
+        <div style="width: 100%; height: 5px"></div>
 
-      <!-- Lists All Courses For The User To Add -->
-      <div v-if="isAdding">
-        <p class="menu-label" style="margin: 10px">Add a course</p>
-        <input
-          class="input"
-          type="text"
-          style="width: 150px; margin: 10px"
-          placeholder="Search Courses"
-          v-model="searchTerm"
-        />
-        <div style="height: 200px; overflow: auto">
-          <!-- Displays the courses for the user to add -->
+        <!-- Add Faculties Button -->
+        <button
+          v-if="!isAdding && !isEditing"
+          @click="showFaculties()"
+          class="addButton is-primary"
+        >
+          ADD FACULTY +
+        </button>
+
+        <!-- Lists All Faculties For The User To Add -->
+        <div v-if="isAdding">
           <ul class="menu-list">
-            <li v-for="course in filteredCourses" :key="course.id">
-              <button class="plusButton" @click="addCourse(course)">
-                {{ course.courseCode }}
+            <p class="menu-label" style="margin: 10px">Add a faculty</p>
+            <li v-for="faculty in allFaculties" :key="faculty.id">
+              <button class="plusButton" @click="addFaculty(faculty)">
+                {{ faculty.name }}
               </button>
             </li>
           </ul>
         </div>
 
-        <!-- Create course -->
-        <div v-if="!isCreating" style="padding: 15px">
-          <p>Don't see the course you're looking for?</p>
-          <button @click="isCreating = true" class="createButton is-success">
-            Create Course
-          </button>
-        </div>
-
-        <!-- If the user is creating a course -->
-        <div v-if="isCreating" style="padding: 15px">
-          <p>Create a new course by entering its course code</p>
-          <input
-            style="margin-bottom: 1em; width: 100px; margin: 10px"
-            v-model="courseCode"
-            class="input is-focused"
-            type="text"
-            placeholder="AAAA 000"
-          />
-          <!-- Cancel button -->
-          <button
-            @click="isCreating = false"
-            class="delButton2 is-danger"
-          ></button>
-
-          <p class="feedback">{{ this.feedback }}</p>
-
-          <!-- Create course button -->
-          <button @click="createCourse()" class="createButton is-success">
-            Create Course
-          </button>
-        </div>
-      </div>
-
-      <!-- Lists All The Users Courses To Be Removed When Clicked -->
-      <ul v-if="isEditing" class="menu-list">
-        <p class="menu-label removeName">
-          Remove a course from your class list
-        </p>
-        <li v-for="course in user.courses" :key="course.id">
-          <button class="delButton" @click="removeCourse(course.course_id)">
-            {{ course.courseCode }}
-          </button>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Lists the user faculties -->
-    <div v-if="!isCourse" class="faculties">
-      <ul
-        style="margin-top: 2em"
-        v-if="!isEditing && !isAdding"
-        class="menu-list"
-      >
-        <div class="row courseList">
-          <div class="column listName">
-            <p class="menu-label">Your Faculties</p>
-          </div>
-
-          <!-- Edit Faculties Button -->
-          <div class="column listEdit2">
+        <!-- Lists All The Users Faculties To Be Removed When Clicked -->
+        <ul v-if="isEditing" class="menu-list">
+          <p class="menu-label removeName">
+            Remove a faculty from your university list
+          </p>
+          <li v-for="faculty in user.faculties" :key="faculty.id">
             <button
-              v-if="!isAdding && !isEditing"
-              @click="(isEditing = true), (isFaculty = true)"
-              class="editButton is-danger"
-            ></button>
-          </div>
-          <div class="void"></div>
-        </div>
-
-        <li v-for="faculty in user.faculties" :key="faculty.id">
-          <router-link
-            @click.native="
-              $store.commit('messageBoard/setCourse', faculty.faculty_id)
-            "
-            :to="{
-              name: 'MessageBoard',
-              params: { name: faculty.name.replace(/\s/g, '') },
-            }"
-            >{{ faculty.name }}</router-link
-          >
-        </li>
-      </ul>
-
-      <div style="width: 100%; height: 5px"></div>
-
-      <!-- Add Faculties Button -->
-      <button
-        v-if="!isAdding && !isEditing"
-        @click="showFaculties()"
-        class="addButton is-primary"
-      >
-        ADD FACULTY +
-      </button>
-
-      <!-- Lists All Faculties For The User To Add -->
-      <div v-if="isAdding">
-        <ul class="menu-list">
-          <p class="menu-label" style="margin: 10px">Add a faculty</p>
-          <li v-for="faculty in allFaculties" :key="faculty.id">
-            <button class="plusButton" @click="addFaculty(faculty)">
+              style="margin-top: 0.5em"
+              class="delButton"
+              @click="removeFaculty(faculty.faculty_id)"
+            >
               {{ faculty.name }}
             </button>
           </li>
         </ul>
       </div>
 
-      <!-- Lists All The Users Faculties To Be Removed When Clicked -->
-      <ul v-if="isEditing" class="menu-list">
-        <p class="menu-label removeName">
-          Remove a faculty from your university list
-        </p>
-        <li v-for="faculty in user.faculties" :key="faculty.id">
-          <button
-            style="margin-top: 0.5em"
-            class="delButton"
-            @click="removeFaculty(faculty.faculty_id)"
-          >
-            {{ faculty.name }}
-          </button>
-        </li>
-      </ul>
+      <!-- Done Button -->
+      <button
+        style="margin-top: 2em"
+        v-if="isEditing || isAdding"
+        @click="reset()"
+        class="doneButton is-primary"
+      >
+        Done
+      </button>
+
+      <h3 class="feedback">{{ this.alreadyAddedMessage }}</h3>
     </div>
-
-    <!-- Done Button -->
-    <button
-      style="margin-top: 2em"
-      v-if="isEditing || isAdding"
-      @click="reset()"
-      class="doneButton is-primary"
-    >
-      Done
-    </button>
-
-    <h3 class="feedback">{{ this.alreadyAddedMessage }}</h3>
   </section>
 </template>
 
@@ -439,6 +487,12 @@ export default {
 </script>
 
 <style>
+/*.list {
+  overflow: auto;
+  height: 100%;
+  background-color: #f3f3f3;
+}*/
+
 .feedback {
   color: red;
   text-align: left;
@@ -575,6 +629,31 @@ export default {
   width: 10%;
   margin-left: 118px;
   margin-top: -48px;
+}
+
+.listCourse {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 0px 30px 30px 0px;
+}
+
+.indCourse {
+  width: 90%;
+  height: 100%;
+  vertical-align: baseline;
+}
+
+.indCourse:hover {
+  background-color: #e0dfdf !important;
+}
+
+.listCourse:hover #courseImg {
+  background-color: #e0dfdf !important;
+}
+
+.listCourse:hover {
+  background-color: #e0dfdf !important;
 }
 
 /* CREATE BUTTON */
